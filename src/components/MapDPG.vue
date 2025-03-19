@@ -1,43 +1,41 @@
 <template>
   <div class="map-container">
     <Loading :isLoading="isLoading" />
-    <LayerMenu
+    <!-- <LayerMenu
       v-if="config.layers?.menu.show && mapRef"
       :data="config.layers"
       :map="mapRef.map"
       :layerControl="mapRef.layerControl"
       @startLoading="isLoading = true"
       @stopLoading="isLoading = false"
-    />
+    /> -->
     <Map
       ref="mapRef"
-      :config="config"
+      :layers="layers"
+      :mapOptions="config"
       @startLoading="isLoading = true"
       @stopLoading="isLoading = false"
-      @onDrawingChange="$emit('onDrawingChange', $event)"
     />
   </div>
 </template>
 
 <script setup lang="ts">
   import { ref } from 'vue'
-  import type { GestaoAtivosShape, MapConfigurations } from '../types/index'
-  import LayerMenu from './LayerMenu.vue'
+  // import LayerMenu from './LayerMenu.vue'
   import Map from './LeafletMap.vue'
   import Loading from './Loading.vue'
 
   type MapaDPGProps = {
-    config: MapConfigurations
+    layers: any,
+    config: any
   }
-
+  
+  defineProps<MapaDPGProps>()
+  
   type MapRef = {
     map: L.Map
     layerControl: L.Control.Layers
   }
-
-  defineEmits<{ onDrawingChange: [GestaoAtivosShape | GestaoAtivosShape[]] }>()
-
-  defineProps<MapaDPGProps>()
 
   const mapRef = ref<MapRef>()
 

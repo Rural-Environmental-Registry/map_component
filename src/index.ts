@@ -1,3 +1,3 @@
-import MapaDPG from './components/MapaDPG.vue'
+import DpgMapa from './components/MapDPG.vue'
 
-export default MapaDPG
+export default DpgMapa

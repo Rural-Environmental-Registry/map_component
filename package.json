@@ -1,5 +1,5 @@
 {
-  "name": "mapa-dpg",
+  "name": "dpg-mapa",
   "version": "1.0.0",
   "scripts": {
     "dev": "vite build --watch",

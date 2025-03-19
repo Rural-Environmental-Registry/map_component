@@ -6,20 +6,9 @@
   import L from 'leaflet'
   import 'leaflet-draw'
   import { onMounted, ref } from 'vue'
-  import BaseMap from '../layers/baseLayer.json'
-  import type {
-    BaseMapLayer,
-    GestaoAtivosShape,
-    MapConfigurations,
-    MapOptions
-  } from '../types/index'
-  import { GestaoAtivosHandler } from '../usecases/GestaoAtivosHandler'
+  import BaseMap from '../assets/layers/mapLayers.json'
 
-  type MapaDPGProps = {
-    config: MapConfigurations
-  }
-
-  const DEFAULT_MAP_OPTIONS: MapOptions = {
+  const DEFAULT_MAP_OPTIONS: any = {
     zoomControl: false,
     minZoom: 3,
     maxZoom: 17,
@@ -28,22 +17,22 @@
   }
 
   const emit = defineEmits<{
-    (
-      e: 'onDrawingChange',
-      shapes: GestaoAtivosShape | GestaoAtivosShape[]
-    ): void
     (e: 'startLoading'): void
     (e: 'stopLoading'): void
   }>()
 
-  const props = defineProps<MapaDPGProps>()
+  // const props = defineProps<any>()
+  const props = defineProps({
+    mapOptions: Object,
+    layers: Object
+  })
 
   const map = ref<L.Map>()
   const layerControl = ref<L.Control.Layers>()
 
   onMounted(() => {
-    const mapOptions: MapOptions =
-      props.config.mapOptions || DEFAULT_MAP_OPTIONS
+    const mapOptions: any =
+      props.mapOptions || DEFAULT_MAP_OPTIONS
 
     initMap(mapOptions)
   })
@@ -55,11 +44,11 @@
   }
 
   const addBaseLayer = (): void => {
-    const DEFAULT_MAP_LAYER: BaseMapLayer[] = BaseMap.baseMap
+    const DEFAULT_MAP_LAYER: any = BaseMap.mapLayers
 
-    const baseMap = props.config.baseLayer?.baseMap || DEFAULT_MAP_LAYER
+    const baseMap = props.layers?.mapLayers || DEFAULT_MAP_LAYER
 
-    baseMap.forEach((layer: BaseMapLayer) => {
+    baseMap.forEach((layer: any) => {
       const tileLayer = L.tileLayer(layer.url, {
         attribution: `© ${layer.name}`
       })
@@ -74,29 +63,7 @@
     })
   }
 
-  const addGestaoAtivosDrawingControls = (): void => {
-    const gestaoAtivosHandler = new GestaoAtivosHandler()
-
-    const { featureGroup, control } = gestaoAtivosHandler.init()
-
-    map.value!.addLayer(featureGroup)
-    map.value!.addControl(control)
-
-    map.value!.on(L.Draw.Event.CREATED, (e: L.LeafletEvent) => {
-      featureGroup.addLayer(e.layer)
-      emit('onDrawingChange', gestaoAtivosHandler.handleCreatedShape(e))
-    })
-
-    map.value!.on(L.Draw.Event.EDITED, (e: L.LeafletEvent) => {
-      emit('onDrawingChange', gestaoAtivosHandler.handleEditedShapes(e))
-    })
-
-    map.value!.on(L.Draw.Event.DELETED, (e: L.LeafletEvent) => {
-      emit('onDrawingChange', gestaoAtivosHandler.handleDeletedShapes(e))
-    })
-  }
-
-  const initMap = (mapOptions: MapOptions): void => {
+  const initMap = (mapOptions: any): void => {
     map.value = L.map('map', {
       zoomControl: mapOptions.zoomControl,
       minZoom: mapOptions.minZoom,
@@ -107,7 +74,6 @@
 
     addBaseLayer()
 
-    addGestaoAtivosDrawingControls()
     setTimeout(() => {
       map.value!.invalidateSize()
     }, 300)

@@ -6,7 +6,7 @@
   import L from 'leaflet'
   import 'leaflet-draw'
   import { onMounted, ref } from 'vue'
-  import BaseMap from '../assets/layers/mapLayers.json'
+  import BaseMap from '../../assets/layers/mapLayers.json'
 
   const DEFAULT_MAP_OPTIONS: any = {
     zoomControl: false,

@@ -1,14 +1,15 @@
 <template>
   <div class="map-container">
     <Loading :isLoading="isLoading" />
-    <!-- <LayerMenu
-      v-if="config.layers?.menu.show && mapRef"
-      :data="config.layers"
+    <LayerMenu
+      v-if="mapRef"
+      :layers="layers.customLayers"
+      :options="{size: 'medium'}"
       :map="mapRef.map"
       :layerControl="mapRef.layerControl"
       @startLoading="isLoading = true"
       @stopLoading="isLoading = false"
-    /> -->
+    />
     <Map
       ref="mapRef"
       :layers="layers"
@@ -21,9 +22,9 @@
 
 <script setup lang="ts">
   import { ref } from 'vue'
-  // import LayerMenu from './LayerMenu.vue'
-  import Map from './LeafletMap.vue'
-  import Loading from './Loading.vue'
+  import LayerMenu from './menu/LayerMenu.vue'
+  import Map from './map/LeafletMap.vue'
+  import Loading from './loading/Loading.vue'
 
   type MapaDPGProps = {
     layers: any,

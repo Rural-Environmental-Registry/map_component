@@ -1,6 +1,6 @@
 <template>
   <div v-if="isLoading" class="map-loading">
-    <img src="../assets/icons/loading.gif" />
+    <img src="../../assets/icons/loading.gif" />
   </div>
 </template>
 

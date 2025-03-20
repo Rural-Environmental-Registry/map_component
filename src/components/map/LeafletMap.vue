@@ -82,6 +82,39 @@
     setTimeout(() => {
       map.value!.invalidateSize()
     }, 300)
+
+    disableLayerControlHover()
+  }
+
+  const disableLayerControlHover = (): void => {
+    setTimeout(() => {
+      const container = document.querySelector(
+        '.leaflet-control-layers'
+      ) as HTMLElement & {
+        _expand: () => void
+        _collapse: () => void
+      }
+      if (!container) return
+
+      const originalExpand =
+        (L.DomEvent as any)._originalExpand || container._expand
+
+      L.DomEvent.off(container)
+
+      L.DomEvent.on(container, 'click', function (e) {
+        if (container.classList.contains('leaflet-control-layers-expanded')) {
+          container._collapse()
+        } else if (originalExpand) {
+          originalExpand.call(container)
+        } else {
+          container.classList.add('leaflet-control-layers-expanded')
+        }
+
+        L.DomEvent.stopPropagation(e)
+        L.DomEvent.preventDefault(e)
+      })
+      ;(L.DomEvent as any)._originalExpand = originalExpand
+    }, 100)
   }
 
   const watchLayerStatus = (tileLayer: L.TileLayer): void => {

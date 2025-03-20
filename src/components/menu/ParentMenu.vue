@@ -27,7 +27,7 @@
       <ChildMenu
         v-if="child.name"
         :data="child"
-        @onChildVisibilityChange="onChildChange($event, idx)"
+        @onChildLayerToggle="onChildChange($event, idx)"
       />
     </template>
   </ElSubMenu>
@@ -47,26 +47,26 @@
   const props = defineProps<ParentMenuProps>()
 
   const emit = defineEmits<{
-    onChildVisibilityChange: [any]
-    onParentVisibilityChange: [any]
+    onChildLayerToggle: [any]
+    onGroupLayerToggle: [any]
   }>()
 
   const childrenLayers = ref<any[]>(props.data.layers)
 
   const toggleVisibleAllLayers = (): void => {
-    emit('onParentVisibilityChange', {
+    emit('onGroupLayerToggle', {
       ...props.data,
       layers: childrenLayers.value
     })
   }
 
   const allLayersActive = computed<boolean>({
-    get: () => childrenLayers.value.every((layer: any) => layer.active),
-    set: (visible: boolean) => {
+    get: () => childrenLayers.value.some((layer: any) => layer.active),
+    set: (active: boolean) => {
       childrenLayers.value = props.data.layers.map((layer: any) => {
         return {
           ...layer,
-          active: visible
+          active
         }
       })
 
@@ -76,7 +76,7 @@
 
   const onChildChange = (layer: any, idx: number): void => {
     childrenLayers.value[idx] = layer
-    emit('onChildVisibilityChange', layer)
+    emit('onChildLayerToggle', layer)
   }
 </script>
 

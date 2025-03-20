@@ -10,7 +10,7 @@
       <template v-for="layers in props.layers">
         <ParentMenu
           :data="layers"
-          @onChildVisibilityChange="onChildLayerChange"
+          @onChildLayerToggle="onChildLayerChange"
           @onParentVisibilityChange="onParentLayerChange"
         />
       </template>
@@ -39,6 +39,8 @@
   const emit = defineEmits<{
     (e: 'startLoading'): void
     (e: 'stopLoading'): void
+    (e: 'onChildLayerToggle'): any
+    (e: 'onParentVisibilityChange'): any
   }>()
 
   const props = defineProps<MenuProps>()
@@ -69,12 +71,15 @@
 
   const onChildLayerChange = (layer: any): void => {
     handleWmsLayer(layer)
+    emit('onChildLayerToggle', layer)
   }
 
   const onParentLayerChange = (parent: any): void => {
     parent.layers.forEach((childLayer: any) =>
       handleWmsLayer(childLayer)
     )
+
+    emit('onParentVisibilityChange', parent)
   }
 
   const convertToWmsLayer = (layer: any): L.TileLayer => {

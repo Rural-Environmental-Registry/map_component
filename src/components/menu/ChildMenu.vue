@@ -43,7 +43,7 @@
 
   const props = defineProps<ChildMenuProps>()
 
-  const emit = defineEmits<{ onChildVisibilityChange: [any] }>()
+  const emit = defineEmits<{ onChildLayerToggle: [any] }>()
 
   const active = computed<boolean>({
     get: () => props.data.active,
@@ -54,13 +54,13 @@
 
   const toggleLayerVisible = (active: boolean): void => {
     const layer = { ...props.data, active }
-    emit('onChildVisibilityChange', layer)
+    emit('onChildLayerToggle', layer)
   }
 
   onMounted(() => {
-    if (props.data.active) {
+    if (props.data.activeDefault) {
       setTimeout(() => {
-        toggleLayerVisible(props.data.active)
+        toggleLayerVisible(props.data.activeDefault)
       }, 100)
     }
   })

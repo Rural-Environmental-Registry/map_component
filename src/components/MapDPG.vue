@@ -19,6 +19,7 @@
       :showDrawingControls="options.drawing?.show"
       @startLoading="isLoading = true"
       @stopLoading="isLoading = false"
+      @onDrawing="emit('onDrawing', $event)"
     />
   </div>
 </template>
@@ -40,6 +41,7 @@
   const emit = defineEmits<{
     (e: 'onGroupLayerToggle'): any
     (e: 'onChildLayerToggle'): any
+    (e: 'onDrawing'): any
   }>()
 
   type MapRef = {
@@ -57,7 +59,9 @@
 
   defineExpose({
     map: computed(() => mapRef.value?.map),
-    layerControl: computed(() => mapRef.value?.layerControl)
+    layerControl: computed(() => mapRef.value?.layerControl),
+    drawControl: computed(() => mapRef.value?.drawControl),
+    drawItemsGroup: computed(() => mapRef.value?.drawItemsGroup)
   })
 </script>
 

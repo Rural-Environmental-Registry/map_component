@@ -19,6 +19,7 @@
   const emit = defineEmits<{
     (e: 'startLoading'): void
     (e: 'stopLoading'): void
+    (e: 'onDrawing'): any
   }>()
 
   // const props = defineProps<any>()
@@ -31,6 +32,7 @@
   const map = ref<L.Map>()
   const layerControl = ref<L.Control.Layers>()
   const drawControl = ref<L.Control.Draw>()
+  const drawItemsGroup = ref<L.FeatureGroup>()
 
   onMounted(() => {
     const mapOptions: any = props.mapOptions?.config || DEFAULT_MAP_OPTIONS
@@ -97,6 +99,9 @@
   }
 
   const addDrawingControls = (): void => {
+    drawItemsGroup.value = new L.featureGroup()
+    map.value!.addLayer(drawItemsGroup.value)
+
     const DEFAULT_DRAW_OPTIONS: L.Control.DrawConstructorOptions = {
       position: 'topright',
       draw: {
@@ -116,26 +121,56 @@
         circlemarker: false
       },
       edit: {
-        featureGroup: new L.FeatureGroup(),
-        edit: {
-          selectedPathOptions: {
-            fill: true,
-            fillColor: '#42916e',
-            fillOpacity: 0.1
-          }
-        }
+        featureGroup: drawItemsGroup.value
       }
     }
 
-    drawControl.value = new L.Control.Draw(DEFAULT_DRAW_OPTIONS).addTo(
-      map.value!
-    )
+    drawControl.value = new L.Control.Draw(DEFAULT_DRAW_OPTIONS)
+
+    map.value!.addControl(drawControl.value)
+
+    addMapDrawingEvents()
+  }
+
+  const addMapDrawingEvents = (): void => {
+    map.value!.on('draw:created', (e: any) => {
+      drawItemsGroup.value!.addLayer(e.layer)
+      if (e.layerType === 'polygon') {
+        const area = L.GeometryUtil.geodesicArea(e.layer.getLatLngs()[0])
+        e.layer.drawnArea = {
+          m2: area,
+          km2: area / 1000000,
+          ha: area / 10000
+        }
+      }
+      emit('onDrawing', { type: 'created', data: e })
+    })
+
+    map.value!.on('draw:edited', (e: any) => {
+      drawItemsGroup.value!.addLayer(e.layer)
+
+      if (e.layerType === 'polygon') {
+        const area = L.GeometryUtil.geodesicArea(e.layer.getLatLngs()[0])
+        e.layer.drawnArea = {
+          m2: area,
+          km2: area / 1000000,
+          ha: area / 10000
+        }
+      }
+
+      emit('onDrawing', { type: 'edited', data: e })
+    })
+
+    map.value!.on('draw:deleted', (e: any) => {
+      emit('onDrawing', { type: 'deleted', data: e })
+    })
   }
 
   defineExpose({
     map,
     layerControl,
-    drawControl
+    drawControl,
+    drawItemsGroup
   })
 </script>
 

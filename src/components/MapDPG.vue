@@ -1,6 +1,6 @@
 <template>
   <div class="map-container">
-    <Loading :isLoading="isLoading" />
+    <Loading :isLoading="isLoading || showLoading" />
     <LayerMenu
       v-if="mapRef"
       :layers="layers.customLayers"
@@ -9,6 +9,8 @@
       :layerControl="mapRef.layerControl"
       @startLoading="isLoading = true"
       @stopLoading="isLoading = false"
+      @onChildLayerToggle="emit('onChildLayerToggle', $event)"
+      @onGroupLayerToggle="emit('onGroupLayerToggle', $event)"
     />
     <Map
       ref="mapRef"
@@ -21,17 +23,23 @@
 </template>
 
 <script setup lang="ts">
-  import { ref } from 'vue'
+  import { ref, computed } from 'vue'
   import LayerMenu from './menu/LayerMenu.vue'
   import Map from './map/LeafletMap.vue'
   import Loading from './loading/Loading.vue'
 
   type MapaDPGProps = {
     layers: any,
-    config: any
+    config: any,
+    showLoading: boolean
   }
   
   defineProps<MapaDPGProps>()
+
+  const emit = defineEmits<{
+    (e: 'onGroupLayerToggle'): any
+    (e: 'onChildLayerToggle'): any
+  }>()
   
   type MapRef = {
     map: L.Map
@@ -41,6 +49,15 @@
   const mapRef = ref<MapRef>()
 
   const isLoading = ref<boolean>(false)
+
+  const log = (data: any): void => {
+    console.log(data)
+  }
+
+  defineExpose({
+    map: computed(() => mapRef.value?.map),
+    layerControl: computed(() => mapRef.value?.layerControl)
+  })
 </script>
 
 <style>

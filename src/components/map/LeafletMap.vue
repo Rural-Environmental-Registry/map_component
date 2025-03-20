@@ -7,6 +7,7 @@
   import 'leaflet-draw'
   import { onMounted, ref } from 'vue'
   import BaseMap from '../../assets/layers/mapLayers.json'
+  import DrawingControlHandler from '../../handlers/drawingControl'
 
   const DEFAULT_MAP_OPTIONS: any = {
     zoomControl: false,
@@ -26,7 +27,7 @@
   const props = defineProps({
     mapOptions: Object,
     layers: Object,
-    showDrawingControls: Boolean
+    drawingOptions: Object
   })
 
   const map = ref<L.Map>()
@@ -39,7 +40,7 @@
 
     initMap(mapOptions)
 
-    if (props.showDrawingControls) addDrawingControls()
+    if (props.drawingOptions?.show) handleDrawingControls()
   })
 
   const addControls = (): void => {
@@ -131,72 +132,20 @@
     })
   }
 
-  const addDrawingControls = (): void => {
-    drawItemsGroup.value = new L.featureGroup()
-    map.value!.addLayer(drawItemsGroup.value)
+  const handleDrawingControls = (): void => {
+    const drawingControlHandler = new DrawingControlHandler(
+      map.value!,
+      props.drawingOptions?.config,
+      emitDrawingEvents
+    )
 
-    const DEFAULT_DRAW_OPTIONS: L.Control.DrawConstructorOptions = {
-      position: 'topright',
-      draw: {
-        polygon: {
-          showArea: false,
-          showLength: false,
-          precision: {
-            km: 1,
-            ha: 1,
-            m: 0
-          }
-        },
-        polyline: false,
-        circle: false,
-        rectangle: false,
-        marker: false,
-        circlemarker: false
-      },
-      edit: {
-        featureGroup: drawItemsGroup.value
-      }
-    }
-
-    drawControl.value = new L.Control.Draw(DEFAULT_DRAW_OPTIONS)
-
-    map.value!.addControl(drawControl.value)
-
-    addMapDrawingEvents()
+    map.value = drawingControlHandler.map
+    drawControl.value = drawingControlHandler.drawControl
+    drawItemsGroup.value = drawingControlHandler.drawItemsGroup
   }
 
-  const addMapDrawingEvents = (): void => {
-    map.value!.on('draw:created', (e: any) => {
-      drawItemsGroup.value!.addLayer(e.layer)
-      if (e.layerType === 'polygon') {
-        const area = L.GeometryUtil.geodesicArea(e.layer.getLatLngs()[0])
-        e.layer.drawnArea = {
-          m2: area,
-          km2: area / 1000000,
-          ha: area / 10000
-        }
-      }
-      emit('onDrawing', { type: 'created', data: e })
-    })
-
-    map.value!.on('draw:edited', (e: any) => {
-      drawItemsGroup.value!.addLayer(e.layer)
-
-      if (e.layerType === 'polygon') {
-        const area = L.GeometryUtil.geodesicArea(e.layer.getLatLngs()[0])
-        e.layer.drawnArea = {
-          m2: area,
-          km2: area / 1000000,
-          ha: area / 10000
-        }
-      }
-
-      emit('onDrawing', { type: 'edited', data: e })
-    })
-
-    map.value!.on('draw:deleted', (e: any) => {
-      emit('onDrawing', { type: 'deleted', data: e })
-    })
+  const emitDrawingEvents = (data: any): void => {
+    emit('onDrawing', data)
   }
 
   defineExpose({

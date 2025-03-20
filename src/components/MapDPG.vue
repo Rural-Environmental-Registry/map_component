@@ -16,7 +16,7 @@
       ref="mapRef"
       :layers="layers"
       :mapOptions="options.map"
-      :showDrawingControls="options.drawing?.show"
+      :drawingOptions="options.drawing"
       @startLoading="isLoading = true"
       @stopLoading="isLoading = false"
       @onDrawing="emit('onDrawing', $event)"

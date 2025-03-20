@@ -24,17 +24,20 @@
   // const props = defineProps<any>()
   const props = defineProps({
     mapOptions: Object,
-    layers: Object
+    layers: Object,
+    showDrawingControls: Boolean
   })
 
   const map = ref<L.Map>()
   const layerControl = ref<L.Control.Layers>()
+  const drawControl = ref<L.Control.Draw>()
 
   onMounted(() => {
-    const mapOptions: any =
-      props.mapOptions || DEFAULT_MAP_OPTIONS
+    const mapOptions: any = props.mapOptions?.config || DEFAULT_MAP_OPTIONS
 
     initMap(mapOptions)
+
+    if (props.showDrawingControls) addDrawingControls()
   })
 
   const addControls = (): void => {
@@ -93,9 +96,46 @@
     })
   }
 
+  const addDrawingControls = (): void => {
+    const DEFAULT_DRAW_OPTIONS: L.Control.DrawConstructorOptions = {
+      position: 'topright',
+      draw: {
+        polygon: {
+          showArea: false,
+          showLength: false,
+          precision: {
+            km: 1,
+            ha: 1,
+            m: 0
+          }
+        },
+        polyline: false,
+        circle: false,
+        rectangle: false,
+        marker: false,
+        circlemarker: false
+      },
+      edit: {
+        featureGroup: new L.FeatureGroup(),
+        edit: {
+          selectedPathOptions: {
+            fill: true,
+            fillColor: '#42916e',
+            fillOpacity: 0.1
+          }
+        }
+      }
+    }
+
+    drawControl.value = new L.Control.Draw(DEFAULT_DRAW_OPTIONS).addTo(
+      map.value!
+    )
+  }
+
   defineExpose({
     map,
-    layerControl
+    layerControl,
+    drawControl
   })
 </script>
 

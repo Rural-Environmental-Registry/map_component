@@ -4,7 +4,7 @@
     <LayerMenu
       v-if="mapRef"
       :layers="layers.customLayers"
-      :options="{size: 'medium'}"
+      :options="options.layersMenu"
       :map="mapRef.map"
       :layerControl="mapRef.layerControl"
       @startLoading="isLoading = true"
@@ -15,7 +15,8 @@
     <Map
       ref="mapRef"
       :layers="layers"
-      :mapOptions="config"
+      :mapOptions="options.map"
+      :showDrawingControls="options.drawing?.show"
       @startLoading="isLoading = true"
       @stopLoading="isLoading = false"
     />
@@ -29,18 +30,18 @@
   import Loading from './loading/Loading.vue'
 
   type MapaDPGProps = {
-    layers: any,
-    config: any,
+    layers: any
+    options: any
     showLoading: boolean
   }
-  
+
   defineProps<MapaDPGProps>()
 
   const emit = defineEmits<{
     (e: 'onGroupLayerToggle'): any
     (e: 'onChildLayerToggle'): any
   }>()
-  
+
   type MapRef = {
     map: L.Map
     layerControl: L.Control.Layers

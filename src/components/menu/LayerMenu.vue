@@ -11,7 +11,7 @@
         <ParentMenu
           :data="layers"
           @onChildLayerToggle="onChildLayerChange"
-          @onParentVisibilityChange="onParentLayerChange"
+          @onGroupLayerToggle="onGroupLayerToggle"
         />
       </template>
     </ElMenu>
@@ -40,7 +40,7 @@
     (e: 'startLoading'): void
     (e: 'stopLoading'): void
     (e: 'onChildLayerToggle'): any
-    (e: 'onParentVisibilityChange'): any
+    (e: 'onGroupLayerToggle'): any
   }>()
 
   const props = defineProps<MenuProps>()
@@ -74,12 +74,10 @@
     emit('onChildLayerToggle', layer)
   }
 
-  const onParentLayerChange = (parent: any): void => {
-    parent.layers.forEach((childLayer: any) =>
-      handleWmsLayer(childLayer)
-    )
+  const onGroupLayerToggle = (parent: any): void => {
+    parent.layers.forEach((childLayer: any) => handleWmsLayer(childLayer))
 
-    emit('onParentVisibilityChange', parent)
+    emit('onGroupLayerToggle', parent)
   }
 
   const convertToWmsLayer = (layer: any): L.TileLayer => {
@@ -97,10 +95,10 @@
 
   const handleWmsLayer = (layer: any): void => {
     if (convertedLayers.value[layer.key]) {
-      if (layer.active) return
-
-      return removeWmsLayer(layer)
+      if (!layer.active) return removeWmsLayer(layer)
     }
+
+    if (!layer.active) return
 
     const wmsLayer = convertToWmsLayer(layer)
     convertedLayers.value[layer.key] = wmsLayer

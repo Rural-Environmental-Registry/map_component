@@ -4,8 +4,8 @@ export const DEFAULT_DRAW_OPTIONS: Control.DrawConstructorOptions = {
   position: 'topright',
   draw: {
     polygon: {
-      showArea: false,
-      showLength: false,
+      showArea: true,
+      showLength: true,
       precision: {
         km: 1,
         ha: 1,

@@ -4,7 +4,7 @@ import {
   Map,
   GeometryUtil,
   drawLocal,
-  Localization
+  LatLng
 } from 'leaflet'
 import {
   DEFAULT_DRAW_OPTIONS,
@@ -16,12 +16,7 @@ export default class DrawingControlHandler {
   private _drawItemsGroup: FeatureGroup
   private _options: Control.DrawConstructorOptions
 
-  constructor(
-    map: Map,
-    drawItemsGroup: FeatureGroup,
-    controlOptions: any,
-    controlTexts: Localization.DrawToolbar
-  ) {
+  constructor(map: Map, drawItemsGroup: FeatureGroup, controlOptions: any) {
     this._map = map
     this._drawItemsGroup = drawItemsGroup
     this._options = this.formatOptions(controlOptions.config)
@@ -59,18 +54,29 @@ export default class DrawingControlHandler {
     return options
   }
 
-  private incrementLayerInfos(data: any): any {
-    let area = 0
-
-    if (data.layerType === 'polygon') {
-      area = GeometryUtil.geodesicArea(data.layer.getLatLngs()[0])
-    }
-
-    data.layer.drawnArea = {
+  private calculateAreas(latLangs: LatLng[]): any {
+    const area = GeometryUtil.geodesicArea(latLangs)
+    return {
       m2: area,
       km2: area / 1000000,
       ha: area / 10000
     }
+  }
+
+  private incrementLayerInfosOnCreate(data: any): any {
+    const polygons = ['marker', 'circle', 'rectangle', 'polygon']
+
+    if (!polygons.includes(data.layerType)) return data
+
+    data.layer.drawnArea = this.calculateAreas(data.layer.getLatLngs()[0])
+
+    return data
+  }
+
+  private incrementLayerInfosOnEdit(data: any): any {
+    if (!data.drawnArea) return data
+
+    data.drawnArea = this.calculateAreas(data.getLatLngs()[0])
 
     return data
   }
@@ -79,21 +85,29 @@ export default class DrawingControlHandler {
     this._map.on('draw:created', (e: any) => {
       this._drawItemsGroup.addLayer(e.layer)
 
-      const data = this.incrementLayerInfos(e)
+      const { layer } = this.incrementLayerInfosOnCreate(e)
 
-      eventEmitterCallback({ type: 'created', data })
+      eventEmitterCallback({ type: 'created', layer })
     })
 
     this._map.on('draw:edited', (e: any) => {
-      this._drawItemsGroup.addLayer(e.layer)
+      const layers: any = []
 
-      const data = this.incrementLayerInfos(e)
+      e.layers.eachLayer((layer: any) => {
+        const data = this.incrementLayerInfosOnEdit(layer)
 
-      eventEmitterCallback({ type: 'edited', data })
+        layers.push(data)
+      })
+      eventEmitterCallback({ type: 'edited', layers })
     })
 
     this._map.on('draw:deleted', (e: any) => {
-      eventEmitterCallback({ type: 'deleted', data: e })
+      const layers: any = []
+
+      e.layers.eachLayer((layer: any) => {
+        layers.push(layer)
+      })
+      eventEmitterCallback({ type: 'deleted', layers })
     })
   }
 

@@ -133,19 +133,25 @@
   }
 
   const handleDrawingControls = (): void => {
+    drawItemsGroup.value = new L.FeatureGroup()
+    map.value!.addLayer(drawItemsGroup.value)
+
     const drawingControlHandler = new DrawingControlHandler(
       map.value!,
-      props.drawingOptions?.config,
-      emitDrawingEvents
+      drawItemsGroup.value,
+      props.drawingOptions
     )
 
-    map.value = drawingControlHandler.map
-    drawControl.value = drawingControlHandler.drawControl
-    drawItemsGroup.value = drawingControlHandler.drawItemsGroup
-  }
+    drawControl.value = new L.Control.Draw(drawingControlHandler.options)
 
-  const emitDrawingEvents = (data: any): void => {
-    emit('onDrawing', data)
+    map.value!.addControl(drawControl.value)
+
+    drawingControlHandler.handleDrawingEvents((data: any) => {
+      emit('onDrawing', data)
+    })
+
+    drawItemsGroup.value = drawingControlHandler.drawItemsGroup
+    map.value = drawingControlHandler.map
   }
 
   defineExpose({

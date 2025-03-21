@@ -20,7 +20,7 @@
   const emit = defineEmits<{
     (e: 'startLoading'): void
     (e: 'stopLoading'): void
-    (e: 'onDrawing'): any
+    (e: 'onDrawing', data: any): void
   }>()
 
   // const props = defineProps<any>()

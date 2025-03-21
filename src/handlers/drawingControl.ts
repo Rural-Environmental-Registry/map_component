@@ -11,6 +11,12 @@ import {
   DEFAULT_DRAWING_CONTROL_TEXTS
 } from './constants'
 
+// @ts-ignore
+window.type = true
+
+// @ts-ignore
+window.radius = true
+
 export default class DrawingControlHandler {
   private _map: Map
   private _drawItemsGroup: FeatureGroup
@@ -64,7 +70,7 @@ export default class DrawingControlHandler {
   }
 
   private incrementLayerInfosOnCreate(data: any): any {
-    const polygons = ['marker', 'circle', 'rectangle', 'polygon']
+    const polygons = ['rectangle', 'polygon']
 
     if (!polygons.includes(data.layerType)) return data
 

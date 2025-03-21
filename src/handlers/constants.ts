@@ -1,4 +1,16 @@
-import { Control, Localization } from 'leaflet'
+import { Control, Localization, Icon } from 'leaflet'
+import GreenMarker from '../assets/icons/marker-icon-green.svg'
+
+const CUSTOM_MARKER = Icon.extend({
+  options: {
+    iconUrl: GreenMarker,
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41],
+    shadowAnchor: [12, 41]
+  }
+})
 
 export const DEFAULT_DRAW_OPTIONS: Control.DrawConstructorOptions = {
   position: 'topright',
@@ -12,11 +24,9 @@ export const DEFAULT_DRAW_OPTIONS: Control.DrawConstructorOptions = {
         m: 0
       }
     },
-    polyline: {},
-    circle: {},
-    rectangle: {},
-    marker: {},
-    circlemarker: {}
+    marker: {
+      icon: new CUSTOM_MARKER()
+    }
   }
 }
 

@@ -39,14 +39,16 @@
   defineProps<MapaDPGProps>()
 
   const emit = defineEmits<{
-    (e: 'onGroupLayerToggle'): any
-    (e: 'onChildLayerToggle'): any
-    (e: 'onDrawing'): any
+    (e: 'onGroupLayerToggle', data: any): void
+    (e: 'onChildLayerToggle', data: any): void
+    (e: 'onDrawing', data: any): void
   }>()
 
   type MapRef = {
     map: L.Map
     layerControl: L.Control.Layers
+    drawControl: L.Control.Draw
+    drawItemsGroup: L.FeatureGroup
   }
 
   const mapRef = ref<MapRef>()

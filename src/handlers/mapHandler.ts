@@ -38,9 +38,7 @@ export default class MapHandler {
     const baseMap = this._mapLayers.mapLayers || DEFAULT_MAP_LAYER.mapLayers
 
     baseMap.forEach((layer: BaseMapLayer) => {
-      const tileLayer = L.tileLayer(layer.url, {
-        attribution: `© ${layer.name}`
-      })
+      const tileLayer = L.tileLayer(layer.url)
 
       this.watchLayerStatus(tileLayer, eventEmitterCallback)
 

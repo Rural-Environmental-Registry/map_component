@@ -22,10 +22,31 @@ export const DEFAULT_DRAW_OPTIONS: Control.DrawConstructorOptions = {
         km: 1,
         ha: 1,
         m: 0
+      },
+      shapeOptions: {
+        color: '#0fdd61'
       }
     },
     marker: {
       icon: new CUSTOM_MARKER()
+    },
+    circle: {
+      shapeOptions: {
+        color: '#0fdd61'
+      }
+    },
+    rectangle: {
+      shapeOptions: {
+        color: '#0fdd61'
+      }
+    },
+    polyline: {
+      shapeOptions: {
+        color: '#0fdd61'
+      }
+    },
+    circlemarker: {
+      color: '#0fdd61'
     }
   }
 }

@@ -12,11 +12,11 @@ export const DEFAULT_DRAW_OPTIONS: Control.DrawConstructorOptions = {
         m: 0
       }
     },
-    polyline: false,
-    circle: false,
-    rectangle: false,
-    marker: false,
-    circlemarker: false
+    polyline: {},
+    circle: {},
+    rectangle: {},
+    marker: {},
+    circlemarker: {}
   }
 }
 

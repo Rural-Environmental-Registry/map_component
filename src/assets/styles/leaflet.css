@@ -79,21 +79,56 @@
 
   /* leaflet draw */
 
-  .leaflet-draw.leaflet-control .leaflet-draw-draw-polygon{
+  .leaflet-draw.leaflet-control .leaflet-draw-draw-polygon {
     background-image: url('../icons/polygon-draw.svg');
     background-size: var(--mapa-size-base-15) var(--mapa-size-base-15);
     background-repeat: no-repeat;
     background-position: center;
   }
 
-  .leaflet-draw.leaflet-control .leaflet-draw-edit-edit{
+  .leaflet-draw.leaflet-control .leaflet-draw-draw-polyline {
+    background-image: url('../icons/polyline-draw.svg');
+    background-size: var(--mapa-size-base-15) var(--mapa-size-base-15);
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+
+  .leaflet-draw.leaflet-control .leaflet-draw-draw-rectangle {
+    background-image: url('../icons/rectangle-draw.svg');
+    background-size: var(--mapa-size-base-15) var(--mapa-size-base-15);
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+
+  .leaflet-draw.leaflet-control .leaflet-draw-draw-circle {
+    background-image: url('../icons/circle-draw.svg');
+    background-size: var(--mapa-size-base-15) var(--mapa-size-base-15);
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+
+  .leaflet-draw.leaflet-control .leaflet-draw-draw-marker {
+    background-image: url('../icons/marker-draw.svg');
+    background-size: var(--mapa-size-base-15) var(--mapa-size-base-15);
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+
+  .leaflet-draw.leaflet-control .leaflet-draw-draw-circlemarker {
+    background-image: url('../icons/circlemarker-draw.svg');
+    background-size: var(--mapa-size-base-15) var(--mapa-size-base-15);
+    background-repeat: no-repeat;
+    background-position: center;
+  } 
+
+  .leaflet-draw.leaflet-control .leaflet-draw-edit-edit {
     background-image: url('../icons/edit-draw.svg');
     background-size: var(--mapa-size-base-15) var(--mapa-size-base-15);
     background-repeat: no-repeat;
     background-position: center;
   }
 
-  .leaflet-draw.leaflet-control .leaflet-draw-edit-remove{
+  .leaflet-draw.leaflet-control .leaflet-draw-edit-remove {
     background-image: url('../icons/delete-draw.svg');
     background-size: var(--mapa-size-base-15) var(--mapa-size-base-15);
     background-repeat: no-repeat;

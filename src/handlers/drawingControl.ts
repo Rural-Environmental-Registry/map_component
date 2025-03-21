@@ -21,6 +21,7 @@ import {
   DEFAULT_DRAWING_CONTROL_TEXTS
 } from './constants'
 import {
+  DrawingConfig,
   DrawnArea,
   IncrementedCreateLayer,
   IncrementedEditLayer,
@@ -34,12 +35,16 @@ export default class DrawingControlHandler {
   private _drawItemsGroup: FeatureGroup
   private _options: Control.DrawConstructorOptions
 
-  constructor(map: Map, drawItemsGroup: FeatureGroup, controlOptions: any) {
+  constructor(
+    map: Map,
+    drawItemsGroup: FeatureGroup,
+    controlOptions?: DrawingConfig
+  ) {
     this._map = map
     this._drawItemsGroup = drawItemsGroup
-    this._options = this.formatOptions(controlOptions.config)
+    this._options = this.formatOptions(controlOptions?.config)
     this.addTranslation(
-      controlOptions.controlTexts || DEFAULT_DRAWING_CONTROL_TEXTS
+      controlOptions?.controlTexts || DEFAULT_DRAWING_CONTROL_TEXTS
     )
   }
 
@@ -56,7 +61,7 @@ export default class DrawingControlHandler {
   }
 
   private formatOptions(
-    controlOptions: Control.DrawConstructorOptions
+    controlOptions: Control.DrawConstructorOptions | undefined
   ): Control.DrawConstructorOptions {
     let options = DEFAULT_DRAW_OPTIONS
 

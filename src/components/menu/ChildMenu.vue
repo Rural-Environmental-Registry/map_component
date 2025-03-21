@@ -23,7 +23,7 @@
             </template>
           </ElSwitch>
           <span class="child-layer-status">
-            {{ active ? 'data.toggle.active' : 'data.toggle.inactive' }}
+            {{ active ? data.toggle.active : data.toggle.inactive }}
           </span>
         </span>
       </div>

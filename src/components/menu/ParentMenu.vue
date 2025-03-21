@@ -15,8 +15,8 @@
           <span class="parent-layer-status">
             {{
               allLayersActive
-                ? 'groupData.toggle.active'
-                : 'groupData.toggle.inactive'
+                ? groupData.toggle.active
+                : groupData.toggle.inactive
             }}
           </span>
           <ElDivider class="divider-bar" direction="vertical" />

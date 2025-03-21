@@ -2,7 +2,7 @@
   <div class="map-container">
     <Loading :isLoading="isLoading || showLoading" />
     <LayerMenu
-      v-if="mapRef"
+      v-if="mapRef && layers.customLayers"
       :layersConfig="layers.customLayers"
       :options="options.layersMenu"
       :map="mapRef.map"
@@ -29,19 +29,26 @@
   import LayerMenu from './menu/LayerMenu.vue'
   import Map from './map/LeafletMap.vue'
   import Loading from './loading/Loading.vue'
+  import {
+    DrawingEvent,
+    GroupLayerData,
+    LayerData,
+    MapLayers,
+    MapOptionsConfig
+  } from '../types'
 
   type MapaDPGProps = {
-    layers: any
-    options: any
+    layers: MapLayers
+    options: MapOptionsConfig
     showLoading: boolean
   }
 
   defineProps<MapaDPGProps>()
 
   const emit = defineEmits<{
-    (e: 'onGroupLayerToggle', data: any): void
-    (e: 'onChildLayerToggle', data: any): void
-    (e: 'onDrawing', data: any): void
+    (e: 'onGroupLayerToggle', data: GroupLayerData): void
+    (e: 'onChildLayerToggle', data: LayerData): void
+    (e: 'onDrawing', data: DrawingEvent): void
   }>()
 
   type MapRef = {

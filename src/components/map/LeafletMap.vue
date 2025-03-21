@@ -6,8 +6,13 @@
   import L from 'leaflet'
   import 'leaflet-draw'
   import { onMounted, ref } from 'vue'
+  import {
+    DrawingConfig,
+    DrawingEvent,
+    MapConfig,
+    MapLayers
+  } from '../../types'
   import DrawingControlHandler from '../../handlers/drawingControl'
-  import { DrawingEvent } from '../../types'
   import MapHandler from '../../handlers/mapHandler'
 
   const emit = defineEmits<{
@@ -16,12 +21,13 @@
     (e: 'onDrawing', data: DrawingEvent): void
   }>()
 
-  // const props = defineProps<any>()
-  const props = defineProps({
-    mapOptions: Object,
-    layers: Object,
-    drawingOptions: Object
-  })
+  type MapProps = {
+    mapOptions: MapConfig
+    layers: MapLayers
+    drawingOptions?: DrawingConfig
+  }
+
+  const props = defineProps<MapProps>()
 
   const map = ref<L.Map>()
   const layerControl = ref<L.Control.Layers>()
@@ -35,7 +41,7 @@
   })
 
   const initMap = (): void => {
-    const config = props.mapOptions?.config
+    const { config } = props.mapOptions
 
     const mapHandler = new MapHandler(config)
 

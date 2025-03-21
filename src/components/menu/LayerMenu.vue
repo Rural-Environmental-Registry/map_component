@@ -24,11 +24,16 @@
   import { computed, ref } from 'vue'
   import FontAwesomeIcon from '../fa-icon/FontAwesomeIcon.vue'
   import ParentMenu from './ParentMenu.vue'
-  import { GroupLayerData, LayerData, LayersConfig } from '../../types'
+  import {
+    GroupLayerData,
+    LayerData,
+    LayersConfig,
+    LayersMenuConfig
+  } from '../../types'
 
   type MenuProps = {
     layersConfig: LayersConfig
-    options: any
+    options?: LayersMenuConfig
     map: L.Map
     layerControl: L.Control.Layers
   }
@@ -58,7 +63,7 @@
   const customClasses = computed((): CustomClasses => {
     const status = isMenuOpen.value ? 'open' : 'close'
     return {
-      layerMenu: `layer-menu layer-menu-${props.options.size}`,
+      layerMenu: `layer-menu layer-menu-${props.options?.size || 'medium'}`,
       menuButton: `map-menu-button map-menu-button-${status}`,
       customMenu: `map-custom-menu map-custom-menu-${status}`
     }

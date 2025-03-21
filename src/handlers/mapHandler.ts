@@ -1,5 +1,5 @@
 import { DEFAULT_MAP_OPTIONS } from './constants'
-import { BaseMapLayer, CustomMapOptions } from '../types'
+import { BaseMapLayer, CustomMapOptions, MapLayers } from '../types'
 import DEFAULT_MAP_LAYER from '../assets/layers/mapLayers.json'
 
 import L from 'leaflet'
@@ -7,7 +7,7 @@ import L from 'leaflet'
 export default class MapHandler {
   private _map: L.Map
   private _mapOptions: CustomMapOptions
-  private _mapLayers: any
+  private _mapLayers!: MapLayers
   private _layerControl!: L.Control.Layers
 
   constructor(mapOptions: CustomMapOptions) {
@@ -100,7 +100,7 @@ export default class MapHandler {
     })
   }
 
-  public init(mapLayers: any, eventEmitterCallback: Function): void {
+  public init(mapLayers: MapLayers, eventEmitterCallback: Function): void {
     this._mapLayers = mapLayers
 
     this.addControls()

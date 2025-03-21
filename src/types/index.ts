@@ -1,3 +1,5 @@
+import { Localization } from 'leaflet'
+
 export type FaIconName = 'check' | 'xmark' | 'chevron-right' | 'chevron-left'
 
 export type DrawnArea = {
@@ -51,6 +53,10 @@ export type LayerData = {
 export type GroupLayerData = {
   name: string
   key: string
+  toggle: {
+    active: string
+    inactive: string
+  }
   layers: LayerData[]
 }
 
@@ -74,4 +80,29 @@ export type BaseMapLayers = BaseMapLayer[]
 export type CustomMapOptions = L.MapOptions & {
   center: L.LatLng
   zoom: number
+}
+
+export type MapLayers = {
+  mapLayers: BaseMapLayers
+  customLayers?: LayersConfig
+}
+
+export type MapConfig = {
+  config?: CustomMapOptions
+}
+
+export type LayersMenuConfig = {
+  size: 'small' | 'medium' | 'large'
+}
+
+export type DrawingConfig = {
+  show: boolean
+  config?: L.Control.DrawConstructorOptions
+  controlTexts?: Localization.DrawLocal
+}
+
+export type MapOptionsConfig = {
+  layersMenu?: LayersMenuConfig
+  map: MapConfig
+  drawing?: DrawingConfig
 }

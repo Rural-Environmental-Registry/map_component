@@ -7,9 +7,9 @@
       <FontAwesomeIcon :iconName="iconButton" />
     </ElButton>
     <ElMenu :class="customClasses.customMenu" mode="vertical">
-      <template v-for="layers in props.layers">
+      <template v-for="group in props.layersConfig">
         <ParentMenu
-          :data="layers"
+          :groupData="group"
           @onChildLayerToggle="onChildLayerChange"
           @onGroupLayerToggle="onGroupLayerToggle"
         />
@@ -24,9 +24,10 @@
   import { computed, ref } from 'vue'
   import FontAwesomeIcon from '../fa-icon/FontAwesomeIcon.vue'
   import ParentMenu from './ParentMenu.vue'
+  import { GroupLayerData, LayerData, LayersConfig } from '../../types'
 
   type MenuProps = {
-    layers: any
+    layersConfig: LayersConfig
     options: any
     map: L.Map
     layerControl: L.Control.Layers
@@ -39,8 +40,8 @@
   const emit = defineEmits<{
     (e: 'startLoading'): void
     (e: 'stopLoading'): void
-    (e: 'onChildLayerToggle'): any
-    (e: 'onGroupLayerToggle'): any
+    (e: 'onChildLayerToggle', data: LayerData): void
+    (e: 'onGroupLayerToggle', data: GroupLayerData): void
   }>()
 
   const props = defineProps<MenuProps>()
@@ -69,18 +70,18 @@
     return isMenuOpen.value ? 'chevron-left' : 'chevron-right'
   })
 
-  const onChildLayerChange = (layer: any): void => {
+  const onChildLayerChange = (layer: LayerData): void => {
     handleWmsLayer(layer)
     emit('onChildLayerToggle', layer)
   }
 
-  const onGroupLayerToggle = (parent: any): void => {
-    parent.layers.forEach((childLayer: any) => handleWmsLayer(childLayer))
+  const onGroupLayerToggle = (parent: GroupLayerData): void => {
+    parent.layers.forEach((childLayer: LayerData) => handleWmsLayer(childLayer))
 
     emit('onGroupLayerToggle', parent)
   }
 
-  const convertToWmsLayer = (layer: any): L.TileLayer => {
+  const convertToWmsLayer = (layer: LayerData): L.TileLayer => {
     const wmsLayer = L.tileLayer.wms(layer.baseUrl, {
       layers: layer.layers,
       format: layer.format || 'image/png',
@@ -93,7 +94,7 @@
     return wmsLayer
   }
 
-  const handleWmsLayer = (layer: any): void => {
+  const handleWmsLayer = (layer: LayerData): void => {
     if (convertedLayers.value[layer.key]) {
       if (!layer.active) return removeWmsLayer(layer)
     }
@@ -107,7 +108,7 @@
     props.layerControl.addOverlay(wmsLayer, `${wmsLayer.options.attribution}`)
   }
 
-  const removeWmsLayer = (layer: any): void => {
+  const removeWmsLayer = (layer: LayerData): void => {
     props.map.removeLayer(convertedLayers.value[layer.key])
     props.layerControl.removeLayer(convertedLayers.value[layer.key])
 

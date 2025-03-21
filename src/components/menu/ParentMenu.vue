@@ -1,8 +1,8 @@
 <template>
-  <ElSubMenu :index="data.key" class="parent-menu">
+  <ElSubMenu :index="groupData.key" class="parent-menu">
     <template #title>
       <div class="parent-menu-row">
-        <div class="parent-layer-title">{{ data.name }}</div>
+        <div class="parent-layer-title">{{ groupData.name }}</div>
         <span class="switch-component">
           <ElSwitch v-model="allLayersActive" @click.stop>
             <template #active-action>
@@ -13,11 +13,7 @@
             </template>
           </ElSwitch>
           <span class="parent-layer-status">
-            {{
-              allLayersActive
-                ? 'active'
-                : 'inactive'
-            }}
+            {{ allLayersActive ? 'active' : 'inactive' }}
           </span>
           <ElDivider class="divider-bar" direction="vertical" />
         </span>
@@ -39,31 +35,32 @@
   import { computed, ref } from 'vue'
   import FontAwesomeIcon from '../fa-icon/FontAwesomeIcon.vue'
   import ChildMenu from './ChildMenu.vue'
+  import { GroupLayerData, LayerData } from '../../types'
 
   type ParentMenuProps = {
-    data: any
+    groupData: GroupLayerData
   }
 
   const props = defineProps<ParentMenuProps>()
 
   const emit = defineEmits<{
-    onChildLayerToggle: [any]
-    onGroupLayerToggle: [any]
+    onChildLayerToggle: [LayerData]
+    onGroupLayerToggle: [GroupLayerData]
   }>()
 
-  const childrenLayers = ref<any[]>(props.data.layers)
+  const childrenLayers = ref<LayerData[]>(props.groupData.layers)
 
   const toggleVisibleAllLayers = (): void => {
     emit('onGroupLayerToggle', {
-      ...props.data,
+      ...props.groupData,
       layers: childrenLayers.value
     })
   }
 
   const allLayersActive = computed<boolean>({
-    get: () => childrenLayers.value.some((layer: any) => layer.active),
+    get: () => childrenLayers.value.some((layer: LayerData) => layer.active),
     set: (active: boolean) => {
-      childrenLayers.value = props.data.layers.map((layer: any) => {
+      childrenLayers.value = props.groupData.layers.map((layer: LayerData) => {
         return {
           ...layer,
           active
@@ -74,7 +71,7 @@
     }
   })
 
-  const onChildChange = (layer: any, idx: number): void => {
+  const onChildChange = (layer: LayerData, idx: number): void => {
     childrenLayers.value[idx] = layer
     emit('onChildLayerToggle', layer)
   }

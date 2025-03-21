@@ -23,7 +23,7 @@
             </template>
           </ElSwitch>
           <span class="child-layer-status">
-            {{ active ? 'active' : 'inactive' }}
+            {{ active ? data.toggle.active : data.toggle.inactive }}
           </span>
         </span>
       </div>
@@ -36,14 +36,15 @@
   import { ElDivider, ElMenuItem, ElSwitch } from 'element-plus'
   import { computed, onMounted } from 'vue'
   import FontAwesomeIcon from '../fa-icon/FontAwesomeIcon.vue'
+  import { LayerData } from '../../types'
 
   type ChildMenuProps = {
-    data: any
+    data: LayerData
   }
 
   const props = defineProps<ChildMenuProps>()
 
-  const emit = defineEmits<{ onChildLayerToggle: [any] }>()
+  const emit = defineEmits<{ onChildLayerToggle: [LayerData] }>()
 
   const active = computed<boolean>({
     get: () => props.data.active,
@@ -70,7 +71,7 @@
   .child-menu {
     padding-left: var(--mapa-size-base-20) !important;
   }
-  
+
   .child-menu .child-menu-row {
     display: flex;
     justify-content: space-between;

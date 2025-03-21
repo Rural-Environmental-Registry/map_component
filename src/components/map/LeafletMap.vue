@@ -9,7 +9,7 @@
   import BaseMap from '../../assets/layers/mapLayers.json'
   import DrawingControlHandler from '../../handlers/drawingControl'
 
-  const DEFAULT_MAP_OPTIONS: any = {
+  const DEFAULT_MAP_OPTIONS: L.MapOptions = {
     zoomControl: false,
     minZoom: 3,
     maxZoom: 17,

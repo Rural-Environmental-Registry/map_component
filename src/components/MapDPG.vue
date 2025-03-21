@@ -3,7 +3,7 @@
     <Loading :isLoading="isLoading || showLoading" />
     <LayerMenu
       v-if="mapRef"
-      :layers="layers.customLayers"
+      :layersConfig="layers.customLayers"
       :options="options.layersMenu"
       :map="mapRef.map"
       :layerControl="mapRef.layerControl"
@@ -54,10 +54,6 @@
   const mapRef = ref<MapRef>()
 
   const isLoading = ref<boolean>(false)
-
-  const log = (data: any): void => {
-    console.log(data)
-  }
 
   defineExpose({
     map: computed(() => mapRef.value?.map),

@@ -1,21 +1,33 @@
+/* The following workaround is needed to avoid a runtime error in leaflet-draw */
+// @ts-ignore
+window.type = true
+
+// @ts-ignore
+window.radius = true
+
 import {
   FeatureGroup,
   Control,
   Map,
   GeometryUtil,
   drawLocal,
-  LatLng
+  LatLng,
+  LeafletEvent,
+  Localization,
+  Layer
 } from 'leaflet'
 import {
   DEFAULT_DRAW_OPTIONS,
   DEFAULT_DRAWING_CONTROL_TEXTS
 } from './constants'
-
-// @ts-ignore
-window.type = true
-
-// @ts-ignore
-window.radius = true
+import {
+  DrawnArea,
+  IncrementedCreateLayer,
+  IncrementedEditLayer,
+  LeafletDrawCreateEvent,
+  LeafletDrawDeleteEvent,
+  LeafletDrawEditEvent
+} from '../types'
 
 export default class DrawingControlHandler {
   private _map: Map
@@ -60,7 +72,7 @@ export default class DrawingControlHandler {
     return options
   }
 
-  private calculateAreas(latLangs: LatLng[]): any {
+  private calculateAreas(latLangs: LatLng[]): DrawnArea {
     const area = GeometryUtil.geodesicArea(latLangs)
     return {
       m2: area,
@@ -69,7 +81,9 @@ export default class DrawingControlHandler {
     }
   }
 
-  private incrementLayerInfosOnCreate(data: any): any {
+  private incrementLayerInfosOnCreate(
+    data: LeafletDrawCreateEvent
+  ): IncrementedCreateLayer {
     const polygons = ['rectangle', 'polygon']
 
     if (!polygons.includes(data.layerType)) return data
@@ -79,27 +93,33 @@ export default class DrawingControlHandler {
     return data
   }
 
-  private incrementLayerInfosOnEdit(data: any): any {
-    if (!data.drawnArea) return data
+  private incrementLayerInfosOnEdit(data: Layer): IncrementedEditLayer {
+    const layer = data as IncrementedEditLayer
 
-    data.drawnArea = this.calculateAreas(data.getLatLngs()[0])
+    if (!layer.drawnArea) return layer
 
-    return data
+    layer.drawnArea = this.calculateAreas(layer.getLatLngs()[0])
+
+    return layer
   }
 
   public handleDrawingEvents(eventEmitterCallback: Function): void {
-    this._map.on('draw:created', (e: any) => {
-      this._drawItemsGroup.addLayer(e.layer)
+    this._map.on('draw:created', (e: LeafletEvent) => {
+      const evt = e as LeafletDrawCreateEvent
 
-      const { layer } = this.incrementLayerInfosOnCreate(e)
+      this._drawItemsGroup.addLayer(evt.layer)
+
+      const { layer } = this.incrementLayerInfosOnCreate(evt)
 
       eventEmitterCallback({ type: 'created', layer })
     })
 
-    this._map.on('draw:edited', (e: any) => {
-      const layers: any = []
+    this._map.on('draw:edited', (e: LeafletEvent) => {
+      const evt = e as LeafletDrawEditEvent
 
-      e.layers.eachLayer((layer: any) => {
+      const layers: Layer[] = []
+
+      evt.layers.eachLayer((layer: Layer) => {
         const data = this.incrementLayerInfosOnEdit(layer)
 
         layers.push(data)
@@ -107,17 +127,19 @@ export default class DrawingControlHandler {
       eventEmitterCallback({ type: 'edited', layers })
     })
 
-    this._map.on('draw:deleted', (e: any) => {
-      const layers: any = []
+    this._map.on('draw:deleted', (e: LeafletEvent) => {
+      const evt = e as LeafletDrawDeleteEvent
 
-      e.layers.eachLayer((layer: any) => {
+      const layers: Layer[] = []
+
+      evt.layers.eachLayer((layer: Layer) => {
         layers.push(layer)
       })
       eventEmitterCallback({ type: 'deleted', layers })
     })
   }
 
-  private addTranslation(customTexts: any): void {
+  private addTranslation(customTexts: Localization.DrawLocal): void {
     /*
      * due to a runtime issue in leaflet-draw, this workaround is needed
      * to override the default texts

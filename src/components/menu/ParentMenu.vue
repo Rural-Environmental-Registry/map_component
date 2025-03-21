@@ -13,7 +13,11 @@
             </template>
           </ElSwitch>
           <span class="parent-layer-status">
-            {{ allLayersActive ? 'active' : 'inactive' }}
+            {{
+              allLayersActive
+                ? 'groupData.toggle.active'
+                : 'groupData.toggle.inactive'
+            }}
           </span>
           <ElDivider class="divider-bar" direction="vertical" />
         </span>

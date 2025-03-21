@@ -55,3 +55,23 @@ export type GroupLayerData = {
 }
 
 export type LayersConfig = GroupLayerData[]
+
+export type DrawingEvent = {
+  type: 'created' | 'edited' | 'deleted'
+  layer?: L.Layer
+  layers?: L.Layer[]
+}
+
+export type BaseMapLayer = {
+  name: string
+  key: string
+  default: boolean
+  url: string
+}
+
+export type BaseMapLayers = BaseMapLayer[]
+
+export type CustomMapOptions = L.MapOptions & {
+  center: L.LatLng
+  zoom: number
+}

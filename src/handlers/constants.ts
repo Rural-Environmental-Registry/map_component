@@ -1,5 +1,13 @@
-import { Control, Localization, Icon } from 'leaflet'
+import { MapOptions, Control, Localization, Icon } from 'leaflet'
 import GreenMarker from '../assets/icons/marker-icon-green.svg'
+
+export const DEFAULT_MAP_OPTIONS: MapOptions = {
+  zoomControl: false,
+  minZoom: 3,
+  maxZoom: 17,
+  center: [-15.235, -51.9253],
+  zoom: 4
+}
 
 const CUSTOM_MARKER = Icon.extend({
   options: {

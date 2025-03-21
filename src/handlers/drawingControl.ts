@@ -124,6 +124,7 @@ export default class DrawingControlHandler {
 
         layers.push(data)
       })
+
       eventEmitterCallback({ type: 'edited', layers })
     })
 
@@ -135,6 +136,7 @@ export default class DrawingControlHandler {
       evt.layers.eachLayer((layer: Layer) => {
         layers.push(layer)
       })
+
       eventEmitterCallback({ type: 'deleted', layers })
     })
   }

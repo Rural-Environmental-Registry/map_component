@@ -78,4 +78,30 @@
   }
 
   /* leaflet draw */
+
+  .leaflet-draw.leaflet-control .leaflet-draw-draw-polygon{
+    background-image: url('../icons/polygon-draw.svg');
+    background-size: var(--mapa-size-base-15) var(--mapa-size-base-15);
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+
+  .leaflet-draw.leaflet-control .leaflet-draw-edit-edit{
+    background-image: url('../icons/edit-draw.svg');
+    background-size: var(--mapa-size-base-15) var(--mapa-size-base-15);
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+
+  .leaflet-draw.leaflet-control .leaflet-draw-edit-remove{
+    background-image: url('../icons/delete-draw.svg');
+    background-size: var(--mapa-size-base-15) var(--mapa-size-base-15);
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+
+  .leaflet-draw-toolbar.leaflet-bar,
+  .leaflet-draw-toolbar.leaflet-bar a {
+    border: var(--mapa-size-base-2) solid transparent;
+  }
 }

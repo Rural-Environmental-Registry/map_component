@@ -23,7 +23,7 @@
             </template>
           </ElSwitch>
           <span class="child-layer-status">
-            {{ active ? data.activeLabel.active : data.activeLabel.inactive }}
+            {{ active ? data.toggle.active : data.toggle.inactive }}
           </span>
         </span>
       </div>
@@ -35,16 +35,16 @@
 <script setup lang="ts">
   import { ElDivider, ElMenuItem, ElSwitch } from 'element-plus'
   import { computed, onMounted } from 'vue'
-  import { ChildLayer } from '../../types'
-  import FontAwesomeIcon from '../FontAwesomeIcon.vue'
+  import FontAwesomeIcon from '../fa-icon/FontAwesomeIcon.vue'
+  import { LayerData } from '../../types'
 
   type ChildMenuProps = {
-    data: ChildLayer
+    data: LayerData
   }
 
   const props = defineProps<ChildMenuProps>()
 
-  const emit = defineEmits<{ onChildVisibilityChange: [ChildLayer] }>()
+  const emit = defineEmits<{ onChildLayerToggle: [LayerData] }>()
 
   const active = computed<boolean>({
     get: () => props.data.active,
@@ -55,19 +55,23 @@
 
   const toggleLayerVisible = (active: boolean): void => {
     const layer = { ...props.data, active }
-    emit('onChildVisibilityChange', layer)
+    emit('onChildLayerToggle', layer)
   }
 
   onMounted(() => {
-    if (props.data.active) {
+    if (props.data.activeDefault) {
       setTimeout(() => {
-        toggleLayerVisible(props.data.active)
+        toggleLayerVisible(props.data.activeDefault)
       }, 100)
     }
   })
 </script>
 
 <style>
+  .child-menu {
+    padding-left: var(--mapa-size-base-20) !important;
+  }
+
   .child-menu .child-menu-row {
     display: flex;
     justify-content: space-between;
@@ -97,7 +101,7 @@
     display: inline-block;
     width: var(--mapa-size-base-8);
     height: var(--mapa-size-base-8);
-    border-radius: 50%;
+    min-width: var(--mapa-size-base-8);
   }
 
   .child-menu-divider-row {

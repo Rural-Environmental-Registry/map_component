@@ -11,10 +11,10 @@
     faXmark
   } from '@fortawesome/free-solid-svg-icons'
   import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-  import { FontAwesomeIconName } from '../types'
+  import { FaIconName } from '../../types'
 
   type IconProps = {
-    iconName: FontAwesomeIconName
+    iconName: FaIconName
   }
 
   defineProps<IconProps>()

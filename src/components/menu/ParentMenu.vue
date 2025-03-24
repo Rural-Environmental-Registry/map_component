@@ -1,8 +1,8 @@
 <template>
-  <ElSubMenu :index="data.key" class="parent-menu">
+  <ElSubMenu :index="groupData.key" class="parent-menu">
     <template #title>
       <div class="parent-menu-row">
-        <div class="parent-layer-title">{{ data.name }}</div>
+        <div class="parent-layer-title">{{ groupData.name }}</div>
         <span class="switch-component">
           <ElSwitch v-model="allLayersActive" @click.stop>
             <template #active-action>
@@ -15,8 +15,8 @@
           <span class="parent-layer-status">
             {{
               allLayersActive
-                ? data.activeLabel.active
-                : data.activeLabel.inactive
+                ? groupData.toggle.active
+                : groupData.toggle.inactive
             }}
           </span>
           <ElDivider class="divider-bar" direction="vertical" />
@@ -27,7 +27,7 @@
       <ChildMenu
         v-if="child.name"
         :data="child"
-        @onChildVisibilityChange="onChildChange($event, idx)"
+        @onChildLayerToggle="onChildChange($event, idx)"
       />
     </template>
   </ElSubMenu>
@@ -37,37 +37,37 @@
 <script setup lang="ts">
   import { ElDivider, ElSubMenu, ElSwitch } from 'element-plus'
   import { computed, ref } from 'vue'
-  import { ChildLayer, ParentLayer } from '../../types'
-  import FontAwesomeIcon from '../FontAwesomeIcon.vue'
+  import FontAwesomeIcon from '../fa-icon/FontAwesomeIcon.vue'
   import ChildMenu from './ChildMenu.vue'
+  import { GroupLayerData, LayerData } from '../../types'
 
   type ParentMenuProps = {
-    data: ParentLayer
+    groupData: GroupLayerData
   }
 
   const props = defineProps<ParentMenuProps>()
 
   const emit = defineEmits<{
-    onChildVisibilityChange: [ChildLayer]
-    onParentVisibilityChange: [ParentLayer]
+    onChildLayerToggle: [LayerData]
+    onGroupLayerToggle: [GroupLayerData]
   }>()
 
-  const childrenLayers = ref<ChildLayer[]>(props.data.layers)
+  const childrenLayers = ref<LayerData[]>(props.groupData.layers)
 
   const toggleVisibleAllLayers = (): void => {
-    emit('onParentVisibilityChange', {
-      ...props.data,
+    emit('onGroupLayerToggle', {
+      ...props.groupData,
       layers: childrenLayers.value
     })
   }
 
   const allLayersActive = computed<boolean>({
-    get: () => childrenLayers.value.every((layer: ChildLayer) => layer.active),
-    set: (visible: boolean) => {
-      childrenLayers.value = props.data.layers.map((layer: ChildLayer) => {
+    get: () => childrenLayers.value.some((layer: LayerData) => layer.active),
+    set: (active: boolean) => {
+      childrenLayers.value = props.groupData.layers.map((layer: LayerData) => {
         return {
           ...layer,
-          active: visible
+          active
         }
       })
 
@@ -75,9 +75,9 @@
     }
   })
 
-  const onChildChange = (layer: ChildLayer, idx: number): void => {
+  const onChildChange = (layer: LayerData, idx: number): void => {
     childrenLayers.value[idx] = layer
-    emit('onChildVisibilityChange', layer)
+    emit('onChildLayerToggle', layer)
   }
 </script>
 

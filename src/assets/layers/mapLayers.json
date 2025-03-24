@@ -1,5 +1,5 @@
 {
-  "baseMap": [
+  "mapLayers": [
     {
       "name": "Esri Imagery",
       "default": true,

@@ -7,11 +7,11 @@
       <FontAwesomeIcon :iconName="iconButton" />
     </ElButton>
     <ElMenu :class="customClasses.customMenu" mode="vertical">
-      <template v-for="group in props.data.groups">
+      <template v-for="group in props.layersConfig">
         <ParentMenu
-          :data="group"
-          @onChildVisibilityChange="onChildLayerChange"
-          @onParentVisibilityChange="onParentLayerChange"
+          :groupData="group"
+          @onChildLayerToggle="onChildLayerChange"
+          @onGroupLayerToggle="onGroupLayerToggle"
         />
       </template>
     </ElMenu>
@@ -22,12 +22,18 @@
   import { ElButton, ElMenu } from 'element-plus'
   import L from 'leaflet'
   import { computed, ref } from 'vue'
-  import { ChildLayer, LayersConfig, ParentLayer } from '../types'
-  import FontAwesomeIcon from './FontAwesomeIcon.vue'
-  import ParentMenu from './car-menu/ParentMenu.vue'
+  import FontAwesomeIcon from '../fa-icon/FontAwesomeIcon.vue'
+  import ParentMenu from './ParentMenu.vue'
+  import {
+    GroupLayerData,
+    LayerData,
+    LayersConfig,
+    LayersMenuConfig
+  } from '../../types'
 
   type MenuProps = {
-    data: LayersConfig
+    layersConfig: LayersConfig
+    options?: LayersMenuConfig
     map: L.Map
     layerControl: L.Control.Layers
   }
@@ -39,6 +45,8 @@
   const emit = defineEmits<{
     (e: 'startLoading'): void
     (e: 'stopLoading'): void
+    (e: 'onChildLayerToggle', data: LayerData): void
+    (e: 'onGroupLayerToggle', data: GroupLayerData): void
   }>()
 
   const props = defineProps<MenuProps>()
@@ -55,7 +63,7 @@
   const customClasses = computed((): CustomClasses => {
     const status = isMenuOpen.value ? 'open' : 'close'
     return {
-      layerMenu: `layer-menu layer-menu-${props.data.menu.size}`,
+      layerMenu: `layer-menu layer-menu-${props.options?.size || 'medium'}`,
       menuButton: `map-menu-button map-menu-button-${status}`,
       customMenu: `map-custom-menu map-custom-menu-${status}`
     }
@@ -67,22 +75,22 @@
     return isMenuOpen.value ? 'chevron-left' : 'chevron-right'
   })
 
-  const onChildLayerChange = (layer: ChildLayer): void => {
+  const onChildLayerChange = (layer: LayerData): void => {
     handleWmsLayer(layer)
+    emit('onChildLayerToggle', layer)
   }
 
-  const onParentLayerChange = (parent: ParentLayer): void => {
-    parent.layers.forEach((childLayer: ChildLayer) =>
-      handleWmsLayer(childLayer)
-    )
+  const onGroupLayerToggle = (parent: GroupLayerData): void => {
+    parent.layers.forEach((childLayer: LayerData) => handleWmsLayer(childLayer))
+
+    emit('onGroupLayerToggle', parent)
   }
 
-  const convertToWmsLayer = (layer: ChildLayer): L.TileLayer => {
+  const convertToWmsLayer = (layer: LayerData): L.TileLayer => {
     const wmsLayer = L.tileLayer.wms(layer.baseUrl, {
       layers: layer.layers,
       format: layer.format || 'image/png',
-      transparent: layer.transparent,
-      attribution: layer.name
+      transparent: layer.transparent
     })
 
     watchLayerStatus(wmsLayer)
@@ -90,12 +98,12 @@
     return wmsLayer
   }
 
-  const handleWmsLayer = (layer: ChildLayer): void => {
+  const handleWmsLayer = (layer: LayerData): void => {
     if (convertedLayers.value[layer.key]) {
-      if (layer.active) return
-
-      return removeWmsLayer(layer)
+      if (!layer.active) return removeWmsLayer(layer)
     }
+
+    if (!layer.active) return
 
     const wmsLayer = convertToWmsLayer(layer)
     convertedLayers.value[layer.key] = wmsLayer
@@ -104,7 +112,7 @@
     props.layerControl.addOverlay(wmsLayer, `${wmsLayer.options.attribution}`)
   }
 
-  const removeWmsLayer = (layer: ChildLayer): void => {
+  const removeWmsLayer = (layer: LayerData): void => {
     props.map.removeLayer(convertedLayers.value[layer.key])
     props.layerControl.removeLayer(convertedLayers.value[layer.key])
 

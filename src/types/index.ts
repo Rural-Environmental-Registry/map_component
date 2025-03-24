@@ -1,4 +1,4 @@
-import { Localization } from 'leaflet'
+import { Localization, MapOptions } from 'leaflet'
 
 export type FaIconName = 'check' | 'xmark' | 'chevron-right' | 'chevron-left'
 
@@ -77,18 +77,13 @@ export type BaseMapLayer = {
 
 export type BaseMapLayers = BaseMapLayer[]
 
-export type CustomMapOptions = L.MapOptions & {
-  center: L.LatLng
-  zoom: number
-}
-
 export type MapLayers = {
   mapLayers: BaseMapLayers
   customLayers?: LayersConfig
 }
 
 export type MapConfig = {
-  config?: CustomMapOptions
+  config?: MapOptions
 }
 
 export type LayersMenuConfig = {

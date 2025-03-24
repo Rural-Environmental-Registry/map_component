@@ -1,23 +1,23 @@
 import { DEFAULT_MAP_OPTIONS } from './constants'
-import { BaseMapLayer, CustomMapOptions, MapLayers } from '../types'
+import { BaseMapLayer, MapLayers } from '../types'
 import DEFAULT_MAP_LAYER from '../assets/layers/mapLayers.json'
 
-import L from 'leaflet'
+import L, { MapOptions } from 'leaflet'
 
 export default class MapHandler {
   private _map: L.Map
-  private _mapOptions: CustomMapOptions
+  private _mapOptions: MapOptions
   private _mapLayers!: MapLayers
   private _layerControl!: L.Control.Layers
 
-  constructor(mapOptions: CustomMapOptions) {
+  constructor(mapOptions: MapOptions | undefined) {
     this._mapOptions = mapOptions || DEFAULT_MAP_OPTIONS
 
     this._map = L.map('map', {
       zoomControl: this._mapOptions.zoomControl,
       minZoom: this._mapOptions.minZoom,
       maxZoom: this._mapOptions.maxZoom
-    }).setView(this._mapOptions.center, this._mapOptions.zoom)
+    }).setView(this._mapOptions.center!, this._mapOptions.zoom)
   }
 
   get map(): L.Map {

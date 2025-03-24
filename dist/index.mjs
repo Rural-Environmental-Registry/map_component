@@ -15371,9 +15371,10 @@ class a0 {
     this._map.addControl(Vt.control.zoom({ position: "topright" })), this._layerControl = Vt.control.layers().addTo(this._map);
   }
   addBaseLayer(i) {
-    (this._mapLayers.mapLayers || r0.mapLayers).forEach((l) => {
-      const o = Vt.tileLayer(l.url);
-      this.watchLayerStatus(o, i), l.default && o.addTo(this._map), this._layerControl.addBaseLayer(o, l.name);
+    var l;
+    ((l = this._mapLayers) == null ? void 0 : l.mapLayers).forEach((o) => {
+      const s = Vt.tileLayer(o.url);
+      this.watchLayerStatus(s, i), o.default && s.addTo(this._map), this._layerControl.addBaseLayer(s, o.name);
     });
   }
   disableLayerControlHover() {
@@ -15398,7 +15399,7 @@ class a0 {
     });
   }
   init(i, r) {
-    this._mapLayers = i, this.addControls(), this.addBaseLayer(r), setTimeout(() => {
+    this._mapLayers = i || r0, this.addControls(), this.addBaseLayer(r), setTimeout(() => {
       this._map.invalidateSize();
     }, 300), this.disableLayerControlHover();
   }
@@ -15457,7 +15458,12 @@ const s0 = { id: "map" }, l0 = /* @__PURE__ */ J({
   __name: "MapDPG",
   props: {
     layers: {},
-    options: {},
+    options: { default: () => ({
+      map: {},
+      layersMenu: {
+        size: "medium"
+      }
+    }) },
     showLoading: { type: Boolean }
   },
   emits: ["onGroupLayerToggle", "onChildLayerToggle", "onDrawing"],
@@ -15480,32 +15486,35 @@ const s0 = { id: "map" }, l0 = /* @__PURE__ */ J({
         var u;
         return (u = o.value) == null ? void 0 : u.drawItemsGroup;
       })
-    }), (u, d) => (K(), ht("div", d0, [
-      xt(h0, {
-        isLoading: s.value || u.showLoading
-      }, null, 8, ["isLoading"]),
-      o.value && u.layers.customLayers ? (K(), vt(Jw, {
-        key: 0,
-        layersConfig: u.layers.customLayers,
-        options: u.options.layersMenu,
-        map: o.value.map,
-        layerControl: o.value.layerControl,
-        onStartLoading: d[0] || (d[0] = (f) => s.value = !0),
-        onStopLoading: d[1] || (d[1] = (f) => s.value = !1),
-        onOnChildLayerToggle: d[2] || (d[2] = (f) => l("onChildLayerToggle", f)),
-        onOnGroupLayerToggle: d[3] || (d[3] = (f) => l("onGroupLayerToggle", f))
-      }, null, 8, ["layersConfig", "options", "map", "layerControl"])) : It("", !0),
-      xt(l0, {
-        ref_key: "mapRef",
-        ref: o,
-        layers: u.layers,
-        mapOptions: u.options.map,
-        drawingOptions: u.options.drawing,
-        onStartLoading: d[4] || (d[4] = (f) => s.value = !0),
-        onStopLoading: d[5] || (d[5] = (f) => s.value = !1),
-        onOnDrawing: d[6] || (d[6] = (f) => l("onDrawing", f))
-      }, null, 8, ["layers", "mapOptions", "drawingOptions"])
-    ]));
+    }), (u, d) => {
+      var f;
+      return K(), ht("div", d0, [
+        xt(h0, {
+          isLoading: s.value || u.showLoading
+        }, null, 8, ["isLoading"]),
+        o.value && ((f = u.layers) != null && f.customLayers) ? (K(), vt(Jw, {
+          key: 0,
+          layersConfig: u.layers.customLayers,
+          options: u.options.layersMenu,
+          map: o.value.map,
+          layerControl: o.value.layerControl,
+          onStartLoading: d[0] || (d[0] = (m) => s.value = !0),
+          onStopLoading: d[1] || (d[1] = (m) => s.value = !1),
+          onOnChildLayerToggle: d[2] || (d[2] = (m) => l("onChildLayerToggle", m)),
+          onOnGroupLayerToggle: d[3] || (d[3] = (m) => l("onGroupLayerToggle", m))
+        }, null, 8, ["layersConfig", "options", "map", "layerControl"])) : It("", !0),
+        xt(l0, {
+          ref_key: "mapRef",
+          ref: o,
+          layers: u.layers,
+          mapOptions: u.options.map,
+          drawingOptions: u.options.drawing,
+          onStartLoading: d[4] || (d[4] = (m) => s.value = !0),
+          onStopLoading: d[5] || (d[5] = (m) => s.value = !1),
+          onOnDrawing: d[6] || (d[6] = (m) => l("onDrawing", m))
+        }, null, 8, ["layers", "mapOptions", "drawingOptions"])
+      ]);
+    };
   }
 });
 export {

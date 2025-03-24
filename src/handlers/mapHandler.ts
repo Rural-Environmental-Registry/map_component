@@ -35,7 +35,7 @@ export default class MapHandler {
   }
 
   private addBaseLayer(eventEmitterCallback: Function): void {
-    const baseMap = this._mapLayers.mapLayers || DEFAULT_MAP_LAYER.mapLayers
+    const baseMap = this._mapLayers?.mapLayers
 
     baseMap.forEach((layer: BaseMapLayer) => {
       const tileLayer = L.tileLayer(layer.url)
@@ -99,7 +99,7 @@ export default class MapHandler {
   }
 
   public init(mapLayers: MapLayers, eventEmitterCallback: Function): void {
-    this._mapLayers = mapLayers
+    this._mapLayers = mapLayers || DEFAULT_MAP_LAYER
 
     this.addControls()
     this.addBaseLayer(eventEmitterCallback)

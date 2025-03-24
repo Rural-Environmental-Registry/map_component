@@ -2,7 +2,7 @@
   <div class="map-container">
     <Loading :isLoading="isLoading || showLoading" />
     <LayerMenu
-      v-if="mapRef && layers.customLayers"
+      v-if="mapRef && layers?.customLayers"
       :layersConfig="layers.customLayers"
       :options="options.layersMenu"
       :map="mapRef.map"

@@ -50,9 +50,9 @@
 
 ## MapConfig
 
-| Campo  | Tipo                                                          | Descrição                                         |
-| ------ | ------------------------------------------------------------- | ------------------------------------------------- |
-| config | [MapOptions](https://leafletjs.com/reference.html#map-option) | Define opções do mapa com base na API do Leaflet. |
+| Campo  | Tipo                      | Descrição                                         |
+| ------ | ------------------------- | ------------------------------------------------- |
+| config | [MapOptions](#mapoptions) | Define opções do mapa com base na API do Leaflet. |
 
 
 ## LayersMenuConfig
@@ -63,8 +63,15 @@
 
 ## DrawingConfig
 
-| Campo        | Tipo                                                                      | Descrição                                                |
-| ------------ | ------------------------------------------------------------------------- | -------------------------------------------------------- |
-| show         | boolean                                                                   | Ativa ou desativa as ferramentas de desenho.             |
-| controlTexts | [Localization.DrawLocal](https://leafletjs.com/reference.html#map-option) | Textos utilizados nas ferramentas de desenho (opcional). |
-| config       | [Control.Draw](https://leafletjs.com/reference.html#map-option)           | Configurações adicionais (opcional).                     |
+| Campo        | Tipo                                             | Descrição                                                |
+| ------------ | ------------------------------------------------ | -------------------------------------------------------- |
+| show         | boolean                                          | Ativa ou desativa as ferramentas de desenho.             |
+| controlTexts | [Localization.DrawLocal](#localizationdrawlocal) | Textos utilizados nas ferramentas de desenho (opcional). |
+| config       | [Control.Draw](#controldraw)                     | Configurações adicionais (opcional).                     |
+
+
+## Links externos
+
+#### [MapOptions](https://leafletjs.com/reference.html#map-option)
+#### [Localization.DrawLocal](https://github.com/Leaflet/Leaflet.draw/blob/develop/src/Leaflet.draw.js#L74)
+#### [Control.Draw](https://leaflet.github.io/Leaflet.draw/docs/leaflet-draw-latest.html#options)

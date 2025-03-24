@@ -77,8 +77,8 @@ const mapRefInstances = computed(() => {
 | Nome        | Tipo                                | Obrigatório | Descrição                                                                  |
 | ----------- | ----------------------------------- | ----------- | -------------------------------------------------------------------------- |
 | showLoading | boolean                             | Opcional    | Controla a visibilidade da animação de carregamento.                       |
-| layers      | [MapLayers](docs/properties)        | Opcional    | Define as camadas base e camadas customizadas.                             |
-| options     | [MapOptionsConfig](docs/properties) | Opcional    | Define as configurações do mapa, menu de camadas e ferramentas de desenho. |
+| layers      | [MapLayers](docs/properties.md)        | Opcional    | Define as camadas base e camadas customizadas.                             |
+| options     | [MapOptionsConfig](docs/properties.md) | Opcional    | Define as configurações do mapa, menu de camadas e ferramentas de desenho. |
 
 ### Eventos
 

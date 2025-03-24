@@ -43,7 +43,14 @@
     showLoading: boolean
   }
 
-  defineProps<MapaDPGProps>()
+  withDefaults(defineProps<MapaDPGProps>(), {
+    options: () => ({
+      map: {},
+      layersMenu: {
+        size: 'medium'
+      }
+    })
+  })
 
   const emit = defineEmits<{
     (e: 'onGroupLayerToggle', data: GroupLayerData): void

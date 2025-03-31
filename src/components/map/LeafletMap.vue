@@ -6,14 +6,14 @@
   import L from 'leaflet'
   import 'leaflet-draw'
   import { onMounted, ref } from 'vue'
+  import DrawingControlHandler from '../../handlers/drawingControl'
+  import MapHandler from '../../handlers/mapHandler'
   import {
     DrawingConfig,
     DrawingEvent,
     MapConfig,
     MapLayers
   } from '../../types'
-  import DrawingControlHandler from '../../handlers/drawingControl'
-  import MapHandler from '../../handlers/mapHandler'
 
   const emit = defineEmits<{
     (e: 'startLoading'): void
@@ -82,7 +82,8 @@
     map,
     layerControl,
     drawControl,
-    drawItemsGroup
+    drawItemsGroup,
+    leaflet: L
   })
 </script>
 

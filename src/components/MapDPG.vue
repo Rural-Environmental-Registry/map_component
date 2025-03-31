@@ -25,10 +25,8 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, computed } from 'vue'
-  import LayerMenu from './menu/LayerMenu.vue'
-  import Map from './map/LeafletMap.vue'
-  import Loading from './loading/Loading.vue'
+  import L from 'leaflet'
+  import { computed, ref } from 'vue'
   import {
     DrawingEvent,
     GroupLayerData,
@@ -36,6 +34,9 @@
     MapLayers,
     MapOptionsConfig
   } from '../types'
+  import Loading from './loading/Loading.vue'
+  import Map from './map/LeafletMap.vue'
+  import LayerMenu from './menu/LayerMenu.vue'
 
   type MapaDPGProps = {
     layers: MapLayers
@@ -63,6 +64,7 @@
     layerControl: L.Control.Layers
     drawControl: L.Control.Draw
     drawItemsGroup: L.FeatureGroup
+    leaflet: typeof L
   }
 
   const mapRef = ref<MapRef>()
@@ -73,7 +75,8 @@
     map: computed(() => mapRef.value?.map),
     layerControl: computed(() => mapRef.value?.layerControl),
     drawControl: computed(() => mapRef.value?.drawControl),
-    drawItemsGroup: computed(() => mapRef.value?.drawItemsGroup)
+    drawItemsGroup: computed(() => mapRef.value?.drawItemsGroup),
+    leaflet: computed(() => mapRef.value?.leaflet)
   })
 </script>
 

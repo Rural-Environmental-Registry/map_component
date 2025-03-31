@@ -96,4 +96,5 @@ const mapRefInstances = computed(() => {
 | layerControl   | Controle de camadas Leaflet. Utilizada para manipulação das camadas                |
 | drawControl    | Controle de desenho Leaflet. Utilizada para manipulação das ferramentas de desenho |
 | drawItemsGroup | Grupo de desenhos Leaflet. Utilizada para manipulação dos desenhos                 |
+| leaflet        | Instância Leaflet.                                                                 |
 

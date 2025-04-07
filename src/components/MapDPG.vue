@@ -1,6 +1,6 @@
 <template>
   <div class="map-container">
-    <Loading :isLoading="isLoading || showLoading" />
+    <Loading v-if="!disableLoading" :isLoading="isLoading || showLoading" />
     <LayerMenu
       v-if="mapRef && layers?.customLayers"
       :layersConfig="layers.customLayers"
@@ -42,6 +42,7 @@
     layers: MapLayers
     options: MapOptionsConfig
     showLoading: boolean
+    disableLoading: boolean
   }
 
   withDefaults(defineProps<MapaDPGProps>(), {

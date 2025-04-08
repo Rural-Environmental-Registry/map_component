@@ -1,6 +1,6 @@
 <template>
   <div class="map-container">
-    <Loading v-if="!disableLoading" :isLoading="isLoading || showLoading" />
+    <Loading :isLoading="(isLoading || showLoading) && !disableLoading" />
     <LayerMenu
       v-if="mapRef && layers?.customLayers"
       :layersConfig="layers.customLayers"

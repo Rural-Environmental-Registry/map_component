@@ -67,7 +67,8 @@ const mapRefInstances = computed(() => {
     map: mapRef.value?.map,
     layerControl: mapRef.value?.layerControl,
     drawControl: mapRef.value?.drawControl,
-    drawItemsGroup: mapRef.value?.drawItemsGroup
+    drawItemsGroup: mapRef.value?.drawItemsGroup,
+    leaflet: mapRef.value?.leaflet
   }
 })
 ```

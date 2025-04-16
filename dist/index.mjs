@@ -15465,7 +15465,8 @@ const Pi = /* @__PURE__ */ J({
         size: "medium"
       }
     }) },
-    showLoading: { type: Boolean }
+    showLoading: { type: Boolean },
+    disableLoading: { type: Boolean }
   },
   emits: ["onGroupLayerToggle", "onChildLayerToggle", "onDrawing"],
   setup(e, { expose: i, emit: r }) {
@@ -15495,7 +15496,7 @@ const Pi = /* @__PURE__ */ J({
       var f;
       return K(), ht("div", d0, [
         xt(Xd, {
-          isLoading: s.value || u.showLoading
+          isLoading: (s.value || u.showLoading) && !u.disableLoading
         }, null, 8, ["isLoading"]),
         o.value && ((f = u.layers) != null && f.customLayers) ? (K(), vt(h0, {
           key: 0,

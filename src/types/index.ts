@@ -1,6 +1,6 @@
 import { Localization, MapOptions } from 'leaflet'
 
-export type FaIconName = 'check' | 'xmark' | 'chevron-right' | 'chevron-left'
+export type FaIconName = 'check' | 'xmark' | 'chevron-right' | 'chevron-left' | 'terminal' | 'file-lines' | 'upload' | 'pencil' | 'trash' | 'chevron-down'
 
 export type DrawnArea = {
   m2: number

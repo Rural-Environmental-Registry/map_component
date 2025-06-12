@@ -8,7 +8,13 @@
     faCheck,
     faChevronLeft,
     faChevronRight,
-    faXmark
+    faXmark,
+    faTerminal,
+    faFileLines,
+    faUpload,
+    faPencil,
+    faTrash,
+    faChevronDown
   } from '@fortawesome/free-solid-svg-icons'
   import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
   import { FaIconName } from '../../types'
@@ -19,7 +25,7 @@
 
   defineProps<IconProps>()
 
-  library.add(faCheck, faXmark, faChevronRight, faChevronLeft)
+  library.add(faCheck, faXmark, faChevronRight, faChevronLeft, faTerminal, faFileLines, faUpload, faPencil, faTrash, faChevronDown)
 </script>
 
 <style>

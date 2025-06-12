@@ -21,6 +21,14 @@
       @stopLoading="isLoading = false"
       @onDrawing="emit('onDrawing', $event)"
     />
+    <CoordinatePanel
+      v-if="mapRef"
+      :showMemorialDescritivo="showMemorialDescritivo"
+      :map="mapRef.map"
+      @systemChange="handleCoordinateSystemChange"
+      @geometryChange="handleGeometryChange"
+      @geometryRemoved="handleGeometryRemoved"
+    />
   </div>
 </template>
 
@@ -37,12 +45,14 @@
   import Loading from './loading/Loading.vue'
   import Map from './map/LeafletMap.vue'
   import LayerMenu from './menu/LayerMenu.vue'
+  import CoordinatePanel from './coordinate/CoordinatePanel.vue'
 
   type MapaDPGProps = {
     layers: MapLayers
     options: MapOptionsConfig
     showLoading: boolean
     disableLoading: boolean
+    showMemorialDescritivo?: boolean
   }
 
   withDefaults(defineProps<MapaDPGProps>(), {
@@ -58,6 +68,7 @@
     (e: 'onGroupLayerToggle', data: GroupLayerData): void
     (e: 'onChildLayerToggle', data: LayerData): void
     (e: 'onDrawing', data: DrawingEvent): void
+    (e: 'onCoordinateSystemChange', system: string): void
   }>()
 
   type MapRef = {
@@ -69,8 +80,80 @@
   }
 
   const mapRef = ref<MapRef>()
-
   const isLoading = ref<boolean>(false)
+
+  const handleCoordinateSystemChange = (system: string) => {
+    console.log('system :>> ', system);
+    emit('onCoordinateSystemChange', system)
+  }
+
+  const handleGeometryChange = (geometry: string) => {
+    if (!mapRef.value?.map || !mapRef.value?.drawItemsGroup) return
+
+    // Limpa as geometrias existentes
+    mapRef.value.drawItemsGroup.clearLayers()
+
+    // Extrai as coordenadas da string WKT
+    const coordinates = geometry
+      .replace(/[A-Z()]/g, '')
+      .trim()
+      .split(',')
+      .map(coord => {
+        const [x, y] = coord.trim().split(' ')
+        return [parseFloat(y), parseFloat(x)] as [number, number] // Leaflet usa [lat, lng]
+      })
+
+    let leafletGeometry: L.Layer
+
+    // Cria a geometria apropriada baseada no tipo WKT
+    if (geometry.startsWith('POINT')) {
+      leafletGeometry = L.marker(coordinates[0])
+    } else if (geometry.startsWith('LINESTRING')) {
+      leafletGeometry = L.polyline(coordinates as [number, number][])
+    } else if (geometry.startsWith('POLYGON')) {
+      leafletGeometry = L.polygon(coordinates as [number, number][])
+    } else {
+      console.error('Tipo de geometria não suportado:', geometry)
+      return
+    }
+
+    // Adiciona a geometria ao grupo de desenho e emite evento como se fosse um desenho manual
+    mapRef.value.drawItemsGroup.addLayer(leafletGeometry)
+
+    // Emite o evento de desenho como se fosse criado pela ferramenta de desenho nativa
+    emit('onDrawing', {
+      type: 'created',
+      layer: leafletGeometry
+    })
+
+    // Ajusta o zoom do mapa para mostrar toda a geometria
+    if (leafletGeometry instanceof L.Marker) {
+      mapRef.value.map.setView(coordinates[0], 15)
+    } else if (leafletGeometry instanceof L.Polyline || leafletGeometry instanceof L.Polygon) {
+      mapRef.value.map.fitBounds(leafletGeometry.getBounds())
+    }
+  }
+
+  const handleGeometryRemoved = () => {
+    if (!mapRef.value?.map || !mapRef.value?.drawItemsGroup) return
+
+    // Armazena as camadas que serão removidas
+    const layersToRemove: L.Layer[] = []
+    mapRef.value.drawItemsGroup.eachLayer((layer) => {
+      layersToRemove.push(layer)
+    })
+
+    // Limpa as geometrias existentes
+    mapRef.value.drawItemsGroup.clearLayers()
+
+    // Emite o evento de remoção como se fosse feito pela ferramenta de desenho nativa
+    if (layersToRemove.length > 0) {
+      emit('onDrawing', {
+        type: 'deleted',
+        layers: layersToRemove
+      })
+    }
+  }
 
   defineExpose({
     map: computed(() => mapRef.value?.map),

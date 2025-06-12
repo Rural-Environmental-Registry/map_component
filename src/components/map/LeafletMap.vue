@@ -57,7 +57,9 @@
   }
 
   const handleDrawingControls = (): void => {
+    console.log(props.drawingOptions);
     drawItemsGroup.value = new L.FeatureGroup()
+    console.log('drawItemsGroup :>> ', drawItemsGroup.value);
     map.value!.addLayer(drawItemsGroup.value)
 
     const drawingControlHandler = new DrawingControlHandler(

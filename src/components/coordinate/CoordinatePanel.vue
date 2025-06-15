@@ -304,7 +304,6 @@ interface ManualPoint {
 }
 
 const props = defineProps<{
-  showMemorialDescritivo?: boolean
   map?: L.Map
 }>()
 
@@ -347,7 +346,6 @@ const onSystemChange = (value: string) => {
 }
 
 const onFormatChange = (value: string) => {
-  // Limpa os campos ao mudar o formato
   manualInput.value = {
     x: '',
     y: '',
@@ -514,35 +512,35 @@ const addManualPoint = () => {
     let x: number, y: number
 
     if (selectedFormat.value === 'DD') {
-      if (!manualInput.value.x || !manualInput.value.y) {
-        ElMessage.error('X e Y são obrigatórios')
+      if (editingIndex.value === 0 && (!manualInput.value.x || !manualInput.value.y)) {
+        ElMessage.error('X e Y são obrigatórios no primeiro ponto')
         return
       }
-      x = parseFloat(manualInput.value.x)
-      y = parseFloat(manualInput.value.y)
+      x = parseFloat(manualInput.value.x) || parseFloat(manualPoints.value[editingIndex.value].x)
+      y = parseFloat(manualInput.value.y) || parseFloat(manualPoints.value[editingIndex.value].y)
     } else {
-      if (!manualInput.value.xDegrees || !manualInput.value.yDegrees) {
-        ElMessage.error('Graus são obrigatórios')
+      if (editingIndex.value === 0 && (!manualInput.value.xDegrees || !manualInput.value.yDegrees)) {
+        ElMessage.error('Graus são obrigatórios no primeiro ponto')
         return
       }
-      x = convertDMSToDD(
+      x = manualInput.value.xDegrees ? convertDMSToDD(
         manualInput.value.xDegrees,
         manualInput.value.xMinutes,
         manualInput.value.xSeconds
-      )
-      y = convertDMSToDD(
+      ) : parseFloat(manualPoints.value[editingIndex.value].x)
+      y = manualInput.value.yDegrees ? convertDMSToDD(
         manualInput.value.yDegrees,
         manualInput.value.yMinutes,
         manualInput.value.ySeconds
-      )
+      ) : parseFloat(manualPoints.value[editingIndex.value].y)
     }
 
     manualPoints.value[editingIndex.value] = {
       index: editingIndex.value + 1,
       x: x.toString(),
       y: y.toString(),
-      azimuth: manualInput.value.azimuth,
-      distance: manualInput.value.distance
+      azimuth: manualInput.value.azimuth || manualPoints.value[editingIndex.value].azimuth,
+      distance: manualInput.value.distance || manualPoints.value[editingIndex.value].distance
     }
 
     editingIndex.value = null
@@ -673,6 +671,7 @@ const applyCSVCoordinates = () => {
 const clearGeometries = () => {
   manualGeometries.value = []
   csvData.value = []
+  manualPoints.value = []
   
   if (props.map) {
     props.map.eachLayer((layer) => {

@@ -96,6 +96,12 @@ export type DrawingConfig = {
   controlTexts?: Localization.DrawLocal
 }
 
+export type MemorialConfig = {
+  show: boolean
+  config?: L.Control.DrawConstructorOptions
+  controlTexts?: Localization.DrawLocal
+}
+
 export type MapOptionsConfig = {
   layersMenu?: LayersMenuConfig
   map: MapConfig

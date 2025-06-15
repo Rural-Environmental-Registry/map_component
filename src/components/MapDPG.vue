@@ -22,8 +22,7 @@
       @onDrawing="emit('onDrawing', $event)"
     />
     <CoordinatePanel
-      v-if="mapRef"
-      :showMemorialDescritivo="showMemorialDescritivo"
+      v-if="mapRef && showMemorialDescritivo"
       :map="mapRef.map"
       @systemChange="handleCoordinateSystemChange"
       @geometryChange="handleGeometryChange"
@@ -90,43 +89,42 @@
   const handleGeometryChange = (geometry: string) => {
     if (!mapRef.value?.map || !mapRef.value?.drawItemsGroup) return
 
-    // Limpa as geometrias existentes
     mapRef.value.drawItemsGroup.clearLayers()
 
-    // Extrai as coordenadas da string WKT
     const coordinates = geometry
       .replace(/[A-Z()]/g, '')
       .trim()
       .split(',')
       .map(coord => {
         const [x, y] = coord.trim().split(' ')
-        return [parseFloat(y), parseFloat(x)] as [number, number] // Leaflet usa [lat, lng]
+        return [parseFloat(y), parseFloat(x)] as [number, number]
       })
 
-    let leafletGeometry: L.Layer
+    const polygonColor = (mapRef.value?.drawControl?.options as any)?.draw?.polygon?.shapeOptions?.color || '#3388ff'
+    const polylineColor = (mapRef.value?.drawControl?.options as any)?.draw?.polyline?.shapeOptions?.color || '#3388ff'
 
-    // Cria a geometria apropriada baseada no tipo WKT
+    let leafletGeometry: L.Layer & { options: { memorialKey?: string } }
+
     if (geometry.startsWith('POINT')) {
       leafletGeometry = L.marker(coordinates[0])
     } else if (geometry.startsWith('LINESTRING')) {
-      leafletGeometry = L.polyline(coordinates as [number, number][])
+      leafletGeometry = L.polyline(coordinates as [number, number][], { color: polylineColor })
     } else if (geometry.startsWith('POLYGON')) {
-      leafletGeometry = L.polygon(coordinates as [number, number][])
+      leafletGeometry = L.polygon(coordinates as [number, number][], { color: polygonColor })
     } else {
       console.error('Tipo de geometria não suportado:', geometry)
       return
     }
 
-    // Adiciona a geometria ao grupo de desenho e emite evento como se fosse um desenho manual
+    leafletGeometry.options.memorialKey = 'memorial'
+
     mapRef.value.drawItemsGroup.addLayer(leafletGeometry)
 
-    // Emite o evento de desenho como se fosse criado pela ferramenta de desenho nativa
     emit('onDrawing', {
-      type: 'created',
-      layer: leafletGeometry
+      type: 'created', 
+      layer: leafletGeometry 
     })
 
-    // Ajusta o zoom do mapa para mostrar toda a geometria
     if (leafletGeometry instanceof L.Marker) {
       mapRef.value.map.setView(coordinates[0], 15)
     } else if (leafletGeometry instanceof L.Polyline || leafletGeometry instanceof L.Polygon) {
@@ -137,20 +135,17 @@
   const handleGeometryRemoved = () => {
     if (!mapRef.value?.map || !mapRef.value?.drawItemsGroup) return
 
-    // Armazena as camadas que serão removidas
     const layersToRemove: L.Layer[] = []
     mapRef.value.drawItemsGroup.eachLayer((layer) => {
       layersToRemove.push(layer)
     })
 
-    // Limpa as geometrias existentes
     mapRef.value.drawItemsGroup.clearLayers()
 
-    // Emite o evento de remoção como se fosse feito pela ferramenta de desenho nativa
     if (layersToRemove.length > 0) {
-      emit('onDrawing', {
-        type: 'deleted',
-        layers: layersToRemove
+      emit('onDrawing', { 
+        type: 'deleted', 
+        layers: layersToRemove 
       })
     }
   }

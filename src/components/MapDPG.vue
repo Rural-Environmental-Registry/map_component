@@ -23,6 +23,7 @@
     />
     <CoordinatePanel
       v-if="mapRef && showMemorialDescritivo"
+      ref="coordinatePanelRef"
       :map="mapRef.map"
       @systemChange="handleCoordinateSystemChange"
       @geometryChange="handleGeometryChange"
@@ -79,6 +80,7 @@
   }
 
   const mapRef = ref<MapRef>()
+  const coordinatePanelRef = ref()
   const isLoading = ref<boolean>(false)
 
   const handleCoordinateSystemChange = (system: string) => {
@@ -121,8 +123,8 @@
     mapRef.value.drawItemsGroup.addLayer(leafletGeometry)
 
     emit('onDrawing', {
-      type: 'created', 
-      layer: leafletGeometry 
+      type: 'created',
+      layer: leafletGeometry
     })
 
     if (leafletGeometry instanceof L.Marker) {
@@ -136,17 +138,28 @@
     if (!mapRef.value?.map || !mapRef.value?.drawItemsGroup) return
 
     const layersToRemove: L.Layer[] = []
+
     mapRef.value.drawItemsGroup.eachLayer((layer) => {
-      layersToRemove.push(layer)
+      if ((layer as any).options?.nome === 'memorial') {
+        layersToRemove.push(layer)
+      }
     })
 
-    mapRef.value.drawItemsGroup.clearLayers()
+    layersToRemove.forEach(layer => {
+      mapRef.value?.drawItemsGroup.removeLayer(layer)
+    })
 
     if (layersToRemove.length > 0) {
-      emit('onDrawing', { 
-        type: 'deleted', 
-        layers: layersToRemove 
+      emit('onDrawing', {
+        type: 'deleted',
+        layers: layersToRemove
       })
+    }
+  }
+
+  const toggleCoordinatePanel = () => {
+    if (coordinatePanelRef.value) {
+      coordinatePanelRef.value.togglePanel()
     }
   }
 
@@ -155,7 +168,8 @@
     layerControl: computed(() => mapRef.value?.layerControl),
     drawControl: computed(() => mapRef.value?.drawControl),
     drawItemsGroup: computed(() => mapRef.value?.drawItemsGroup),
-    leaflet: computed(() => mapRef.value?.leaflet)
+    leaflet: computed(() => mapRef.value?.leaflet),
+    toggleCoordinatePanel
   })
 </script>
 

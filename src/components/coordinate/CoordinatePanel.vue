@@ -220,6 +220,7 @@
               <h4>Upload de Arquivo CSV</h4>
               <div class="csv-upload">
                 <ElUpload
+                  ref="uploadRef"
                   class="upload-area"
                   drag
                   action="#"
@@ -336,6 +337,7 @@ const manualInput = ref({
 const manualPoints = ref<any[]>([])
 const manualGeometries = ref<string[]>([])
 const editingIndex = ref<number | null>(null)
+const uploadRef = ref()
 
 const togglePanel = () => {
   isOpen.value = !isOpen.value
@@ -375,8 +377,24 @@ const generateWKT = (points: Point[]): string => {
   if (points.length === 1) {
     return `POINT(${points[0].x} ${points[0].y})`
   }
-  const coordinates = points.map(p => `${p.x} ${p.y}`).join(', ')
-  return `LINESTRING(${coordinates})`
+
+  if (points.length < 3) {
+    const coordinates = points.map(p => `${p.x} ${p.y}`).join(', ')
+    return `LINESTRING(${coordinates})`
+  }
+
+  const firstPoint = points[0]
+  const lastPoint = points[points.length - 1]
+  const isClosedPolygon = firstPoint.x === lastPoint.x && firstPoint.y === lastPoint.y
+
+  let coordinates: string
+  if (isClosedPolygon) {
+    coordinates = points.map(p => `${p.x} ${p.y}`).join(', ')
+  } else {
+    const closedPoints = [...points, firstPoint]
+    coordinates = closedPoints.map(p => `${p.x} ${p.y}`).join(', ')
+  }
+  return `POLYGON((${coordinates}))`
 }
 
 const convertDMSToDDFromString = (dmsString: string): number => {
@@ -427,6 +445,16 @@ const processCSVData = (data: CSVRow[]): Point[] => {
 
 const handleFileChange = (file: any) => {
   if (file.raw) {
+    csvData.value = []
+    if (props.map) {
+      props.map.eachLayer((layer) => {
+        if ((layer instanceof L.Polyline || layer instanceof L.Polygon || layer instanceof L.Marker) && 
+            (layer as any).options?.nome === 'memorial') {
+          props.map?.removeLayer(layer)
+        }
+      })
+    }
+
     Papa.parse(file.raw, {
       header: true,
       complete: (results: Papa.ParseResult<CSVRow>) => {
@@ -458,6 +486,18 @@ const handleFileChange = (file: any) => {
 
 const handleFileRemove = () => {
   csvData.value = []
+  manualGeometries.value = []
+  if (props.map) {
+    props.map.eachLayer((layer) => {
+      if ((layer instanceof L.Polyline || layer instanceof L.Polygon || layer instanceof L.Marker) && 
+          (layer as any).options?.nome === 'memorial') {
+        props.map?.removeLayer(layer)
+      }
+    })
+  }
+  if (uploadRef.value) {
+    uploadRef.value.clearFiles()
+  }
   emit('geometryRemoved')
 }
 
@@ -465,7 +505,7 @@ const editPoint = (index: number) => {
   const point = manualPoints.value[index]
   const dms = CoordinateConverter.ddToDMS(parseFloat(point.x))
   const dmsY = CoordinateConverter.ddToDMS(parseFloat(point.y))
-  
+
   manualInput.value = {
     x: point.x.toString(),
     y: point.y.toString(),
@@ -634,7 +674,7 @@ const addManualPoint = () => {
       distance: manualInput.value.distance
     })
   }
-   
+
   manualInput.value = {
     x: '',
     y: '',
@@ -672,15 +712,17 @@ const clearGeometries = () => {
   manualGeometries.value = []
   csvData.value = []
   manualPoints.value = []
-  
   if (props.map) {
     props.map.eachLayer((layer) => {
-      if (layer instanceof L.Polyline || layer instanceof L.Polygon || layer instanceof L.Marker) {
+      if ((layer instanceof L.Polyline || layer instanceof L.Polygon || layer instanceof L.Marker) && 
+          (layer as any).options?.nome === 'memorial') {
         props.map?.removeLayer(layer)
       }
     })
   }
-
+  if (uploadRef.value) {
+    uploadRef.value.clearFiles()
+  }
   manualInput.value = {
     x: '',
     y: '',
@@ -693,14 +735,11 @@ const clearGeometries = () => {
     azimuth: '',
     distance: ''
   }
-
   emit('geometryRemoved')
 }
 
-watch(() => props.showMemorialDescritivo, (newValue) => {
-  if (!newValue) {
-    clearGeometries()
-  }
+defineExpose({
+  togglePanel
 })
 </script>
 
@@ -942,7 +981,7 @@ watch(() => props.showMemorialDescritivo, (newValue) => {
   display: flex;
   gap: 16px;
   justify-content: space-between;
-  
+
   .el-input {
     width: 100%;
   }

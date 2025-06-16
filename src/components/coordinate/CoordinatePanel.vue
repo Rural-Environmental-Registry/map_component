@@ -462,7 +462,6 @@ const handleFileChange = (file: any) => {
         const requiredHeaders = ['X', 'Y', 'AZIMUTH', 'DISTANCIA']
 
         const firstRow = results.data[0]
-        console.log('results.data :>> ', results.data);
         if (!firstRow.X || !firstRow.Y) {
           ElMessage.error('A primeira linha do CSV deve conter as coordenadas X e Y')
           return

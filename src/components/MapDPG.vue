@@ -84,7 +84,6 @@
   const isLoading = ref<boolean>(false)
 
   const handleCoordinateSystemChange = (system: string) => {
-    console.log('system :>> ', system);
     emit('onCoordinateSystemChange', system)
   }
 

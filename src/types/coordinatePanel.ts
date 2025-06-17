@@ -19,4 +19,40 @@ export interface CoordinatePanelTexts {
   editPointDescription: string
   removePointDescription: string
   clearGeometriesDescription: string
-} 
+
+  memorialDescriptive: string
+  referenceSystem: string
+  selectSystem: string
+  sirgas2000: string
+  coordinateFormat: string
+  selectFormat: string
+  decimalDegrees: string
+  degreesMinutesSeconds: string
+  manualInput: string
+  insertCoordinates: string
+  xLongitude: string
+  yLatitude: string
+  degrees: string
+  minutes: string
+  seconds: string
+  addedPoints: string
+  finalizeGeometry: string
+  csvUpload: string
+  csvFileUpload: string
+  dragCsvFile: string
+  csvColumnsInfo: string
+  applyCsvCoordinates: string
+
+  placeholderLongitude: string
+  placeholderLatitude: string
+  placeholderAzimuth: string
+  placeholderDistance: string
+  placeholderDegrees: string
+  placeholderMinutes: string
+  placeholderSeconds: string
+
+  errorXYRequired: string
+  errorDegreesRequired: string
+  errorFirstRowXY: string
+  errorProvideCoordinatesOrAzimuthDistance: string
+}

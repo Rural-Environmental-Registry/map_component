@@ -3,7 +3,7 @@
     <ElTooltip
         class="box-item"
         effect="dark"
-        content="memorial descritivo"
+        :content="COORDINATE_PANEL_TEXTS.memorialDescriptive"
         placement="top-start"
       >
       <ElButton
@@ -25,11 +25,11 @@
       </div>
       <div class="panel-content">
         <div class="coordinate-section">
-          <h4>Sistema de Referência</h4>
+          <h4>{{ COORDINATE_PANEL_TEXTS.referenceSystem }}</h4>
           <ElSelect
             v-model="selectedSystem"
             class="coordinate-select"
-            placeholder="Selecione o sistema"
+            :placeholder="COORDINATE_PANEL_TEXTS.selectSystem"
             :disabled="true"
             @change="onSystemChange"
           >
@@ -38,11 +38,11 @@
         </div>
 
         <div class="coordinate-section">
-          <h4>Formato de Coordenadas</h4>
+          <h4>{{ COORDINATE_PANEL_TEXTS.coordinateFormat }}</h4>
           <ElSelect
             v-model="selectedFormat"
             class="coordinate-select"
-            placeholder="Selecione o formato"
+            :placeholder="COORDINATE_PANEL_TEXTS.selectFormat"
             @change="onFormatChange"
           >
             <ElOption label="Graus Decimais (DD)" value="DD" />
@@ -51,24 +51,24 @@
         </div>
 
         <ElTabs v-model="activeTab">
-          <ElTabPane label="Preenchimento Manual" name="manual">
+          <ElTabPane :label="COORDINATE_PANEL_TEXTS.manualInput" name="manual">
             <div class="coordinate-section">
-              <h4>Inserir Coordenadas</h4>
+              <h4>{{ COORDINATE_PANEL_TEXTS.insertCoordinates }}</h4>
               <div v-if="selectedFormat === 'DD'" class="coordinate-inputs-row">
                 <div class="input-group">
-                  <label>X (Longitude)</label>
+                  <label>{{ COORDINATE_PANEL_TEXTS.xLongitude }}</label>
                   <ElInput
                     v-model="manualInput.x"
-                    placeholder="Ex: -46.6333"
+                    :placeholder="COORDINATE_PANEL_TEXTS.placeholderLongitude"
                     type="number"
                     step="any"
                   />
                 </div>
                 <div class="input-group">
-                  <label>Y (Latitude)</label>
+                  <label>{{ COORDINATE_PANEL_TEXTS.yLatitude }}</label>
                   <ElInput
                     v-model="manualInput.y"
-                    placeholder="Ex: -23.5505"
+                    :placeholder="COORDINATE_PANEL_TEXTS.placeholderLatitude"
                     type="number"
                     step="any"
                   />
@@ -77,46 +77,46 @@
 
               <div v-if="selectedFormat === 'DMS'" class="coordinate-inputs-column">
                 <div class="input-group">
-                  <label>X (Longitude)</label>
+                  <label>{{ COORDINATE_PANEL_TEXTS.xLongitude }}</label>
                   <div class="dms-inputs">
                     <ElInput
                       v-model="manualInput.xDegrees"
-                      placeholder="Graus"
+                      :placeholder="COORDINATE_PANEL_TEXTS.placeholderDegrees"
                       type="number"
                       step="1"
                     />
                     <ElInput
                       v-model="manualInput.xMinutes"
-                      placeholder="Minutos"
+                      :placeholder="COORDINATE_PANEL_TEXTS.placeholderMinutes"
                       type="number"
                       step="1"
                     />
                     <ElInput
                       v-model="manualInput.xSeconds"
-                      placeholder="Segundos"
+                      :placeholder="COORDINATE_PANEL_TEXTS.placeholderSeconds"
                       type="number"
                       step="any"
                     />
                   </div>
                 </div>
                 <div class="input-group">
-                  <label>Y (Latitude)</label>
+                  <label>{{ COORDINATE_PANEL_TEXTS.yLatitude }}</label>
                   <div class="dms-inputs">
                     <ElInput
                       v-model="manualInput.yDegrees"
-                      placeholder="Graus"
+                      :placeholder="COORDINATE_PANEL_TEXTS.placeholderDegrees"
                       type="number"
                       step="1"
                     />
                     <ElInput
                       v-model="manualInput.yMinutes"
-                      placeholder="Minutos"
+                      :placeholder="COORDINATE_PANEL_TEXTS.placeholderMinutes"
                       type="number"
                       step="1"
                     />
                     <ElInput
                       v-model="manualInput.ySeconds"
-                      placeholder="Segundos"
+                      :placeholder="COORDINATE_PANEL_TEXTS.placeholderSeconds"
                       type="number"
                       step="any"
                     />
@@ -125,19 +125,19 @@
               </div>
               <div class="coordinate-inputs-row">
                 <div class="input-group">
-                  <label>Azimuth</label>
+                  <label>{{ COORDINATE_PANEL_TEXTS.azimuth }}</label>
                   <ElInput
                     v-model="manualInput.azimuth"
-                    placeholder="Ex: 90"
+                    :placeholder="COORDINATE_PANEL_TEXTS.placeholderAzimuth"
                     type="number"
                     step="any"
                   />
                 </div>
                 <div class="input-group">
-                  <label>Distância</label>
+                  <label>{{ COORDINATE_PANEL_TEXTS.distance }}</label>
                   <ElInput
                     v-model="manualInput.distance"
-                    placeholder="Ex: 100"
+                    :placeholder="COORDINATE_PANEL_TEXTS.placeholderDistance"
                     type="number"
                     step="any"
                   />
@@ -151,7 +151,7 @@
                 {{ COORDINATE_PANEL_TEXTS.addPoint }}
               </ElButton>
               <div v-if="manualPoints.length > 0" class="geometry-list">
-                <h4>Pontos Adicionados</h4>
+                <h4>{{ COORDINATE_PANEL_TEXTS.addedPoints }}</h4>
                 <div class="table-container">
                   <ElTable :data="manualPoints" style="width: 100%">
                     <ElTableColumn :label="COORDINATE_PANEL_TEXTS.index" prop="index" width="80" />
@@ -198,7 +198,7 @@
                 type="success"
                 @click="finalizeManualGeometry"
               >
-                Finalizar Geometria
+                {{ COORDINATE_PANEL_TEXTS.finalizeGeometry }}
               </ElButton>
               <div v-if="manualGeometries.length > 0" class="geometry-list">
                 <ElButton
@@ -217,7 +217,7 @@
 
           <ElTabPane label="Upload CSV" name="csv">
             <div class="coordinate-section">
-              <h4>Upload de Arquivo CSV</h4>
+              <h4>{{ COORDINATE_PANEL_TEXTS.csvFileUpload }}</h4>
               <div class="csv-upload">
                 <ElUpload
                   ref="uploadRef"
@@ -232,11 +232,11 @@
                 >
                   <FontAwesomeIcon iconName="upload" class="upload-icon" />
                   <div class="el-upload__text">
-                    Arraste o arquivo CSV ou <em>clique para fazer upload</em>
+                    {{ COORDINATE_PANEL_TEXTS.dragCsvFile }}
                   </div>
                   <template #tip>
                     <div class="el-upload__tip">
-                      O arquivo deve conter as colunas: X, Y, AZIMUTH, DISTANCIA
+                      {{ COORDINATE_PANEL_TEXTS.csvColumnsInfo }}
                     </div>
                   </template>
                 </ElUpload>
@@ -246,7 +246,7 @@
                   type="primary"
                   @click="applyCSVCoordinates"
                 >
-                  Aplicar Coordenadas do CSV
+                  {{ COORDINATE_PANEL_TEXTS.applyCsvCoordinates }}
                 </ElButton>
                 <ElButton
                   type="danger"
@@ -341,6 +341,10 @@ const uploadRef = ref()
 
 const togglePanel = () => {
   isOpen.value = !isOpen.value
+}
+
+const closePanel = () => {
+  isOpen.value = false
 }
 
 const onSystemChange = (value: string) => {
@@ -661,7 +665,7 @@ const addManualPoint = () => {
         parseFloat(manualInput.value.distance)
       )
     } else {
-      ElMessage.error('Forneça coordenadas ou Azimuth e Distância')
+      ElMessage.error(COORDINATE_PANEL_TEXTS.errorProvideCoordinatesOrAzimuthDistance)
       return
     }
 
@@ -738,7 +742,8 @@ const clearGeometries = () => {
 }
 
 defineExpose({
-  togglePanel
+  togglePanel,
+  closePanel
 })
 </script>
 

@@ -162,13 +162,20 @@
     }
   }
 
+  const closeCoordinatePanel = () => {
+    if (coordinatePanelRef.value) {
+      coordinatePanelRef.value.closePanel()
+    }
+  }
+
   defineExpose({
     map: computed(() => mapRef.value?.map),
     layerControl: computed(() => mapRef.value?.layerControl),
     drawControl: computed(() => mapRef.value?.drawControl),
     drawItemsGroup: computed(() => mapRef.value?.drawItemsGroup),
     leaflet: computed(() => mapRef.value?.leaflet),
-    toggleCoordinatePanel
+    toggleCoordinatePanel,
+    closeCoordinatePanel
   })
 </script>
 

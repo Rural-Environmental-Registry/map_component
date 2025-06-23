@@ -12,6 +12,7 @@
     DrawingConfig,
     DrawingEvent,
     MapConfig,
+    MemorialConfig,
     MapLayers
   } from '../../types'
 
@@ -25,6 +26,7 @@
     mapOptions: MapConfig
     layers: MapLayers
     drawingOptions?: DrawingConfig
+    memorialOptions?: MemorialConfig
   }
 
   const props = defineProps<MapProps>()

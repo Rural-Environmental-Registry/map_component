@@ -1,9 +1,7 @@
 @import 'leaflet/dist/leaflet.css';
-@import 'leaflet-draw/dist/leaflet.draw.css';
 
 .map-container {
-  .leaflet-control-layers,
-  .leaflet-draw.leaflet-control {
+  .leaflet-control-layers {
     border: var(--mapa-size-base-1) solid var(--mapa-base-white) !important;
     border-radius: var(--mapa-base-radius-10);
     background-color: var(--mapa-base-white);
@@ -13,14 +11,13 @@
     display: none;
   }
 
-  .leaflet-draw-toolbar {
-    margin-top: 0;
-  }
-
   .leaflet-control-layers label {
     font-size: var(--mapa-fs-15);
     color: var(--mapa-base-black);
     padding: var(--mapa-size-base-5);
+    cursor: pointer;
+    margin-top: var(--mapa-size-base-2);
+    margin-bottom: var(--mapa-size-base-2);
   }
 
   .leaflet-control-layers input[type='radio'] {
@@ -40,13 +37,6 @@
     height: var(--mapa-size-base-30) !important;
   }
 
-  .leaflet-control-layers label {
-    color: var(--mapa-base-black);
-    cursor: pointer;
-    margin-top: var(--mapa-size-base-2);
-    margin-bottom: var(--mapa-size-base-2);
-  }
-
   /* zoom */
 
   .leaflet-control-zoom {
@@ -55,12 +45,13 @@
   }
 
   .leaflet-control-zoom a {
-    width: var(--mapa-size-base-35) !important;
-    height: var(--mapa-size-base-35) !important;
+    width: var(--mapa-size-base-30) !important;
+    height: var(--mapa-size-base-30) !important;
     font-size: var(--mapa-fs-22) !important;
     line-height: var(--mapa-size-base-35) !important;
     border: none !important;
     background-color: var(--mapa-base-white) !important;
+    color: var(--mapa-base-gray);
   }
 
   .leaflet-control-zoom a:first-child {
@@ -77,66 +68,24 @@
     background-color: var(--mapa-base-white) !important;
   }
 
-  /* leaflet draw */
+  /* Geoman.io */
 
-  .leaflet-draw.leaflet-control .leaflet-draw-draw-polygon {
-    background-image: url('../icons/polygon-draw.svg');
-    background-size: var(--mapa-size-base-15) var(--mapa-size-base-15);
-    background-repeat: no-repeat;
-    background-position: center;
+  .leaflet-pm-toolbar {
+    border-radius: var(--mapa-base-radius-10);
+    background-color: var(--mapa-base-white);
   }
 
-  .leaflet-draw.leaflet-control .leaflet-draw-draw-polyline {
-    background-image: url('../icons/polyline-draw.svg');
-    background-size: var(--mapa-size-base-15) var(--mapa-size-base-15);
-    background-repeat: no-repeat;
-    background-position: center;
-  }
+  .leaflet-pm-toolbar .button-container {
+    padding: var(--mapa-size-base-1);
 
-  .leaflet-draw.leaflet-control .leaflet-draw-draw-rectangle {
-    background-image: url('../icons/rectangle-draw.svg');
-    background-size: var(--mapa-size-base-15) var(--mapa-size-base-15);
-    background-repeat: no-repeat;
-    background-position: center;
-  }
+    &:first-child a {
+      border-top-right-radius: var(--mapa-base-radius-10);
+      border-top-left-radius: var(--mapa-base-radius-10);
+    }
 
-  .leaflet-draw.leaflet-control .leaflet-draw-draw-circle {
-    background-image: url('../icons/circle-draw.svg');
-    background-size: var(--mapa-size-base-15) var(--mapa-size-base-15);
-    background-repeat: no-repeat;
-    background-position: center;
-  }
-
-  .leaflet-draw.leaflet-control .leaflet-draw-draw-marker {
-    background-image: url('../icons/marker-draw.svg');
-    background-size: var(--mapa-size-base-15) var(--mapa-size-base-15);
-    background-repeat: no-repeat;
-    background-position: center;
-  }
-
-  .leaflet-draw.leaflet-control .leaflet-draw-draw-circlemarker {
-    background-image: url('../icons/circlemarker-draw.svg');
-    background-size: var(--mapa-size-base-15) var(--mapa-size-base-15);
-    background-repeat: no-repeat;
-    background-position: center;
-  } 
-
-  .leaflet-draw.leaflet-control .leaflet-draw-edit-edit {
-    background-image: url('../icons/edit-draw.svg');
-    background-size: var(--mapa-size-base-15) var(--mapa-size-base-15);
-    background-repeat: no-repeat;
-    background-position: center;
-  }
-
-  .leaflet-draw.leaflet-control .leaflet-draw-edit-remove {
-    background-image: url('../icons/delete-draw.svg');
-    background-size: var(--mapa-size-base-15) var(--mapa-size-base-15);
-    background-repeat: no-repeat;
-    background-position: center;
-  }
-
-  .leaflet-draw-toolbar.leaflet-bar,
-  .leaflet-draw-toolbar.leaflet-bar a {
-    border: var(--mapa-size-base-2) solid transparent;
+    &:last-child a {
+      border-bottom-right-radius: var(--mapa-base-radius-10);
+      border-bottom-left-radius: var(--mapa-base-radius-10);
+    }
   }
 }

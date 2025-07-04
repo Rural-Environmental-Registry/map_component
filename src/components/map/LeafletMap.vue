@@ -4,7 +4,6 @@
 
 <script setup lang="ts">
   import L from 'leaflet'
-  import 'leaflet-draw'
   import { onMounted, ref } from 'vue'
   import DrawingControlHandler from '../../handlers/drawingControl'
   import MapHandler from '../../handlers/mapHandler'
@@ -33,7 +32,6 @@
 
   const map = ref<L.Map>()
   const layerControl = ref<L.Control.Layers>()
-  const drawControl = ref<L.Control.Draw>()
   const drawItemsGroup = ref<L.FeatureGroup>()
 
   onMounted(() => {
@@ -60,7 +58,7 @@
 
   const handleDrawingControls = (): void => {
     drawItemsGroup.value = new L.FeatureGroup()
-    map.value!.addLayer(drawItemsGroup.value)
+    drawItemsGroup.value.addTo(map.value!)
 
     const drawingControlHandler = new DrawingControlHandler(
       map.value!,
@@ -68,9 +66,7 @@
       props.drawingOptions
     )
 
-    drawControl.value = new L.Control.Draw(drawingControlHandler.options)
-
-    map.value!.addControl(drawControl.value)
+    map.value!.pm.addControls(drawingControlHandler.options)
 
     drawingControlHandler.handleDrawingEvents((data: DrawingEvent) => {
       emit('onDrawing', data)
@@ -83,7 +79,6 @@
   defineExpose({
     map,
     layerControl,
-    drawControl,
     drawItemsGroup,
     leaflet: L
   })

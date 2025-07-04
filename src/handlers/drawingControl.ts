@@ -1,157 +1,104 @@
-/* The following workaround is needed to avoid a runtime error in leaflet-draw */
-// @ts-ignore
-window.type = true
+import L, { Map, FeatureGroup, Layer } from 'leaflet'
+import '@geoman-io/leaflet-geoman-free'
+import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css'
+import { area } from '@turf/turf'
 
-// @ts-ignore
-window.radius = true
-
-import {
-  FeatureGroup,
-  Control,
-  Map,
-  GeometryUtil,
-  drawLocal,
-  LatLng,
-  LeafletEvent,
-  Localization,
-  Layer
-} from 'leaflet'
-import {
-  DEFAULT_DRAW_OPTIONS,
-  DEFAULT_DRAWING_CONTROL_TEXTS
-} from './constants'
+import { DEFAULT_DRAW_OPTIONS } from './constants'
 import {
   DrawingConfig,
+  GeomanDrawingEvent,
+  IncrementedLayer,
+  TranslationConfig,
   DrawnArea,
-  IncrementedCreateLayer,
-  IncrementedEditLayer,
-  LeafletDrawCreateEvent,
-  LeafletDrawDeleteEvent,
-  LeafletDrawEditEvent
+    ToolbarOptions
 } from '../types'
 
 export default class DrawingControlHandler {
-  private _map: Map
-  private _drawItemsGroup: FeatureGroup
-  private _options: Control.DrawConstructorOptions
+  private readonly _map: Map
+  private readonly _drawItemsGroup: FeatureGroup
+  private readonly _options: ToolbarOptions
 
-  constructor(
-    map: Map,
-    drawItemsGroup: FeatureGroup,
-    controlOptions?: DrawingConfig
-  ) {
-    this._map = map
-    this._drawItemsGroup = drawItemsGroup
-    this._options = this.formatOptions(controlOptions?.config)
-    this.addTranslation(
-      controlOptions?.controlTexts || DEFAULT_DRAWING_CONTROL_TEXTS
-    )
+   constructor( map: Map, drawItemsGroup: FeatureGroup, controlOptions?: DrawingConfig ) {
+     this._map = map
+     this._drawItemsGroup = drawItemsGroup
+     this._options = this.formatMenuOptions(controlOptions)
+     this.addTranslation(controlOptions?.translation || DEFAULT_DRAW_OPTIONS.translation)
   }
 
-  get drawItemsGroup(): FeatureGroup {
-    return this._drawItemsGroup
-  }
+  get drawItemsGroup(): FeatureGroup { return this._drawItemsGroup }
 
-  get map(): Map {
-    return this._map
-  }
+  get map(): Map { return this._map }
 
-  get options(): Control.DrawConstructorOptions {
-    return this._options
-  }
+  get options(): ToolbarOptions { return this._options }
 
-  private formatOptions(
-    controlOptions: Control.DrawConstructorOptions | undefined
-  ): Control.DrawConstructorOptions {
-    let options = DEFAULT_DRAW_OPTIONS
+  private calculateAreas(layer: Layer): DrawnArea {
+    if (layer instanceof L.Polygon || layer instanceof L.Rectangle) {
+      const drawnArea: number = area(layer.toGeoJSON())
 
-    if (controlOptions) {
-      options = controlOptions
+      return {
+        m2: drawnArea,
+        km2: drawnArea / 1000000,
+        ha: drawnArea / 10000
+      }
     }
 
-    options.edit = {
-      ...options.edit,
-      featureGroup: this._drawItemsGroup
-    }
-
-    return options
-  }
-
-  private calculateAreas(latLangs: LatLng[]): DrawnArea {
-    const area = GeometryUtil.geodesicArea(latLangs)
     return {
-      m2: area,
-      km2: area / 1000000,
-      ha: area / 10000
+      m2: 0,
+      km2: 0,
+      ha: 0
     }
   }
 
-  private incrementLayerInfosOnCreate(
-    data: LeafletDrawCreateEvent
-  ): IncrementedCreateLayer {
-    const polygons = ['rectangle', 'polygon']
+  private incrementLayerInfos(layer: Layer): IncrementedLayer {
+    const newLayer = layer as IncrementedLayer
+    newLayer.drawnArea = this.calculateAreas(layer)
 
-    if (!polygons.includes(data.layerType)) return data
-
-    data.layer.drawnArea = this.calculateAreas(data.layer.getLatLngs()[0])
-
-    return data
-  }
-
-  private incrementLayerInfosOnEdit(data: Layer): IncrementedEditLayer {
-    const layer = data as IncrementedEditLayer
-
-    if (!layer.drawnArea) return layer
-
-    layer.drawnArea = this.calculateAreas(layer.getLatLngs()[0])
-
-    return layer
+    return newLayer
   }
 
   public handleDrawingEvents(eventEmitterCallback: Function): void {
-    this._map.on('draw:created', (e: LeafletEvent) => {
-      const evt = e as LeafletDrawCreateEvent
+    this._map.on('pm:create', (evt: GeomanDrawingEvent) => {
 
-      this._drawItemsGroup.addLayer(evt.layer)
+      const { layer } = evt
 
-      const { layer } = this.incrementLayerInfosOnCreate(evt)
+      this._drawItemsGroup.addLayer(layer)
 
-      eventEmitterCallback({ type: 'created', layer })
-    })
+      const createdLayer: IncrementedLayer = this.incrementLayerInfos(layer)
 
-    this._map.on('draw:edited', (e: LeafletEvent) => {
-      const evt = e as LeafletDrawEditEvent
+      eventEmitterCallback({ type: 'created', layer: createdLayer })
 
-      const layers: Layer[] = []
-
-      evt.layers.eachLayer((layer: Layer) => {
-        const data = this.incrementLayerInfosOnEdit(layer)
-
-        layers.push(data)
-      })
-
-      eventEmitterCallback({ type: 'edited', layers })
-    })
-
-    this._map.on('draw:deleted', (e: LeafletEvent) => {
-      const evt = e as LeafletDrawDeleteEvent
-
-      const layers: Layer[] = []
-
-      evt.layers.eachLayer((layer: Layer) => {
-        layers.push(layer)
-      })
-
-      eventEmitterCallback({ type: 'deleted', layers })
+      this.handleUpdateDrawingEvents(eventEmitterCallback, layer)
+      this.handleDeleteDrawingEvents(eventEmitterCallback, layer)
     })
   }
 
-  private addTranslation(customTexts: Localization.DrawLocal): void {
-    /*
-     * due to a runtime issue in leaflet-draw, this workaround is needed
-     * to override the default texts
-     */
-    drawLocal.draw = customTexts.draw
-    drawLocal.edit = customTexts.edit
+  private handleUpdateDrawingEvents(eventEmitterCallback: Function, layer: Layer): void {
+    layer.on('pm:update', (evt: GeomanDrawingEvent) => {
+      const childLayer: Layer = evt.layer
+
+      const editedLayer: IncrementedLayer = this.incrementLayerInfos(childLayer)
+
+      eventEmitterCallback({ type: 'edited', layer: editedLayer })
+    })
+  }
+
+  private handleDeleteDrawingEvents(eventEmitterCallback: Function, layer: Layer): void {
+    layer.on('pm:remove', (evt: GeomanDrawingEvent) => {
+      eventEmitterCallback({ type: 'deleted', layer: evt.layer })
+    })
+  }
+
+  private addTranslation({ lang = 'en', customTexts = {} }: TranslationConfig): void {
+    this._map.pm.setLang(lang, customTexts, 'en')
+  }
+
+  private formatMenuOptions(options: DrawingConfig | undefined): ToolbarOptions {
+    if (!options) return DEFAULT_DRAW_OPTIONS.options
+    // TODO: receber um objeto de opções e formatar conforme o leaflet-geoman
+  }
+
+  private applyShapeStyles(): void {
+    // TODO: baseado no objeto de opcoes, aplicar as estilizacoes
+
   }
 }

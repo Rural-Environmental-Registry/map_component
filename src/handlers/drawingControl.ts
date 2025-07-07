@@ -1,4 +1,4 @@
-import L, { Map, FeatureGroup, Layer } from 'leaflet'
+import L, { Map, FeatureGroup, Layer, PathOptions } from 'leaflet'
 import '@geoman-io/leaflet-geoman-free'
 import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css'
 import { area } from '@turf/turf'
@@ -10,7 +10,9 @@ import {
   IncrementedLayer,
   TranslationConfig,
   DrawnArea,
-    ToolbarOptions
+  ToolbarOptions,
+  PMToolbarOptions,
+  PMSupportedShapes
 } from '../types'
 
 export default class DrawingControlHandler {
@@ -21,7 +23,7 @@ export default class DrawingControlHandler {
    constructor( map: Map, drawItemsGroup: FeatureGroup, controlOptions?: DrawingConfig ) {
      this._map = map
      this._drawItemsGroup = drawItemsGroup
-     this._options = this.formatMenuOptions(controlOptions)
+     this._options = this.formatMenuOptions(controlOptions?.options || DEFAULT_DRAW_OPTIONS.options)
      this.addTranslation(controlOptions?.translation || DEFAULT_DRAW_OPTIONS.translation)
   }
 
@@ -92,13 +94,46 @@ export default class DrawingControlHandler {
     this._map.pm.setLang(lang, customTexts, 'en')
   }
 
-  private formatMenuOptions(options: DrawingConfig | undefined): ToolbarOptions {
-    if (!options) return DEFAULT_DRAW_OPTIONS.options
-    // TODO: receber um objeto de opções e formatar conforme o leaflet-geoman
+  private formatMenuOptions(options: ToolbarOptions): PMToolbarOptions {
+    const toolbarOptions: ToolbarOptions = {}
+
+    const isPathOption = (option: any): boolean => {
+      return typeof option === 'object' && ('color' in option || 'fillColor' in option || 'weight' in option)
+    }
+
+    Object.entries(options).forEach(([key, value]) => {
+      if (isPathOption(value)) {
+        this.applyShapeStyles(key, value as PathOptions)
+        toolbarOptions[key] = true
+      } else {
+        toolbarOptions[key] = value
+      }
+    })
+
+    return toolbarOptions
   }
 
-  private applyShapeStyles(): void {
-    // TODO: baseado no objeto de opcoes, aplicar as estilizacoes
+  private applyShapeStyles(key: string, props: PathOptions): void {
+    const shapes: { [key: string]: PMSupportedShapes } = {
+      drawMarker: 'Marker',
+      drawRectangle: 'Rectangle',
+      drawPolyline: 'Line',
+      drawPolygon: 'Polygon',
+      drawCircle: 'Circle',
+      drawCircleMarker: 'CircleMarker',
+    }
 
+    const ignoredShapes = (currentShape: PMSupportedShapes): string[] => {
+      return [
+        'Marker',
+        'Circle',
+        'Line',
+        'Rectangle',
+        'Polygon',
+        'CircleMarker',
+      ].filter((shape: string) => shape !== currentShape)
+    }
+
+    this._map.pm.setPathOptions(props, { ignoreShapes: ignoredShapes(shapes[key]), merge: true })
   }
 }

@@ -1,4 +1,4 @@
-import { MapOptions, Layer } from 'leaflet'
+import { MapOptions, Layer, PathOptions, ControlOptions } from 'leaflet'
 // @ts-ignore
 import { PM } from '@geoman-io/leaflet-geoman-free'
 
@@ -83,6 +83,8 @@ export type MapOptionsConfig = {
   drawing?: DrawingConfig
 }
 
+export type DrawingConfig = DrawingControlOptions & DisplayDrawingControl
+
 export type TranslationConfig = {
   lang?: PM.SupportLocales
   customTexts?: PM.Translations
@@ -94,7 +96,11 @@ export type GeomanDrawingEvent = {
   [key: string]: any
 }
 
-export type ToolbarOptions = PM.ToolbarOptions
+export type ToolbarOptions = {
+  [K in PM.ToolbarOptions]: ControlOptions | PM.BlockPositions | boolean | PathOptions | undefined
+}
+
+export type PMToolbarOptions = PM.ToolbarOptions
 
 export type DrawingControlOptions = {
   options: ToolbarOptions
@@ -105,19 +111,4 @@ type DisplayDrawingControl = {
   show: boolean
 }
 
-export type DrawingConfig = DrawingControlOptions & DisplayDrawingControl
-
-type DrawingToolsStyleOptions = {
-  color?: string
-  weight?: number
-  fillColor?: string
-  fillOpacity?: number
-}
-
-export type DrawingToolsStyles = {
-  rectangle: DrawingToolsStyleOptions
-  polygon: DrawingToolsStyleOptions
-  polyline: DrawingToolsStyleOptions
-  circle: DrawingToolsStyleOptions
-  circleMarker: DrawingToolsStyleOptions
-}
+export type PMSupportedShapes = PM.SUPPORTED_SHAPES

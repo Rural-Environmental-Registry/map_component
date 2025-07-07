@@ -54,6 +54,8 @@ O componente aceita parametros e emite eventos. Além disso, expôe instâncias 
   :layers="layers"
   :options="options"
   :showLoading="showLoading"
+  :disableLoading="disableLoading"
+  :showMemorialDescritivo="showMemorialDescritivo"
   @onChildLayerToggle="onChildLayerToggle"
   @onGroupLayerToggle="onGroupLayerToggle"
   @onDrawing="onDrawing"
@@ -66,7 +68,6 @@ const mapRefInstances = computed(() => {
   return {
     map: mapRef.value?.map,
     layerControl: mapRef.value?.layerControl,
-    drawControl: mapRef.value?.drawControl,
     drawItemsGroup: mapRef.value?.drawItemsGroup,
     leaflet: mapRef.value?.leaflet
   }
@@ -81,14 +82,15 @@ const mapRefInstances = computed(() => {
 | layers         | [MapLayers](docs/properties.md)        | Opcional    | Define as camadas base e camadas customizadas.                             |
 | options        | [MapOptionsConfig](docs/properties.md) | Opcional    | Define as configurações do mapa, menu de camadas e ferramentas de desenho. |
 | disableLoading | boolean                                | Opcional    | Desabilita o animação de carregamento.                                     |
+|showMemorialDescritivo| boolean                          | Opcional    | Controla a visibilidade do memorial descritivo.                             |
 
 ### Eventos
 
-| Nome               | Descrição                                                                |
-| ------------------ | ------------------------------------------------------------------------ | 
-| onChildLayerToggle | Emite os dados da camada adicionada/removida do mapa                     |
-| onGroupLayerToggle | Emite os dados do grupo e das suas camadas adicionadas/removidas do mapa |
-| onDrawing          | Emite os dados do(s) desenho(s) adicionado(s)/removido(s) do mapa        |
+| Nome               | Descrição                                                                                                                                 |
+| ------------------ |-------------------------------------------------------------------------------------------------------------------------------------------| 
+| onChildLayerToggle | Emite os dados da camada adicionada/removida do mapa                                                                                      |
+| onGroupLayerToggle | Emite os dados do grupo e das suas camadas adicionadas/removidas do mapa                                                                  |
+| onDrawing          | Emite os dados do(s) desenho(s) adicionado(s)/removido(s) do mapa. Poligonos e retângulos são incrementados com a propriedade "drawnArea" |
 
 ### Instâncias
 
@@ -96,7 +98,150 @@ const mapRefInstances = computed(() => {
 | -------------- | ---------------------------------------------------------------------------------- |
 | map            | Mapa Leaflet. Utilizada para manipulação do mapa                                   |
 | layerControl   | Controle de camadas Leaflet. Utilizada para manipulação das camadas                |
-| drawControl    | Controle de desenho Leaflet. Utilizada para manipulação das ferramentas de desenho |
 | drawItemsGroup | Grupo de desenhos Leaflet. Utilizada para manipulação dos desenhos                 |
 | leaflet        | Instância Leaflet.                                                                 |
 
+## Exemplos de parametros
+
+```js
+const props = {
+    showLoading: true,
+    disableLoading: false,
+    showMemorialDescritivo: true,
+    layers: {
+        baseMapLayers: [
+          {
+            name: 'OpenStreetMap',
+            layer: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            key: 'osm',
+            default: true
+          }
+        ],
+        customLayers: [
+          {
+            name: 'Camadas Customizadas',
+            key: 'custom',
+            toggle: {
+              active: 'Ativar',
+              inactive: 'Desativar'
+            },
+            layers: [{
+                baseUrl: 'https://...',
+                layers: 'Layer_1',
+                format: 'image/png',
+                transparent: true,
+                name: 'Layer 1',
+                activeDefault: true,
+                active: true,
+                key: 'layer_1',
+                toggle: {
+                    active: 'Ativar',
+                    inactive: 'Desativar'
+                },
+                style: {
+                    color: '#ff0000',
+                    fillColor: '#00ff00'
+                },
+                options: {}
+            }]
+          }
+        ]
+    },
+    options: {
+        map: {
+            config: {
+                center: [-23.55, -46.63],
+                zoom: 5
+            }
+        },
+        layersMenu: { size: 'small' },
+        drawing: {
+            show: true,
+            translation: {
+                lang: 'pt_br',
+                customTexts: {
+                    tooltips: {
+                        placeMarker: 'Clique para posicionar o marcador',
+                        firstVertex: 'Clique para posicionar o primeiro vértice',
+                        continueLine: 'Clique para continuar desenhando',
+                        finishLine: 'Clique em qualquer marcador existente para finalizar',
+                        finishPoly: 'Clique no primeiro marcador para finalizar',
+                        finishRect: 'Clique para finalizar',
+                        startCircle: 'Clique para posicionar o centro do círculo',
+                        finishCircle: 'Clique para finalizar o círculo',
+                        placeCircleMarker: 'Clique para posicionar o marcador circular',
+                        placeText: 'Clique para inserir texto'
+                    },
+                    actions: {
+                        finish: 'Finalizar',
+                        cancel: 'Cancelar',
+                        removeLastVertex: 'Remover último vértice'
+                    },
+                    buttonTitles: {
+                        drawMarkerButton: 'Desenhar Marcador',
+                        drawPolyButton: 'Desenhar Polígonos',
+                        drawLineButton: 'Desenhar Linha Poligonal',
+                        drawCircleButton: 'Desenhar Círculo',
+                        drawRectButton: 'Desenhar Retângulo',
+                        editButton: 'Editar Camadas',
+                        dragButton: 'Arrastar Camadas',
+                        cutButton: 'Recortar Camadas',
+                        deleteButton: 'Remover Camadas',
+                        drawCircleMarkerButton: 'Desenhar Marcador de Círculo',
+                        snappingButton: 'Ajustar marcador arrastado a outras camadas e vértices',
+                        pinningButton: 'Unir vértices compartilhados',
+                        rotateButton: 'Rotacionar Camadas',
+                        drawTextButton: 'Desenhar Texto',
+                        scaleButton: 'Redimensionar Camadas',
+                        autoTracingButton: 'Traçado Automático de Linha'
+                    },
+                    measurements: {
+                        totalLength: 'Comprimento',
+                        segmentLength: 'Comprimento do Segmento',
+                        area: 'Área',
+                        radius: 'Raio',
+                        perimeter: 'Perímetro',
+                        height: 'Altura',
+                        width: 'Largura',
+                        coordinates: 'Posição',
+                        coordinatesMarker: 'Marcador de Posição'
+                    }
+                }
+            },
+            options: {
+                drawMarker: true,
+                drawRectangle: true,
+                drawPolyline: {
+                    color: '#ff0000',
+                    weight: 5,
+                    opacity: 0.5,
+                    stroke: true,
+                    fill: true,
+                    fillColor: '#ff0000',
+                    fillOpacity: 0.2
+                },
+                drawPolygon: true,
+                drawCircle: true,
+                drawCircleMarker: true,
+                drawText: true,
+                editMode: true,
+                dragMode: true,
+                cutPolygon: false,
+                rotateMode: false,
+                removalMode: true,
+                drawControls: true,
+                editControls: true,
+                position: 'topright',
+                positions: {
+                    draw: {
+                        position: 'topleft',
+                    },
+                    edit: {
+                        position: 'bottomright',
+                    },
+                }
+            }
+        }
+    }
+}
+```

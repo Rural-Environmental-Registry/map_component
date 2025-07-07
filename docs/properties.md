@@ -63,15 +63,21 @@
 
 ## DrawingConfig
 
-| Campo        | Tipo                                             | Descrição                                                |
-| ------------ | ------------------------------------------------ | -------------------------------------------------------- |
-| show         | boolean                                          | Ativa ou desativa as ferramentas de desenho.             |
-| controlTexts | [Localization.DrawLocal](#localizationdrawlocal) | Textos utilizados nas ferramentas de desenho (opcional). |
-| config       | [Control.Draw](#controldraw)                     | Configurações adicionais (opcional).                     |
+| Campo        | Tipo               | Descrição                                                |
+| ------------ |--------------------| -------------------------------------------------------- |
+| show         | boolean            | Ativa ou desativa as ferramentas de desenho.             |
+| options      | [ToolbarOptions](#toolbaroptions) | Opções para personalizar ferramentas de desenho.          |
+|translation  | [TranslationConfig](#translationconfig) | Traduções para ferramentas de desenho.          |
+
+[//]: # (## ToolbarOptions)
+ Esse campo define opções de cada ferramenta de desenho. É um tipo composto que pode ser:
+ - [ControlOptions](https://geoman.io/docs/leaflet/toolbar)
+ - [BlockPositions](https://geoman.io/docs/leaflet/toolbar#toolbar-block-position)
+ - Boolean
+ - [PathOptions](https://leafletjs.com/reference.html#path)
 
 
 ## Links externos
 
 #### [MapOptions](https://leafletjs.com/reference.html#map-option)
-#### [Localization.DrawLocal](https://github.com/Leaflet/Leaflet.draw/blob/develop/src/Leaflet.draw.js#L74)
-#### [Control.Draw](https://leaflet.github.io/Leaflet.draw/docs/leaflet-draw-latest.html#options)
+#### [TranslationConfig](https://github.com/geoman-io/leaflet-geoman/tree/master/src/assets/translations)

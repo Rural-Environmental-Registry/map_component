@@ -95,7 +95,15 @@ export default class DrawingControlHandler {
   }
 
   private formatMenuOptions(options: ToolbarOptions): PMToolbarOptions {
-    const toolbarOptions: ToolbarOptions = {}
+    const toolbarOptions: ToolbarOptions = {
+      drawPolygon: false,
+      drawCircle: false,
+      drawCircleMarker: false,
+      drawText: false,
+      dragMode: false,
+      cutPolygon: false,
+      rotateMode: false
+    }
 
     const isPathOption = (option: any): boolean => {
       return typeof option === 'object' && ('color' in option || 'fillColor' in option || 'weight' in option)

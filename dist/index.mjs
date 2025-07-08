@@ -12225,7 +12225,15 @@ class m_ {
     this._map.pm.setLang(t, i, "en");
   }
   formatMenuOptions(t) {
-    const i = {}, o = (u) => typeof u == "object" && ("color" in u || "fillColor" in u || "weight" in u);
+    const i = {
+      drawPolygon: !1,
+      drawCircle: !1,
+      drawCircleMarker: !1,
+      drawText: !1,
+      dragMode: !1,
+      cutPolygon: !1,
+      rotateMode: !1
+    }, o = (u) => typeof u == "object" && ("color" in u || "fillColor" in u || "weight" in u);
     return Object.entries(t).forEach(([u, f]) => {
       o(f) ? (this.applyShapeStyles(u, f), i[u] = !0) : i[u] = f;
     }), i;

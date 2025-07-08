@@ -1,4 +1,4 @@
-import L, { Map, FeatureGroup, Layer, PathOptions } from 'leaflet'
+import L, { Map, FeatureGroup, Layer, PathOptions, Icon, Point } from 'leaflet'
 import '@geoman-io/leaflet-geoman-free'
 import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css'
 import { area } from '@turf/turf'
@@ -14,6 +14,8 @@ import {
   PMToolbarOptions,
   PMSupportedShapes
 } from '../types'
+
+import markerIcon from '../assets/icons/marker-icon.svg'
 
 export default class DrawingControlHandler {
   private readonly _map: Map
@@ -112,6 +114,7 @@ export default class DrawingControlHandler {
     Object.entries(options).forEach(([key, value]) => {
       if (isPathOption(value)) {
         this.applyShapeStyles(key, value as PathOptions)
+        if (key === 'drawMarker') this.setMartkerIcon()
         toolbarOptions[key] = true
       } else {
         toolbarOptions[key] = value
@@ -143,5 +146,15 @@ export default class DrawingControlHandler {
     }
 
     this._map.pm.setPathOptions(props, { ignoreShapes: ignoredShapes(shapes[key]), merge: true })
+  }
+
+  private setMartkerIcon(): void {
+    const MyCustomMarker = new Icon({
+      iconAnchor: new Point(12, 12),
+      iconSize: new Point(24, 24),
+      iconUrl: markerIcon,
+    })
+
+    this._map.pm.setGlobalOptions({ markerStyle: { icon : MyCustomMarker } });
   }
 }

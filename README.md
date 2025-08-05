@@ -4,6 +4,9 @@ MapaDPG é um componente de mapa interativo para aplicações Vue.js que permite
 
 *Atenção: Essa biblioteca pode ser utilizada apenas para projetos em Vue.js 3.*
 
+
+*** Antes de editar, leia [Wiki versionamento](https://gitlab.criainovacao.com.br/sfb/car-federal/dpg-mapa/-/wikis/Versionamento) ***
+
 ## Instalação
 
 ```package.json

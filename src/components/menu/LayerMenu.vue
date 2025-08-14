@@ -1,6 +1,7 @@
 <template>
   <div :class="customClasses.layerMenu">
     <ElButton
+      v-if="!props.options?.removeMenu"
       :class="customClasses.menuButton"
       @click="isMenuOpen = !isMenuOpen"
     >
@@ -21,7 +22,7 @@
 <script setup lang="ts">
   import { ElButton, ElMenu } from 'element-plus'
   import L from 'leaflet'
-  import { computed, ref } from 'vue'
+  import { computed, onMounted, ref } from 'vue'
   import FontAwesomeIcon from '../fa-icon/FontAwesomeIcon.vue'
   import ParentMenu from './ParentMenu.vue'
   import {
@@ -42,6 +43,10 @@
     [key: string]: L.TileLayer
   }
 
+  type ConvertedGeoJsonLayers = {
+    [key: string]: L.GeoJSON
+  }
+
   const emit = defineEmits<{
     (e: 'startLoading'): void
     (e: 'stopLoading'): void
@@ -53,6 +58,7 @@
 
   const isMenuOpen = ref<boolean>(false)
   const convertedLayers = ref<ConvertedLayers>({})
+  const convertedGeoJsonLayers = ref<ConvertedGeoJsonLayers>({})
 
   type CustomClasses = {
     layerMenu: string
@@ -61,6 +67,8 @@
   }
 
   const customClasses = computed((): CustomClasses => {
+
+
     const status = isMenuOpen.value ? 'open' : 'close'
     return {
       layerMenu: `layer-menu layer-menu-${props.options?.size || 'medium'}`,
@@ -76,25 +84,46 @@
   })
 
   const onChildLayerChange = (layer: LayerData): void => {
-    handleWmsLayer(layer)
+
+    if(layer.geojson){
+      handleGeoJsonLayer(layer)
+    }else{
+      handleWmsLayer(layer)
+    }
+    
     emit('onChildLayerToggle', layer)
   }
 
   const onGroupLayerToggle = (parent: GroupLayerData): void => {
-    parent.layers.forEach((childLayer: LayerData) => handleWmsLayer(childLayer))
+    
+    parent.layers.forEach((childLayer: LayerData) => {
+      if(childLayer.geojson){
+        handleGeoJsonLayer(childLayer)
+      }else{
+        handleWmsLayer(childLayer)
+      }
+    })
 
     emit('onGroupLayerToggle', parent)
   }
 
+
+
+
+
+
+
+
   const convertToWmsLayer = (layer: LayerData): L.TileLayer => {
-    const wmsLayer = L.tileLayer.wms(layer.baseUrl, {
-      layers: layer.layers,
-      format: layer.format || 'image/png',
-      transparent: layer.transparent
-    })
+      
+      const wmsLayer = L.tileLayer.wms(layer.baseUrl, {
+        layers: layer.layers,
+        format: layer.format || 'image/png',
+        transparent: layer.transparent
+      })
 
     watchLayerStatus(wmsLayer)
-
+    
     return wmsLayer
   }
 
@@ -132,6 +161,66 @@
       emit('stopLoading')
     })
   }
+
+
+
+
+
+
+
+
+
+
+
+
+  const convertToGeojsonLayer = (layer: LayerData): L.GeoJSON => {
+    
+    const geojsonLayer = L.geoJSON(JSON.parse(layer.geojson), {
+      style: layer.style
+    })
+
+    watchGeoJsonLayerStatus(geojsonLayer)
+    
+    return geojsonLayer
+
+}
+
+  const handleGeoJsonLayer = (layer: LayerData): void => {
+    if (convertedGeoJsonLayers.value[layer.key]) {
+      if (!layer.active) return removeGeoJsonLayer(layer)
+    }
+
+    if (!layer.active) return
+
+    const geoJsonLayer = convertToGeojsonLayer(layer)
+    convertedGeoJsonLayers.value[layer.key] = geoJsonLayer
+
+    geoJsonLayer.addTo(props.map)
+    props.layerControl.addOverlay(geoJsonLayer, `${geoJsonLayer.options.attribution}`)
+  }
+
+  const removeGeoJsonLayer = (layer: LayerData): void => {
+    props.map.removeLayer(convertedGeoJsonLayers.value[layer.key])
+    props.layerControl.removeLayer(convertedGeoJsonLayers.value[layer.key])
+
+    delete convertedGeoJsonLayers.value[layer.key]
+  }
+
+  const watchGeoJsonLayerStatus = (geoJsonLayer: L.GeoJSON): void => {
+    geoJsonLayer.on('loading', () => {
+      emit('startLoading')
+    })
+
+    geoJsonLayer.on('load', () => {
+      emit('stopLoading')
+    })
+
+    geoJsonLayer.on('error', () => {
+      emit('stopLoading')
+    })
+  }
+
+
 </script>
 
 <style>

@@ -14,6 +14,7 @@ export type IncrementedLayer = Layer & { drawnArea: DrawnArea }
 
 export type LayerData = {
   baseUrl: string
+  geojson: string
   layers: string
   format: string
   transparent: boolean
@@ -68,7 +69,8 @@ export type MapConfig = {
 }
 
 export type LayersMenuConfig = {
-  size: 'small' | 'medium' | 'large'
+  size: 'small' | 'medium' | 'large',
+  removeMenu?: boolean
 }
 
 export type MemorialConfig = {

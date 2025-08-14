@@ -1,4 +1,4 @@
-import { CoordinatePanelTexts } from '@/types/coordinatePanel'
+import { CoordinatePanelTexts } from "../types/coordinatePanel";
 
 export const COORDINATE_PANEL_TEXTS: CoordinatePanelTexts = {
   title: 'Coordenadas',

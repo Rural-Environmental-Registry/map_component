@@ -2,11 +2,11 @@ import { DEFAULT_MAP_OPTIONS } from './constants'
 import { BaseMapLayer, MapLayers } from '../types'
 import DEFAULT_MAP_LAYER from '../assets/layers/mapLayers.json'
 
-import L, { MapOptions } from 'leaflet'
+import L, { MapOptions, ControlPosition } from 'leaflet'
 
 export default class MapHandler {
   private _map: L.Map
-  private _mapOptions: MapOptions
+  private _mapOptions: MapOptions & { zoomControlPosition?: ControlPosition }
   private _mapLayers!: MapLayers
   private _layerControl!: L.Control.Layers
 
@@ -14,10 +14,20 @@ export default class MapHandler {
     this._mapOptions = mapOptions || DEFAULT_MAP_OPTIONS
 
     this._map = L.map('map', {
+      preferCanvas: true,
       zoomControl: this._mapOptions.zoomControl,
       minZoom: this._mapOptions.minZoom,
-      maxZoom: this._mapOptions.maxZoom
-    }).setView(this._mapOptions.center!, this._mapOptions.zoom)
+      maxZoom: this._mapOptions.maxZoom,
+      dragging: this._mapOptions.dragging,
+      scrollWheelZoom: this._mapOptions.scrollWheelZoom,
+      doubleClickZoom: this._mapOptions.doubleClickZoom
+
+    }).setView(this._mapOptions.center!, this._mapOptions.zoom);
+
+    if(this._mapOptions.zoomControl){
+      this._map.zoomControl.setPosition(this._mapOptions.zoomControlPosition!);
+    }
+
   }
 
   get map(): L.Map {
@@ -29,8 +39,7 @@ export default class MapHandler {
   }
 
   private addControls(): void {
-    this._map.addControl(L.control.zoom({ position: 'topright' }))
-
+    //this._map.addControl(L.control.zoom({ position: 'topright' }))
     this._layerControl = L.control.layers().addTo(this._map)
   }
 
@@ -98,7 +107,7 @@ export default class MapHandler {
     })
   }
 
-  public init(mapLayers: MapLayers, eventEmitterCallback: Function): void {
+  public init(mapLayers: MapLayers, mapOptions: MapOptions & { removeControlLayers?: any }, eventEmitterCallback: Function): void {
     this._mapLayers = mapLayers || DEFAULT_MAP_LAYER
 
     this.addControls()
@@ -107,6 +116,10 @@ export default class MapHandler {
     setTimeout(() => {
       this._map.invalidateSize()
     }, 300)
+
+    if(mapOptions.removeControlLayers){
+      this._map.removeControl(this._layerControl);
+    }
 
     this.disableLayerControlHover()
   }

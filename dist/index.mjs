@@ -31304,5 +31304,5 @@ const jP = { class: "panel-header" }, VP = { class: "panel-content" }, WP = { cl
   }
 });
 export {
-  wD as MapDPG
+  wD as default
 };

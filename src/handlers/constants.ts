@@ -1,12 +1,13 @@
-import { MapOptions } from 'leaflet'
-import { DrawingControlOptions } from '../types'
+import { DrawingControlOptions, MapConfigConfig } from '../types'
 
-export const DEFAULT_MAP_OPTIONS: MapOptions = {
+export const DEFAULT_MAP_OPTIONS: MapConfigConfig = {
   zoomControl: false,
   minZoom: 3,
   maxZoom: 17,
   center: [-15.235, -51.9253],
-  zoom: 4
+  zoom: 4,
+  zoomControlPosition: 'topright',
+  removeControlLayers: false,
 }
 
 export const DEFAULT_DRAW_OPTIONS: DrawingControlOptions = {

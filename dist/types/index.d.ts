@@ -1,4 +1,5 @@
-import { MapOptions, Layer, PathOptions, ControlOptions } from 'leaflet';
+import { MapOptions, Layer, PathOptions, ControlOptions, ControlPosition } from 'leaflet';
+import { GeoJsonObject } from 'geojson';
 import { PM } from '@geoman-io/leaflet-geoman-free';
 export type FaIconName = 'check' | 'xmark' | 'chevron-right' | 'chevron-left' | 'terminal' | 'file-lines' | 'upload' | 'pencil' | 'trash' | 'chevron-down';
 export type DrawnArea = {
@@ -11,7 +12,7 @@ export type IncrementedLayer = Layer & {
 };
 export type LayerData = {
     baseUrl: string;
-    geojson: string;
+    geojson?: GeoJsonObject | GeoJsonObject[];
     layers: string;
     format: string;
     transparent: boolean;
@@ -54,8 +55,12 @@ export type MapLayers = {
     mapLayers: BaseMapLayers;
     customLayers?: LayersConfig;
 };
+export type MapConfigConfig = MapOptions & {
+    removeControlLayers?: boolean;
+    zoomControlPosition?: ControlPosition;
+};
 export type MapConfig = {
-    config?: MapOptions;
+    config?: MapConfigConfig;
 };
 export type LayersMenuConfig = {
     size: 'small' | 'medium' | 'large';

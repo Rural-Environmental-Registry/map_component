@@ -1,17 +1,20 @@
 import { DEFAULT_MAP_OPTIONS } from './constants'
-import { BaseMapLayer, MapLayers } from '../types'
+import { BaseMapLayer, MapLayers, MapConfigConfig } from '../types'
 import DEFAULT_MAP_LAYER from '../assets/layers/mapLayers.json'
 
-import L, { MapOptions, ControlPosition } from 'leaflet'
+import L from 'leaflet'
 
 export default class MapHandler {
-  private _map: L.Map
-  private _mapOptions: MapOptions & { zoomControlPosition?: ControlPosition }
+  private readonly _map: L.Map
+  private readonly _mapOptions: MapConfigConfig
   private _mapLayers!: MapLayers
   private _layerControl!: L.Control.Layers
 
-  constructor(mapOptions: MapOptions | undefined) {
-    this._mapOptions = mapOptions || DEFAULT_MAP_OPTIONS
+  constructor(mapOptions: MapConfigConfig | undefined) {
+    this._mapOptions = {
+        ...DEFAULT_MAP_OPTIONS,
+        ...mapOptions
+    }
 
     this._map = L.map('map', {
       preferCanvas: true,
@@ -21,13 +24,7 @@ export default class MapHandler {
       dragging: this._mapOptions.dragging,
       scrollWheelZoom: this._mapOptions.scrollWheelZoom,
       doubleClickZoom: this._mapOptions.doubleClickZoom
-
     }).setView(this._mapOptions.center!, this._mapOptions.zoom);
-
-    if(this._mapOptions.zoomControl){
-      this._map.zoomControl.setPosition(this._mapOptions.zoomControlPosition!);
-    }
-
   }
 
   get map(): L.Map {
@@ -39,8 +36,13 @@ export default class MapHandler {
   }
 
   private addControls(): void {
-    //this._map.addControl(L.control.zoom({ position: 'topright' }))
-    this._layerControl = L.control.layers().addTo(this._map)
+    if (this._mapOptions.zoomControl && this._mapOptions.zoomControlPosition) {
+      this._map.zoomControl.setPosition(this._mapOptions.zoomControlPosition);
+    }
+
+    if (!this._mapOptions.removeControlLayers) {
+      this._layerControl = L.control.layers().addTo(this._map)
+    }
   }
 
   private addBaseLayer(eventEmitterCallback: Function): void {
@@ -74,7 +76,7 @@ export default class MapHandler {
 
       L.DomEvent.off(container)
 
-      L.DomEvent.on(container, 'click', function (e) {
+      L.DomEvent.on(container, 'click', function (e ) {
         if (container.classList.contains('leaflet-control-layers-expanded')) {
           container._collapse()
         } else if (originalExpand) {
@@ -107,7 +109,7 @@ export default class MapHandler {
     })
   }
 
-  public init(mapLayers: MapLayers, mapOptions: MapOptions & { removeControlLayers?: any }, eventEmitterCallback: Function): void {
+  public init(mapLayers: MapLayers, eventEmitterCallback: Function): void {
     this._mapLayers = mapLayers || DEFAULT_MAP_LAYER
 
     this.addControls()
@@ -116,10 +118,6 @@ export default class MapHandler {
     setTimeout(() => {
       this._map.invalidateSize()
     }, 300)
-
-    if(mapOptions.removeControlLayers){
-      this._map.removeControl(this._layerControl);
-    }
 
     this.disableLayerControlHover()
   }

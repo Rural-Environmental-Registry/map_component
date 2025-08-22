@@ -22,7 +22,7 @@
 <script setup lang="ts">
   import { ElButton, ElMenu } from 'element-plus'
   import L from 'leaflet'
-  import { computed, onMounted, ref } from 'vue'
+  import { computed, ref } from 'vue'
   import FontAwesomeIcon from '../fa-icon/FontAwesomeIcon.vue'
   import ParentMenu from './ParentMenu.vue'
   import {
@@ -107,20 +107,12 @@
     emit('onGroupLayerToggle', parent)
   }
 
-
-
-
-
-
-
-
   const convertToWmsLayer = (layer: LayerData): L.TileLayer => {
-      
-      const wmsLayer = L.tileLayer.wms(layer.baseUrl, {
-        layers: layer.layers,
-        format: layer.format || 'image/png',
-        transparent: layer.transparent
-      })
+    const wmsLayer = L.tileLayer.wms(layer.baseUrl, {
+      layers: layer.layers,
+      format: layer.format || 'image/png',
+      transparent: layer.transparent
+    })
 
     watchLayerStatus(wmsLayer)
     
@@ -162,21 +154,10 @@
     })
   }
 
-
-
-
-
-
-
-
-
-
-
-
   const convertToGeojsonLayer = (layer: LayerData): L.GeoJSON => {
-    
-    const geojsonLayer = L.geoJSON(JSON.parse(layer.geojson), {
-      style: layer.style
+   const geojsonLayer = L.geoJSON(layer.geojson, {
+     ...layer,
+      style: layer.style,
     })
 
     watchGeoJsonLayerStatus(geojsonLayer)
@@ -219,8 +200,6 @@
       emit('stopLoading')
     })
   }
-
-
 </script>
 
 <style>

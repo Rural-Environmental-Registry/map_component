@@ -50,7 +50,7 @@
       if (eventName === 'stopLoading') emit('stopLoading')
     }
 
-    mapHandler.init(props.layers, config, emitterCallback)
+    mapHandler.init(props.layers, emitterCallback)
 
     map.value = mapHandler.map
     layerControl.value = mapHandler.layerControl

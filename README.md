@@ -128,33 +128,62 @@ const props = {
               active: 'Ativar',
               inactive: 'Desativar'
             },
-            layers: [{
-                baseUrl: 'https://...',
-                layers: 'Layer_1',
-                format: 'image/png',
-                transparent: true,
-                name: 'Layer 1',
-                activeDefault: true,
-                active: true,
-                key: 'layer_1',
-                toggle: {
-                    active: 'Ativar',
-                    inactive: 'Desativar'
+            layers: [
+                {
+                    baseUrl: 'https://...',
+                    layers: 'geoserver_key',
+                    format: 'image/png',
+                    transparent: true,
+                    name: 'WMS Layer',
+                    activeDefault: true,
+                    active: true,
+                    key: 'wms_layer',
+                    toggle: {
+                        active: 'Ativar',
+                        inactive: 'Desativar'
+                    },
+                    style: {
+                        color: '#ff0000',
+                        fillColor: '#00ff00'
+                    },
                 },
-                style: {
-                    color: '#ff0000',
-                    fillColor: '#00ff00'
-                },
-                options: {}
-            }]
+                {
+                    geojson: {
+                        "type": "Feature",
+                        "properties": {},
+                        "geometry": {
+                            "type": "Polygon",
+                            "coordinates": []
+                        },
+                    },
+                    name: 'GEOJSON Layer',
+                    activeDefault: true,
+                    active: true,
+                    key: 'geojson_layer',
+                    toggle: {
+                        active: 'Ativar',
+                        inactive: 'Desativar'
+                    },
+                    style: {
+                        color: '#ff0000',
+                        fillColor: '#00ff00'
+                    },
+                }
+            ]
           }
         ]
     },
     options: {
         map: {
             config: {
-                center: [-23.55, -46.63],
-                zoom: 5
+                zoomControl: true,
+                zoomControlPosition: 'topright',
+                minZoom: 3,
+                maxZoom: 17,
+                center: [-15.235, -51.9253],
+                zoom: 4,
+                dragging: true,
+                scrollWheelZoom: true
             }
         },
         layersMenu: { size: 'small' },

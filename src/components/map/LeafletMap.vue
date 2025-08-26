@@ -1,5 +1,5 @@
 <template>
-  <div id="map" />
+  <div :id="mapOptions.config.id || 'map'"  style="height: inherit; width: inherit;"/>
 </template>
 
 <script setup lang="ts">
@@ -83,12 +83,3 @@
     leaflet: L
   })
 </script>
-
-<style>
-  .map-container {
-    #map {
-      height: inherit;
-      width: inherit;
-    }
-  }
-</style>

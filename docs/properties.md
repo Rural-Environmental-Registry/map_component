@@ -50,9 +50,18 @@
 
 ## MapConfig
 
-| Campo  | Tipo                      | Descrição                                         |
-| ------ | ------------------------- | ------------------------------------------------- |
-| config | [MapOptions](#mapoptions) | Define opções do mapa com base na API do Leaflet. |
+| Campo  | Tipo                 | Descrição             |
+| ------ |----------------------|-----------------------|
+| config | [MapConfigConfig](#mapconfigconfig) | Define opções do mapa |
+
+## MapConfigConfig
+
+| Campo               | Tipo                                       | Descrição                                         |
+|---------------------|--------------------------------------------|---------------------------------------------------|
+| --                  | [MapOptions](#mapoptions)                  | Define opções do mapa com base na API do Leaflet. |
+| id                  | string                                     | Define id do mapa.                                |
+| removeControlLayers | boolean                                    | Define exibição dos controles do mapa.            |
+| zoomControlPosition | [zoomControlPosition](zoomcontrolposition) | Posição dos controles de zoom.                    |
 
 
 ## LayersMenuConfig
@@ -81,3 +90,4 @@
 
 #### [MapOptions](https://leafletjs.com/reference.html#map-option)
 #### [TranslationConfig](https://github.com/geoman-io/leaflet-geoman/tree/master/src/assets/translations)
+#### [ZoomControlPosition](https://leafletjs.com/reference.html#control-zoom-position)

@@ -1,6 +1,7 @@
 import { DrawingControlOptions, MapConfigConfig } from '../types'
 
 export const DEFAULT_MAP_OPTIONS: MapConfigConfig = {
+  id: 'map',
   zoomControl: false,
   minZoom: 3,
   maxZoom: 17,

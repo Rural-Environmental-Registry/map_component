@@ -16,7 +16,7 @@ export default class MapHandler {
         ...mapOptions
     }
 
-    this._map = L.map('map', {
+    this._map = L.map(this._mapOptions.id, {
       preferCanvas: true,
       zoomControl: this._mapOptions.zoomControl,
       minZoom: this._mapOptions.minZoom,

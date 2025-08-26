@@ -56,6 +56,7 @@ export type MapLayers = {
     customLayers?: LayersConfig;
 };
 export type MapConfigConfig = MapOptions & {
+    id: string;
     removeControlLayers?: boolean;
     zoomControlPosition?: ControlPosition;
 };

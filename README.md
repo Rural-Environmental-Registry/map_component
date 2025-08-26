@@ -176,6 +176,7 @@ const props = {
     options: {
         map: {
             config: {
+                id: 'map',
                 zoomControl: true,
                 zoomControlPosition: 'topright',
                 minZoom: 3,
@@ -183,7 +184,8 @@ const props = {
                 center: [-15.235, -51.9253],
                 zoom: 4,
                 dragging: true,
-                scrollWheelZoom: true
+                scrollWheelZoom: true,
+                removeControlLayers: true
             }
         },
         layersMenu: { size: 'small' },

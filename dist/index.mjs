@@ -12140,6 +12140,7 @@ function Uf(e) {
   return i * p_;
 }
 const g_ = {
+  id: "map",
   zoomControl: !1,
   minZoom: 3,
   maxZoom: 17,
@@ -12279,7 +12280,7 @@ class b_ {
     this._mapOptions = {
       ...g_,
       ...t
-    }, this._map = rn.map("map", {
+    }, this._map = rn.map(this._mapOptions.id, {
       preferCanvas: !0,
       zoomControl: this._mapOptions.zoomControl,
       minZoom: this._mapOptions.minZoom,
@@ -12332,7 +12333,7 @@ class b_ {
     }, 300), this.disableLayerControlHover();
   }
 }
-const A_ = { id: "map" }, C_ = /* @__PURE__ */ Te({
+const A_ = ["id"], C_ = /* @__PURE__ */ Te({
   __name: "LeafletMap",
   props: {
     mapOptions: {},
@@ -12368,7 +12369,10 @@ const A_ = { id: "map" }, C_ = /* @__PURE__ */ Te({
       layerControl: d,
       drawItemsGroup: g,
       leaflet: rn
-    }), (b, C) => (ae(), ke("div", A_));
+    }), (b, C) => (ae(), ke("div", {
+      id: b.mapOptions.config.id || "map",
+      style: { height: "inherit", width: "inherit" }
+    }, null, 8, A_));
   }
 }), pm = Symbol(), xu = "el", w_ = "is-", Yo = (e, t, i, a, u) => {
   let f = `${e}-${t}`;

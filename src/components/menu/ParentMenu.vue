@@ -1,5 +1,5 @@
 <template>
-  <ElSubMenu :index="groupData.key" class="parent-menu">
+  <ElSubMenu :index="groupData.key" class="parent-menu" :disabled="!childrenLayers.length">
     <template #title>
       <div class="parent-menu-row">
         <div class="parent-layer-title">{{ groupData.name }}</div>

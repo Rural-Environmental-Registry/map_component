@@ -29906,7 +29906,8 @@ const zi = /* @__PURE__ */ Te({
       const T = fn.tileLayer.wms(N.baseUrl, {
         layers: N.layers,
         format: N.format || "image/png",
-        transparent: N.transparent
+        transparent: N.transparent,
+        cql_filter: N.cqlFilter || ""
       });
       return w(T), T;
     }, S = (N) => {

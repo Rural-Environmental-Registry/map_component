@@ -22,6 +22,7 @@ export type LayerData = {
   transparent: boolean
   name: string
   activeDefault: boolean
+  cqlFilter?: string
   active: boolean
   key: string
   toggle: {

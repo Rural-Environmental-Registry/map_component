@@ -138,6 +138,7 @@ const props = {
                     activeDefault: true,
                     active: true,
                     key: 'wms_layer',
+                    cqlFilter: '...',
                     toggle: {
                         active: 'Ativar',
                         inactive: 'Desativar'

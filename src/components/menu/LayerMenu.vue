@@ -111,7 +111,8 @@
     const wmsLayer = L.tileLayer.wms(layer.baseUrl, {
       layers: layer.layers,
       format: layer.format || 'image/png',
-      transparent: layer.transparent
+      transparent: layer.transparent,
+      cql_filter: layer.cqlFilter || ''
     })
 
     watchLayerStatus(wmsLayer)

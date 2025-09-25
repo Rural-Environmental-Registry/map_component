@@ -29906,10 +29906,9 @@ const zi = /* @__PURE__ */ Te({
       const T = fn.tileLayer.wms(N.baseUrl, {
         layers: N.layers,
         format: N.format || "image/png",
-        transparent: N.transparent,
-        cql_filter: N.cqlFilter || ""
+        transparent: N.transparent
       });
-      return N != null && N.cqlFilter && T.setParams({
+      return N != null && N.cqlFilter && N.cqlFilter.length > 0 && T.setParams({
         cql_filter: N.cqlFilter
       }), w(T), T;
     }, S = (N) => {
@@ -31274,7 +31273,6 @@ const jP = { class: "panel-header" }, VP = { class: "panel-content" }, WP = { cl
     }), (S, k) => {
       var w;
       return ae(), ke("div", vD, [
-        k[7] || (k[7] = Se("h1", null, "Mapa DPG", -1)),
         Be(l_, {
           isLoading: (d.value || S.showLoading) && !S.disableLoading
         }, null, 8, ["isLoading"]),

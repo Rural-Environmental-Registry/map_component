@@ -90,8 +90,6 @@
   const handleGeometryChange = (geometry: string) => {
     if (!mapRef.value?.map || !mapRef.value?.drawItemsGroup) return
 
-    mapRef.value.drawItemsGroup.clearLayers()
-
     const coordinates = geometry
       .replace(/[A-Z()]/g, '')
       .trim()

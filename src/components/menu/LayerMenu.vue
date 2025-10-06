@@ -8,6 +8,7 @@
       <FontAwesomeIcon :iconName="iconButton" />
     </ElButton>
     <ElMenu :class="customClasses.customMenu" mode="vertical">
+      <div id="external-id-top-menu"></div>
       <template v-for="group in props.layersConfig">
         <ParentMenu
           :groupData="group"
@@ -15,6 +16,7 @@
           @onGroupLayerToggle="onGroupLayerToggle"
         />
       </template>
+      <div id="external-id-bottom-menu"></div>
     </ElMenu>
   </div>
 </template>

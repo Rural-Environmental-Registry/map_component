@@ -102,7 +102,18 @@ const mapRefInstances = computed(() => {
 | map            | Mapa Leaflet. Utilizada para manipulação do mapa                                   |
 | layerControl   | Controle de camadas Leaflet. Utilizada para manipulação das camadas                |
 | drawItemsGroup | Grupo de desenhos Leaflet. Utilizada para manipulação dos desenhos                 |
-| leaflet        | Instância Leaflet.                                                                 |
+| leaflet        | Instância Leaflet. 
+
+### Injeção menu lateral
+
+Esses pontos permitem que aplicações consumidoras injetem conteúdo próprio no menu lateral do MapaDPG.
+
+| Nome       | ID                         | Posição no menu | Descrição                                                         |
+| ---------- | -------------------------- | --------------- | ----------------------------------------------------------------- |
+| Top menu   | `external-id-top-menu`     | topo            | Contêiner para inserir conteúdo antes da listagem de camadas.     |
+| Bottom menu| `external-id-bottom-menu`  | base            | Contêiner para inserir conteúdo após a listagem de camadas.       |
+
+Para exemplos, consulte o guia: [Injeção de Conteúdo](docs/contentInjection.md)
 
 ## Exemplos de parametros
 

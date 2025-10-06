@@ -29970,13 +29970,16 @@ const zi = /* @__PURE__ */ Te({
           mode: "vertical"
         }, {
           default: Oe(() => [
+            T[1] || (T[1] = Se("div", { id: "external-id-top-menu" }, null, -1)),
             (ae(!0), ke(xn, null, ea(a.layersConfig, (Y) => (ae(), Ve(zP, {
               groupData: Y,
               onOnChildLayerToggle: _,
               onOnGroupLayerToggle: b
-            }, null, 8, ["groupData"]))), 256))
+            }, null, 8, ["groupData"]))), 256)),
+            T[2] || (T[2] = Se("div", { id: "external-id-bottom-menu" }, null, -1))
           ]),
-          _: 1
+          _: 1,
+          __: [1, 2]
         }, 8, ["class"])
       ], 2);
     };

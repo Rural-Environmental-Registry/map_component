@@ -3,7 +3,7 @@
     <ElTooltip
         class="box-item"
         effect="dark"
-        :content="COORDINATE_PANEL_TEXTS.memorialDescriptive"
+        :content="texts.memorialDescriptive"
         placement="top-start"
       >
       <ElButton
@@ -15,7 +15,7 @@
     </ElTooltip>
     <div class="coordinate-panel" :class="{ 'panel-open': isOpen }">
       <div class="panel-header">
-        <h3>{{ COORDINATE_PANEL_TEXTS.title }}</h3>
+        <h3>{{ texts.title }}</h3>
         <ElButton
           class="close-button"
           @click="togglePanel"
@@ -25,50 +25,50 @@
       </div>
       <div class="panel-content">
         <div class="coordinate-section">
-          <h4>{{ COORDINATE_PANEL_TEXTS.referenceSystem }}</h4>
+          <h4>{{ texts.referenceSystem }}</h4>
           <ElSelect
             v-model="selectedSystem"
             class="coordinate-select"
-            :placeholder="COORDINATE_PANEL_TEXTS.selectSystem"
+            :placeholder="texts.selectSystem"
             :disabled="true"
             @change="onSystemChange"
           >
-            <ElOption label="SIRGAS 2000" value="SIRGAS2000" />
+            <ElOption :label="texts.sirgas2000" value="SIRGAS2000" />
           </ElSelect>
         </div>
 
         <div class="coordinate-section">
-          <h4>{{ COORDINATE_PANEL_TEXTS.coordinateFormat }}</h4>
+          <h4>{{ texts.coordinateFormat }}</h4>
           <ElSelect
             v-model="selectedFormat"
             class="coordinate-select"
-            :placeholder="COORDINATE_PANEL_TEXTS.selectFormat"
+            :placeholder="texts.selectFormat"
             @change="onFormatChange"
           >
-            <ElOption label="Graus Decimais (DD)" value="DD" />
-            <ElOption label="Graus, Minutos, Segundos (DMS)" value="DMS" />
+            <ElOption :label="texts.decimalDegrees" value="DD" />
+            <ElOption :label="texts.degreesMinutesSeconds" value="DMS" />
           </ElSelect>
         </div>
 
         <ElTabs v-model="activeTab">
-          <ElTabPane :label="COORDINATE_PANEL_TEXTS.manualInput" name="manual">
+          <ElTabPane :label="texts.manualInput" name="manual">
             <div class="coordinate-section">
-              <h4>{{ COORDINATE_PANEL_TEXTS.insertCoordinates }}</h4>
+              <h4>{{ texts.insertCoordinates }}</h4>
               <div v-if="selectedFormat === 'DD'" class="coordinate-inputs-row">
                 <div class="input-group">
-                  <label>{{ COORDINATE_PANEL_TEXTS.xLongitude }}</label>
+                  <label>{{ texts.xLongitude }}</label>
                   <ElInput
                     v-model="manualInput.x"
-                    :placeholder="COORDINATE_PANEL_TEXTS.placeholderLongitude"
+                    :placeholder="texts.placeholderLongitude"
                     type="number"
                     step="any"
                   />
                 </div>
                 <div class="input-group">
-                  <label>{{ COORDINATE_PANEL_TEXTS.yLatitude }}</label>
+                  <label>{{ texts.yLatitude }}</label>
                   <ElInput
                     v-model="manualInput.y"
-                    :placeholder="COORDINATE_PANEL_TEXTS.placeholderLatitude"
+                    :placeholder="texts.placeholderLatitude"
                     type="number"
                     step="any"
                   />
@@ -77,46 +77,46 @@
 
               <div v-if="selectedFormat === 'DMS'" class="coordinate-inputs-column">
                 <div class="input-group">
-                  <label>{{ COORDINATE_PANEL_TEXTS.xLongitude }}</label>
+                  <label>{{ texts.xLongitude }}</label>
                   <div class="dms-inputs">
                     <ElInput
                       v-model="manualInput.xDegrees"
-                      :placeholder="COORDINATE_PANEL_TEXTS.placeholderDegrees"
+                      :placeholder="texts.placeholderDegrees"
                       type="number"
                       step="1"
                     />
                     <ElInput
                       v-model="manualInput.xMinutes"
-                      :placeholder="COORDINATE_PANEL_TEXTS.placeholderMinutes"
+                      :placeholder="texts.placeholderMinutes"
                       type="number"
                       step="1"
                     />
                     <ElInput
                       v-model="manualInput.xSeconds"
-                      :placeholder="COORDINATE_PANEL_TEXTS.placeholderSeconds"
+                      :placeholder="texts.placeholderSeconds"
                       type="number"
                       step="any"
                     />
                   </div>
                 </div>
                 <div class="input-group">
-                  <label>{{ COORDINATE_PANEL_TEXTS.yLatitude }}</label>
+                  <label>{{ texts.yLatitude }}</label>
                   <div class="dms-inputs">
                     <ElInput
                       v-model="manualInput.yDegrees"
-                      :placeholder="COORDINATE_PANEL_TEXTS.placeholderDegrees"
+                      :placeholder="texts.placeholderDegrees"
                       type="number"
                       step="1"
                     />
                     <ElInput
                       v-model="manualInput.yMinutes"
-                      :placeholder="COORDINATE_PANEL_TEXTS.placeholderMinutes"
+                      :placeholder="texts.placeholderMinutes"
                       type="number"
                       step="1"
                     />
                     <ElInput
                       v-model="manualInput.ySeconds"
-                      :placeholder="COORDINATE_PANEL_TEXTS.placeholderSeconds"
+                      :placeholder="texts.placeholderSeconds"
                       type="number"
                       step="any"
                     />
@@ -125,19 +125,19 @@
               </div>
               <div class="coordinate-inputs-row">
                 <div class="input-group">
-                  <label>{{ COORDINATE_PANEL_TEXTS.azimuth }}</label>
+                  <label>{{ texts.azimuth }}</label>
                   <ElInput
                     v-model="manualInput.azimuth"
-                    :placeholder="COORDINATE_PANEL_TEXTS.placeholderAzimuth"
+                    :placeholder="texts.placeholderAzimuth"
                     type="number"
                     step="any"
                   />
                 </div>
                 <div class="input-group">
-                  <label>{{ COORDINATE_PANEL_TEXTS.distance }}</label>
+                  <label>{{ texts.distance }}</label>
                   <ElInput
                     v-model="manualInput.distance"
-                    :placeholder="COORDINATE_PANEL_TEXTS.placeholderDistance"
+                    :placeholder="texts.placeholderDistance"
                     type="number"
                     step="any"
                   />
@@ -148,41 +148,41 @@
                 type="primary"
                 @click="addManualPoint"
               >
-                {{ COORDINATE_PANEL_TEXTS.addPoint }}
+                {{ texts.addPoint }}
               </ElButton>
               <div v-if="manualPoints.length > 0" class="geometry-list">
-                <h4>{{ COORDINATE_PANEL_TEXTS.addedPoints }}</h4>
+                <h4>{{ texts.addedPoints }}</h4>
                 <div class="table-container">
                   <ElTable :data="manualPoints" style="width: 100%">
-                    <ElTableColumn :label="COORDINATE_PANEL_TEXTS.index" prop="index" width="80" />
-                    <ElTableColumn :label="COORDINATE_PANEL_TEXTS.x" prop="x" width="120" />
-                    <ElTableColumn :label="COORDINATE_PANEL_TEXTS.y" prop="y" width="120" />
-                    <ElTableColumn :label="COORDINATE_PANEL_TEXTS.azimuth" prop="azimuth" width="120" />
-                    <ElTableColumn :label="COORDINATE_PANEL_TEXTS.distance" prop="distance" width="120" />
-                    <ElTableColumn :label="COORDINATE_PANEL_TEXTS.actions" width="120">
+                    <ElTableColumn :label="texts.index" prop="index" width="80" />
+                    <ElTableColumn :label="texts.x" prop="x" width="120" />
+                    <ElTableColumn :label="texts.y" prop="y" width="120" />
+                    <ElTableColumn :label="texts.azimuth" prop="azimuth" width="120" />
+                    <ElTableColumn :label="texts.distance" prop="distance" width="120" />
+                    <ElTableColumn :label="texts.actions" width="120">
                       <template #default="{ $index }">
                         <ElDropdown trigger="click">
                           <ElButton type="primary">
-                            {{ COORDINATE_PANEL_TEXTS.actions }}
+                            {{ texts.actions }}
                             <FontAwesomeIcon iconName="chevron-down"/>
                           </ElButton>
                           <template #dropdown>
                             <ElDropdownMenu>
                               <ElDropdownItem
-                                :title="COORDINATE_PANEL_TEXTS.editPointTitle"
-                                :aria-label="COORDINATE_PANEL_TEXTS.editPointDescription"
+                                :title="texts.editPointTitle"
+                                :aria-label="texts.editPointDescription"
                                 @click="editPoint($index)"
                               >
                                 <FontAwesomeIcon iconName="pencil" class="icon-black" />
-                                {{ COORDINATE_PANEL_TEXTS.editPoint }}
+                                {{ texts.editPoint }}
                               </ElDropdownItem>
                               <ElDropdownItem
-                                :title="COORDINATE_PANEL_TEXTS.removePointTitle"
-                                :aria-label="COORDINATE_PANEL_TEXTS.removePointDescription"
+                                :title="texts.removePointTitle"
+                                :aria-label="texts.removePointDescription"
                                 @click="removePoint($index)"
                               >
                                 <FontAwesomeIcon iconName="trash" class="icon-black" />
-                                {{ COORDINATE_PANEL_TEXTS.removePoint }}
+                                {{ texts.removePoint }}
                               </ElDropdownItem>
                             </ElDropdownMenu>
                           </template>
@@ -198,18 +198,18 @@
                 type="success"
                 @click="finalizeManualGeometry"
               >
-                {{ COORDINATE_PANEL_TEXTS.finalizeGeometry }}
+                {{ texts.finalizeGeometry }}
               </ElButton>
               <div v-if="manualGeometries.length > 0" class="geometry-list">
                 <ElButton
                   type="danger"
                   class="clear-button"
-                  :title="COORDINATE_PANEL_TEXTS.clearGeometriesTitle"
-                  :aria-label="COORDINATE_PANEL_TEXTS.clearGeometriesDescription"
+                  :title="texts.clearGeometriesTitle"
+                  :aria-label="texts.clearGeometriesDescription"
                   @click="clearGeometries"
                 >
                   <FontAwesomeIcon iconName="trash" />
-                  {{ COORDINATE_PANEL_TEXTS.clearGeometries }}
+                  {{ texts.clearGeometries }}
                 </ElButton>
               </div>
             </div>
@@ -217,7 +217,7 @@
 
           <ElTabPane label="Upload CSV" name="csv">
             <div class="coordinate-section">
-              <h4>{{ COORDINATE_PANEL_TEXTS.csvFileUpload }}</h4>
+              <h4>{{ texts.csvFileUpload }}</h4>
               <div class="csv-upload">
                 <ElUpload
                   ref="uploadRef"
@@ -232,11 +232,11 @@
                 >
                   <FontAwesomeIcon iconName="upload" class="upload-icon" />
                   <div class="el-upload__text">
-                    {{ COORDINATE_PANEL_TEXTS.dragCsvFile }}
+                    {{ texts.dragCsvFile }}
                   </div>
                   <template #tip>
                     <div class="el-upload__tip">
-                      {{ COORDINATE_PANEL_TEXTS.csvColumnsInfo }}
+                      {{ texts.csvColumnsInfo }}
                     </div>
                   </template>
                 </ElUpload>
@@ -246,18 +246,18 @@
                   type="primary"
                   @click="applyCSVCoordinates"
                 >
-                  {{ COORDINATE_PANEL_TEXTS.applyCsvCoordinates }}
+                  {{ texts.applyCsvCoordinates }}
                 </ElButton>
                 <ElButton
                   type="danger"
                   class="clear-button"
                   v-if="csvData.length > 0"
-                  :title="COORDINATE_PANEL_TEXTS.clearGeometriesTitle"
-                  :aria-label="COORDINATE_PANEL_TEXTS.clearGeometriesDescription"
+                  :title="texts.clearGeometriesTitle"
+                  :aria-label="texts.clearGeometriesDescription"
                   @click="clearGeometries"
                 >
                   <FontAwesomeIcon iconName="trash" />
-                  {{ COORDINATE_PANEL_TEXTS.clearGeometries }}
+                  {{ texts.clearGeometries }}
                 </ElButton>
               </div>
             </div>
@@ -269,7 +269,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import {computed, ref, watch} from 'vue'
 import { ElButton, ElSelect, ElOption, ElInput, ElTabs, ElTabPane, ElUpload, ElMessage, ElTable, ElTableColumn, ElDropdown, ElDropdownMenu, ElDropdownItem, ElTooltip } from 'element-plus'
 import FontAwesomeIcon from '../fa-icon/FontAwesomeIcon.vue'
 import Papa from 'papaparse'
@@ -305,7 +305,8 @@ interface ManualPoint {
 }
 
 const props = defineProps<{
-  map?: L.Map
+  map?: L.Map,
+  customTexts?: typeof COORDINATE_PANEL_TEXTS
 }>()
 
 const emit = defineEmits<{
@@ -338,6 +339,10 @@ const manualPoints = ref<any[]>([])
 const manualGeometries = ref<string[]>([])
 const editingIndex = ref<number | null>(null)
 const uploadRef = ref()
+
+const texts = computed(() => {
+  return {...COORDINATE_PANEL_TEXTS, ...props.customTexts}
+})
 
 const togglePanel = () => {
   isOpen.value = !isOpen.value
@@ -467,7 +472,7 @@ const handleFileChange = (file: any) => {
 
         const firstRow = results.data[0]
         if (!firstRow.X || !firstRow.Y) {
-          ElMessage.error('A primeira linha do CSV deve conter as coordenadas X e Y')
+          ElMessage.error(texts.value.errorFirstRowXY)
           return
         }
 
@@ -556,14 +561,14 @@ const addManualPoint = () => {
 
     if (selectedFormat.value === 'DD') {
       if (editingIndex.value === 0 && (!manualInput.value.x || !manualInput.value.y)) {
-        ElMessage.error('X e Y são obrigatórios no primeiro ponto')
+        ElMessage.error(texts.value.errorXYRequired)
         return
       }
       x = parseFloat(manualInput.value.x) || parseFloat(manualPoints.value[editingIndex.value].x)
       y = parseFloat(manualInput.value.y) || parseFloat(manualPoints.value[editingIndex.value].y)
     } else {
       if (editingIndex.value === 0 && (!manualInput.value.xDegrees || !manualInput.value.yDegrees)) {
-        ElMessage.error('Graus são obrigatórios no primeiro ponto')
+        ElMessage.error(texts.value.errorDegreesRequired)
         return
       }
       x = manualInput.value.xDegrees ? convertDMSToDD(
@@ -607,14 +612,14 @@ const addManualPoint = () => {
 
     if (selectedFormat.value === 'DD') {
       if (!manualInput.value.x || !manualInput.value.y) {
-        ElMessage.error('X e Y são obrigatórios no primeiro ponto')
+        ElMessage.error(texts.value.errorXYRequired)
         return
       }
       x = parseFloat(manualInput.value.x)
       y = parseFloat(manualInput.value.y)
     } else {
       if (!manualInput.value.xDegrees || !manualInput.value.yDegrees) {
-        ElMessage.error('Graus são obrigatórios no primeiro ponto')
+        ElMessage.error(texts.value.errorDegreesRequired)
         return
       }
       x = convertDMSToDD(
@@ -665,7 +670,7 @@ const addManualPoint = () => {
         parseFloat(manualInput.value.distance)
       )
     } else {
-      ElMessage.error(COORDINATE_PANEL_TEXTS.errorProvideCoordinatesOrAzimuthDistance)
+      ElMessage.error(texts.value.errorProvideCoordinatesOrAzimuthDistance)
       return
     }
 

@@ -70,6 +70,71 @@
 | ----------- | ---------- | -------------------------------------------------- |
 |size         | string     | Tamanho do menu de camadas (small, medium, large). |
 
+## DescriptiveMemorial
+
+| Campo       | Tipo                                          | Descrição                                          |
+|-------------|-----------------------------------------------|----------------------------------------------------|
+| show        | boolean                                       | Ativa ou desativa o menu de memorial descritivo.   |
+| customTexts | [CoordinatePanelTexts](#coordinatepaneltexts) | Textos personalizados para o menu de memorial descritivo. |
+
+## CoordinatePanelTexts
+
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| title | string | Título do painel de coordenadas. |
+| addPoint | string | Texto para adicionar ponto. |
+| editPoint | string | Texto para editar ponto. |
+| removePoint | string | Texto para remover ponto. |
+| actions | string | Rótulo para a seção de ações. |
+| clearGeometries | string | Texto para limpar geometrias. |
+| index | string | Rótulo para o índice. |
+| x | string | Rótulo para coordenada X. |
+| y | string | Rótulo para coordenada Y. |
+| azimuth | string | Rótulo para azimute. |
+| distance | string | Rótulo para distância. |
+| noPoints | string | Mensagem quando não há pontos. |
+| addPointTitle | string | Título do botão de adicionar ponto. |
+| editPointTitle | string | Título do botão de editar ponto. |
+| removePointTitle | string | Título do botão de remover ponto. |
+| clearGeometriesTitle | string | Título do botão de limpar geometrias. |
+| addPointDescription | string | Descrição do botão de adicionar ponto. |
+| editPointDescription | string | Descrição do botão de editar ponto. |
+| removePointDescription | string | Descrição do botão de remover ponto. |
+| clearGeometriesDescription | string | Descrição do botão de limpar geometrias. |
+| memorialDescriptive | string | Rótulo para memorial descritivo. |
+| referenceSystem | string | Rótulo para sistema de referência. |
+| selectSystem | string | Texto para selecionar sistema. |
+| sirgas2000 | string | Rótulo para SIRGAS 2000. |
+| coordinateFormat | string | Rótulo para formato de coordenada. |
+| selectFormat | string | Texto para selecionar formato. |
+| decimalDegrees | string | Rótulo para graus decimais. |
+| degreesMinutesSeconds | string | Rótulo para graus, minutos e segundos. |
+| manualInput | string | Rótulo para entrada manual. |
+| insertCoordinates | string | Texto para inserir coordenadas. |
+| xLongitude | string | Rótulo para longitude (X). |
+| yLatitude | string | Rótulo para latitude (Y). |
+| degrees | string | Rótulo para graus. |
+| minutes | string | Rótulo para minutos. |
+| seconds | string | Rótulo para segundos. |
+| addedPoints | string | Rótulo para pontos adicionados. |
+| finalizeGeometry | string | Texto para finalizar geometria. |
+| csvUpload | string | Rótulo para upload de CSV. |
+| csvFileUpload | string | Texto para upload de arquivo CSV. |
+| dragCsvFile | string | Texto para arrastar arquivo CSV. |
+| csvColumnsInfo | string | Informações sobre colunas do CSV. |
+| applyCsvCoordinates | string | Texto para aplicar coordenadas do CSV. |
+| placeholderLongitude | string | Placeholder para longitude. |
+| placeholderLatitude | string | Placeholder para latitude. |
+| placeholderAzimuth | string | Placeholder para azimute. |
+| placeholderDistance | string | Placeholder para distância. |
+| placeholderDegrees | string | Placeholder para graus. |
+| placeholderMinutes | string | Placeholder para minutos. |
+| placeholderSeconds | string | Placeholder para segundos. |
+| errorXYRequired | string | Mensagem de erro para X/Y obrigatório. |
+| errorDegreesRequired | string | Mensagem de erro para graus obrigatório. |
+| errorFirstRowXY | string | Mensagem de erro para primeira linha X/Y. |
+| errorProvideCoordinatesOrAzimuthDistance | string | Mensagem de erro para coordenadas ou azimute/distância necessários. |
+
 ## DrawingConfig
 
 | Campo        | Tipo               | Descrição                                                |

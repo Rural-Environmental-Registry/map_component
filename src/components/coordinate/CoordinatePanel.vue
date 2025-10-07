@@ -341,7 +341,7 @@ const editingIndex = ref<number | null>(null)
 const uploadRef = ref()
 
 const texts = computed(() => {
-  return {...props.customTexts, ...COORDINATE_PANEL_TEXTS}
+  return {...COORDINATE_PANEL_TEXTS, ...props.customTexts}
 })
 
 const togglePanel = () => {

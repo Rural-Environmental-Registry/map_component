@@ -30524,7 +30524,7 @@ const jP = { class: "panel-header" }, VP = { class: "panel-content" }, WP = { cl
       ySeconds: "",
       azimuth: "",
       distance: ""
-    }), w = oe([]), k = oe([]), B = oe(null), E = oe(), C = J(() => ({ ...a.customTexts, ...UP })), R = () => {
+    }), w = oe([]), k = oe([]), B = oe(null), E = oe(), C = J(() => ({ ...UP, ...a.customTexts })), R = () => {
       f.value = !f.value;
     }, I = () => {
       f.value = !1;
@@ -31191,7 +31191,7 @@ const jP = { class: "panel-header" }, VP = { class: "panel-content" }, WP = { cl
   for (const [a, u] of t)
     i[a] = u;
   return i;
-}, mD = /* @__PURE__ */ gD(pD, [["__scopeId", "data-v-816b9062"]]), vD = { class: "map-container" }, wD = /* @__PURE__ */ Te({
+}, mD = /* @__PURE__ */ gD(pD, [["__scopeId", "data-v-b31f0528"]]), vD = { class: "map-container" }, wD = /* @__PURE__ */ Te({
   __name: "MapDPG",
   props: {
     layers: {},

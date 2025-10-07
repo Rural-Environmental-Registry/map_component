@@ -22,9 +22,10 @@
       @onDrawing="emit('onDrawing', $event)"
     />
     <CoordinatePanel
-      v-if="mapRef && showMemorialDescritivo"
+      v-if="mapRef && descriptiveMemorial.show"
       ref="coordinatePanelRef"
       :map="mapRef.map"
+      :customTexts="descriptiveMemorial.customTexts"
       @systemChange="handleCoordinateSystemChange"
       @geometryChange="handleGeometryChange"
       @geometryRemoved="handleGeometryRemoved"
@@ -40,7 +41,8 @@
     GroupLayerData,
     LayerData,
     MapLayers,
-    MapOptionsConfig
+    MapOptionsConfig,
+    DescriptiveMemorial
   } from '../types'
   import Loading from './loading/Loading.vue'
   import Map from './map/LeafletMap.vue'
@@ -52,7 +54,7 @@
     options: MapOptionsConfig
     showLoading: boolean
     disableLoading: boolean
-    showMemorialDescritivo?: boolean
+    descriptiveMemorial: DescriptiveMemorial
   }
 
   withDefaults(defineProps<MapaDPGProps>(), {
@@ -61,6 +63,9 @@
       layersMenu: {
         size: 'medium'
       }
+    }),
+    descriptiveMemorial: () => ({
+      show: false
     })
   })
 

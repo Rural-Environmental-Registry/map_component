@@ -1,2 +1,2 @@
-import { CoordinatePanelTexts } from "../types/coordinatePanel";
+import { CoordinatePanelTexts } from "../types";
 export declare const COORDINATE_PANEL_TEXTS: CoordinatePanelTexts;

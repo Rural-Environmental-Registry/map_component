@@ -58,7 +58,7 @@ O componente aceita parametros e emite eventos. Além disso, expôe instâncias 
   :options="options"
   :showLoading="showLoading"
   :disableLoading="disableLoading"
-  :showMemorialDescritivo="showMemorialDescritivo"
+  :descriptiveMemorial="descriptiveMemorial"
   @onChildLayerToggle="onChildLayerToggle"
   @onGroupLayerToggle="onGroupLayerToggle"
   @onDrawing="onDrawing"
@@ -79,13 +79,13 @@ const mapRefInstances = computed(() => {
 
 ### Propriedades
 
-| Nome           | Tipo                                   | Obrigatório | Descrição                                                                  |
-| -------------- | -------------------------------------- | ----------- | -------------------------------------------------------------------------- |
-| showLoading    | boolean                                | Opcional    | Controla a visibilidade da animação de carregamento.                       |
-| layers         | [MapLayers](docs/properties.md)        | Opcional    | Define as camadas base e camadas customizadas.                             |
-| options        | [MapOptionsConfig](docs/properties.md) | Opcional    | Define as configurações do mapa, menu de camadas e ferramentas de desenho. |
-| disableLoading | boolean                                | Opcional    | Desabilita o animação de carregamento.                                     |
-|showMemorialDescritivo| boolean                          | Opcional    | Controla a visibilidade do memorial descritivo.                             |
+| Nome                | Tipo                                      | Obrigatório | Descrição                                                                  |
+|---------------------|-------------------------------------------| ----------- | -------------------------------------------------------------------------- |
+| showLoading         | boolean                                   | Opcional    | Controla a visibilidade da animação de carregamento.                       |
+| layers              | [MapLayers](docs/properties.md)           | Opcional    | Define as camadas base e camadas customizadas.                             |
+| options             | [MapOptionsConfig](docs/properties.md)    | Opcional    | Define as configurações do mapa, menu de camadas e ferramentas de desenho. |
+| disableLoading      | boolean                                   | Opcional    | Desabilita o animação de carregamento.                                     |
+| descriptiveMemorial | [DescriptiveMemorial](docs/properties.md) | Opcional    | Controla a visibilidade do memorial descritivo.                             |
 
 ### Eventos
 
@@ -121,7 +121,13 @@ Para exemplos, consulte o guia: [Injeção de Conteúdo](docs/contentInjection.m
 const props = {
     showLoading: true,
     disableLoading: false,
-    showMemorialDescritivo: true,
+    descriptiveMemorial: {
+      show: true,
+      customTexts: {
+        title: 'New title',
+        addPoint: 'Custom text'
+      }
+    },
     layers: {
         baseMapLayers: [
           {

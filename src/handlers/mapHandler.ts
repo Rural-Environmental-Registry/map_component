@@ -18,7 +18,7 @@ export default class MapHandler {
 
     this._map = L.map(this._mapOptions.id, {
       preferCanvas: true,
-      zoomControl: this._mapOptions.zoomControl,
+      zoomControl: false,
       minZoom: this._mapOptions.minZoom,
       maxZoom: this._mapOptions.maxZoom,
       dragging: this._mapOptions.dragging,
@@ -37,7 +37,7 @@ export default class MapHandler {
 
   private addControls(): void {
     if (this._mapOptions.zoomControl && this._mapOptions.zoomControlPosition) {
-      this._map.zoomControl.setPosition(this._mapOptions.zoomControlPosition);
+      L.control.zoom({ position: this._mapOptions.zoomControlPosition }).addTo(this._map)
     }
 
     if (!this._mapOptions.removeControlLayers) {

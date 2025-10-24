@@ -1,0 +1,25 @@
+@import 'element-plus/dist/index.css';
+
+.map-container {
+  .el-switch.is-checked .el-switch__core {
+    background: var(--mapa-base-green) !important;
+    border-color: var(--mapa-base-green) !important;
+  }
+
+  .el-switch.is-checked .el-switch__core .el-switch__action {
+    color: var(--mapa-base-green) !important;
+  }
+
+  .el-sub-menu__title:hover,
+  .el-menu-item:hover {
+    background-color: var(--mapa-base-shadow) !important;
+  }
+
+  .el-menu-item.is-active {
+    color: var(--mapa-base-black) !important;
+  }
+
+  .el-switch__input:focus-visible ~ .el-switch__core {
+    outline-color: var(--mapa-base-green) !important;
+  }
+}

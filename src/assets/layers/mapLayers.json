@@ -1,0 +1,16 @@
+{
+  "mapLayers": [
+    {
+      "name": "Esri Imagery",
+      "default": true,
+      "key": "esri",
+      "url": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+    },
+    {
+      "name": "OpenStreetMap",
+      "default": false,
+      "key": "osm",
+      "url": "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+    }
+  ]
+}

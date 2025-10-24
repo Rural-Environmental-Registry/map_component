@@ -1,0 +1,37 @@
+{
+  "name": "dpg-mapa",
+  "groupId": "br.gov.dataprev.sicar",
+  "artifactId": "dpg-mapa",
+  "version": "3.0.0",
+  "scripts": {
+    "dev": "vite build --watch",
+    "build": "vite build && tsc"
+  },
+  "files": [
+    "dist",
+    "src",
+    "index.html",
+    "package.json",
+    "vite.config.js"
+  ],
+  "license": "ISC",
+  "devDependencies": {
+    "@fortawesome/fontawesome-svg-core": "6.7.2",
+    "@fortawesome/free-solid-svg-icons": "6.7.2",
+    "@fortawesome/vue-fontawesome": "3.0.8",
+    "@geoman-io/leaflet-geoman-free": "2.18.3",
+    "@turf/turf": "7.2.0",
+    "@types/geojson": "7946.0.16",
+    "@types/leaflet": "1.9.16",
+    "@types/papaparse": "5.3.16",
+    "@vitejs/plugin-vue": "5.2.1",
+    "element-plus": "2.9.3",
+    "leaflet": "1.9.4",
+    "leaflet-draw": "1.0.4",
+    "papaparse": "5.5.3",
+    "typescript": "5.7.3",
+    "unplugin-element-plus": "0.9.1",
+    "vite": "6.3.5",
+    "vue": "3.5.17"
+  }
+}

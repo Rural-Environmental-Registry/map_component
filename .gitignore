@@ -1,0 +1,20 @@
+node_modules
+dist
+
+# IDEs
+.idea
+.vscode
+*.iml
+
+# Environment
+.env
+.env.*
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+
+# Lock files
+package-lock.json

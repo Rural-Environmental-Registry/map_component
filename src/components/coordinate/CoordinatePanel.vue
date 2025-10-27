@@ -1,18 +1,5 @@
 <template>
   <div>
-    <ElTooltip
-        class="box-item"
-        effect="dark"
-        :content="texts.memorialDescriptive"
-        placement="top-start"
-      >
-      <ElButton
-        class="coordinate-button"
-        @click="togglePanel"
-      >
-        <FontAwesomeIcon iconName="file-lines" />
-      </ElButton>
-    </ElTooltip>
     <div class="coordinate-panel" :class="{ 'panel-open': isOpen }">
       <div class="panel-header">
         <h3>{{ texts.title }}</h3>
@@ -269,13 +256,15 @@
 </template>
 
 <script setup lang="ts">
-import {computed, ref, watch} from 'vue'
+import {computed, ref, watch, onMounted, onBeforeUnmount} from 'vue'
 import { ElButton, ElSelect, ElOption, ElInput, ElTabs, ElTabPane, ElUpload, ElMessage, ElTable, ElTableColumn, ElDropdown, ElDropdownMenu, ElDropdownItem, ElTooltip } from 'element-plus'
 import FontAwesomeIcon from '../fa-icon/FontAwesomeIcon.vue'
 import Papa from 'papaparse'
 import L from 'leaflet'
 import { COORDINATE_PANEL_TEXTS } from '../../constants/coordinatePanel'
 import { CoordinateConverter } from '../../utils/CoordinateConverter'
+import DrawingControlHandler from '../../handlers/drawingControl'
+import type { DescriptiveMemorial } from '../../types'
 
 interface CSVRow {
   X?: string
@@ -306,7 +295,7 @@ interface ManualPoint {
 
 const props = defineProps<{
   map?: L.Map,
-  customTexts?: typeof COORDINATE_PANEL_TEXTS
+  descriptiveMemorial?: DescriptiveMemorial
 }>()
 
 const emit = defineEmits<{
@@ -339,14 +328,59 @@ const manualPoints = ref<any[]>([])
 const manualGeometries = ref<string[]>([])
 const editingIndex = ref<number | null>(null)
 const uploadRef = ref()
+let drawingControlInstance: DrawingControlHandler | null = null
 
 const texts = computed(() => {
-  return {...COORDINATE_PANEL_TEXTS, ...props.customTexts}
+  return {...COORDINATE_PANEL_TEXTS, ...props.descriptiveMemorial?.customTexts}
 })
 
 const togglePanel = () => {
   isOpen.value = !isOpen.value
 }
+
+const getDrawingControlInstance = (): DrawingControlHandler | null => {
+  if (!drawingControlInstance && props.map) {
+    drawingControlInstance = new DrawingControlHandler(props.map, new L.FeatureGroup())
+  }
+  
+  return drawingControlInstance
+}
+
+onMounted(() => {
+  if (props.descriptiveMemorial?.show) {
+    const controller = getDrawingControlInstance()
+    if (controller) {
+      const buttonTitle = texts.value.memorialDescriptive || ''
+      controller.addMemorialDescriptiveButton(togglePanel, buttonTitle)
+    }
+  }
+})
+
+onBeforeUnmount(() => {
+  const controller = getDrawingControlInstance()
+  if (controller) {
+    controller.removeMemorialDescriptiveButton()
+  }
+})
+
+watch(() => props.descriptiveMemorial?.show, (newValue) => {
+  const controller = getDrawingControlInstance()
+  if (!controller) return
+ 
+  if (newValue) {
+    const buttonTitle = texts.value.memorialDescriptive || ''
+    controller.addMemorialDescriptiveButton(togglePanel, buttonTitle)
+  } else {
+    controller.removeMemorialDescriptiveButton()
+  }
+})
+
+watch(() => props.descriptiveMemorial?.customTexts?.memorialDescriptive, (newTitle) => {
+  const controller = getDrawingControlInstance()
+  if (newTitle && controller) {
+    controller.updateMemorialDescriptiveButtonTitle(newTitle)
+  }
+})
 
 const closePanel = () => {
   isOpen.value = false
@@ -753,30 +787,6 @@ defineExpose({
 </script>
 
 <style scoped>
-.coordinate-button {
-  position: absolute;
-  top: 28vh;
-  right: 10px;
-  z-index: 1000;
-  background-color: white;
-  border-radius: 4px;
-  padding: 8px;
-  width: 35px !important;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  color: var(--mapa-base-green);
-
-  &:hover {
-    background-color: var(--mapa-base-white);
-    color: var(--mapa-base-green);
-    border-color: var(--mapa-base-white);
-  }
-}
-
-.icon-button {
-  background-color: transparent !important;
-  border-color: transparent !important;
-}
-
 .coordinate-panel {
   position: absolute;
   bottom: 50px;

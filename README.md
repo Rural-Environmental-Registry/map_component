@@ -5,13 +5,24 @@ MapaDPG é um componente de mapa interativo para aplicações Vue.js que permite
 *Atenção: Essa biblioteca pode ser utilizada apenas para projetos em Vue.js 3.*
 
 
-> *** Antes de editar, leia [Wiki versionamento](https://gitlab.criainovacao.com.br/sfb/car-federal/dpg-mapa/-/wikis/Versionamento) ***
+> *** Antes de editar, leia [Wiki versionamento](https://inovacao.dataprev.gov.br/git/car-dpg/map-component/wikis/Versionamento) ***
 
 ## Instalação
 
+Execute o seguinte comando uma única vez em sua máquina, substituindo `<SEU_USUARIO>` e `<SEU_TOKEN>` por suas credenciais de acesso:
+
+```bash
+git config --global url."https://<SEU_USUARIO>:<SEU_TOKEN>@inovacao.dataprev.gov.br".insteadOf "https://inovacao.dataprev.gov.br"
+```
+
+Após executar este comando, o Git irá automaticamente usar suas credenciais ao buscar dependências do `inovacao.dataprev.gov.br`.
+
+Por se tratar de uma biblioteca versionada, substitua `<VERSION>` pela versão que deseja. Exemplo v3.0
+
+
 ```package.json
 "dependencies": {
-  "dpg-mapa": "git+https://<username>:<token>@gitlab.criainovacao.com.br/sfb/car-federal/dpg-mapa.git#main",
+  "dpg-mapa": "git+https://inovacao.dataprev.gov.br/git/car-dpg/map-component.git#<VERSION>",
 }
 
 ```

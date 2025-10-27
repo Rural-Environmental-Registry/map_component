@@ -25,7 +25,7 @@
       v-if="mapRef && descriptiveMemorial.show"
       ref="coordinatePanelRef"
       :map="mapRef.map"
-      :customTexts="descriptiveMemorial.customTexts"
+      :descriptiveMemorial="descriptiveMemorial"
       @systemChange="handleCoordinateSystemChange"
       @geometryChange="handleGeometryChange"
       @geometryRemoved="handleGeometryRemoved"

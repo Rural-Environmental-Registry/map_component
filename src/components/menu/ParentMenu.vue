@@ -29,7 +29,10 @@
         </span>
       </div>
     </template>
-    <template v-for="(child, idx) in childrenLayers">
+    <template
+      v-for="(child, idx) in childrenLayers"
+      :key="child.key"
+    >
       <ChildMenu
         v-if="child.name"
         :data="child"

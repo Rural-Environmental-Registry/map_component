@@ -12,7 +12,10 @@
       mode="vertical"
     >
       <div id="external-id-top-menu"></div>
-      <template v-for="group in props.layersConfig">
+      <template
+        v-for="group in props.layersConfig"
+        :key="group.key"
+      >
         <ParentMenu
           :groupData="group"
           :persist="!!props.options?.persist"

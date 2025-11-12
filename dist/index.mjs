@@ -29912,7 +29912,9 @@ const Yi = /* @__PURE__ */ Oe({
           ])
         ]),
         default: Fe(() => [
-          (oe(!0), Se(En, null, Xo(u.value, (C, k) => (oe(), Se(En, null, [
+          (oe(!0), Se(En, null, Xo(u.value, (C, k) => (oe(), Se(En, {
+            key: C.key
+          }, [
             C.name ? (oe(), Ye(FP, {
               key: 0,
               data: C,
@@ -29920,7 +29922,7 @@ const Yi = /* @__PURE__ */ Oe({
               onOnChildLayerToggle: (B) => g(B, k),
               onOnInitDefaultLayer: (B) => m(B, k)
             }, null, 8, ["data", "persist", "onOnChildLayerToggle", "onOnInitDefaultLayer"])) : Qe("", !0)
-          ], 64))), 256))
+          ], 64))), 128))
         ]),
         _: 1
       }, 8, ["disabled", "index"]),
@@ -30026,13 +30028,14 @@ const Yi = /* @__PURE__ */ Oe({
             (oe(!0), Se(En, null, Xo(a.layersConfig, (W) => {
               var G;
               return oe(), Ye(QP, {
+                key: W.key,
                 groupData: W,
                 persist: !!((G = a.options) != null && G.persist),
                 onOnChildLayerToggle: b,
                 onOnGroupLayerToggle: C,
                 onOnInitDefaultLayer: _
               }, null, 8, ["groupData", "persist"]);
-            }), 256)),
+            }), 128)),
             R[2] || (R[2] = Pe("div", { id: "external-id-bottom-menu" }, null, -1))
           ]),
           _: 1,

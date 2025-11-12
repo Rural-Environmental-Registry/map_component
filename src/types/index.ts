@@ -68,6 +68,12 @@ export type BaseMapLayer = {
   key: string
   default: boolean
   url: string
+  tms?: boolean
+  minZoom?: number
+  maxZoom?: number
+  maxNativeZoom?: number
+  errorTileUrl?: string
+  minZoomWarning?: number | null
 }
 
 export type BaseMapLayers = BaseMapLayer[]

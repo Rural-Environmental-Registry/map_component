@@ -12322,11 +12322,16 @@ class A_ {
       doubleClickZoom: this._mapOptions.doubleClickZoom
     }).setView(this._mapOptions.center, this._mapOptions.zoom);
   }
+  get layerControl() {
+    return this._layerControl;
+  }
   get map() {
     return this._map;
   }
-  get layerControl() {
-    return this._layerControl;
+  init(t, i) {
+    this._mapLayers = t || b_, this.addControls(), this.addBaseLayer(i), setTimeout(() => {
+      this._map.invalidateSize();
+    }, 300), this.disableLayerControlHover();
   }
   addControls() {
     this._mapOptions.zoomControl && this._mapOptions.zoomControlPosition && $t.control.zoom({ position: this._mapOptions.zoomControlPosition }).addTo(this._map), this._mapOptions.removeControlLayers || (this._layerControl = $t.control.layers().addTo(this._map));
@@ -12334,7 +12339,13 @@ class A_ {
   addBaseLayer(t) {
     var a;
     ((a = this._mapLayers) == null ? void 0 : a.mapLayers).forEach((u) => {
-      const f = $t.tileLayer(u.url);
+      const f = $t.tileLayer(u.url, {
+        tms: u.tms,
+        minZoom: u.minZoom,
+        maxZoom: u.maxZoom,
+        maxNativeZoom: u.maxNativeZoom,
+        errorTileUrl: u.errorTileUrl
+      });
       this.watchLayerStatus(f, t), u.default && f.addTo(this._map), this._layerControl.addBaseLayer(f, u.name);
     });
   }
@@ -12352,11 +12363,6 @@ class A_ {
     }), t.on("error", () => {
       i("stopLoading");
     });
-  }
-  init(t, i) {
-    this._mapLayers = t || b_, this.addControls(), this.addBaseLayer(i), setTimeout(() => {
-      this._map.invalidateSize();
-    }, 300), this.disableLayerControlHover();
   }
 }
 const C_ = ["id"], w_ = /* @__PURE__ */ Oe({

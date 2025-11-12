@@ -8,7 +8,6 @@ export default class MapHandler {
   private readonly _map: L.Map
   private readonly _mapOptions: MapConfigConfig
   private _mapLayers!: MapLayers
-  private _layerControl!: L.Control.Layers
 
   constructor(mapOptions: MapConfigConfig | undefined) {
     this._mapOptions = {
@@ -27,12 +26,27 @@ export default class MapHandler {
     }).setView(this._mapOptions.center!, this._mapOptions.zoom)
   }
 
+  private _layerControl!: L.Control.Layers
+
+  get layerControl(): L.Control.Layers {
+    return this._layerControl
+  }
+
   get map(): L.Map {
     return this._map
   }
 
-  get layerControl(): L.Control.Layers {
-    return this._layerControl
+  public init(mapLayers: MapLayers, eventEmitterCallback: Function): void {
+    this._mapLayers = mapLayers || DEFAULT_MAP_LAYER
+
+    this.addControls()
+    this.addBaseLayer(eventEmitterCallback)
+
+    setTimeout(() => {
+      this._map.invalidateSize()
+    }, 300)
+
+    this.disableLayerControlHover()
   }
 
   private addControls(): void {
@@ -49,7 +63,13 @@ export default class MapHandler {
     const baseMap = this._mapLayers?.mapLayers
 
     baseMap.forEach((layer: BaseMapLayer) => {
-      const tileLayer = L.tileLayer(layer.url)
+      const tileLayer = L.tileLayer(layer.url, {
+        tms: layer.tms,
+        minZoom: layer.minZoom,
+        maxZoom: layer.maxZoom,
+        maxNativeZoom: layer.maxNativeZoom,
+        errorTileUrl: layer.errorTileUrl
+      })
 
       this.watchLayerStatus(tileLayer, eventEmitterCallback)
 
@@ -88,18 +108,5 @@ export default class MapHandler {
     tileLayer.on('error', () => {
       eventEmitterCallback('stopLoading')
     })
-  }
-
-  public init(mapLayers: MapLayers, eventEmitterCallback: Function): void {
-    this._mapLayers = mapLayers || DEFAULT_MAP_LAYER
-
-    this.addControls()
-    this.addBaseLayer(eventEmitterCallback)
-
-    setTimeout(() => {
-      this._map.invalidateSize()
-    }, 300)
-
-    this.disableLayerControlHover()
   }
 }

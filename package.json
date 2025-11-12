@@ -1,10 +1,11 @@
 {
   "name": "dpg-mapa",
   "artifactId": "dpg-mapa",
-  "version": "3.0.1",
+  "version": "3.1.0",
   "scripts": {
     "dev": "vite build --watch",
-    "build": "vite build && tsc"
+    "build": "vite build && tsc",
+    "format": "prettier --write ./src"
   },
   "files": [
     "dist",

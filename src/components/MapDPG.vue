@@ -3,47 +3,40 @@
     <Loading :isLoading="(isLoading || showLoading) && !disableLoading" />
     <LayerMenu
       v-if="mapRef && layers?.customLayers"
-      :layersConfig="layers.customLayers"
-      :options="options.layersMenu"
-      :map="mapRef.map"
       :layerControl="mapRef.layerControl"
-      @startLoading="isLoading = true"
-      @stopLoading="isLoading = false"
+      :layersConfig="layers.customLayers"
+      :map="mapRef.map"
+      :options="options.layersMenu"
       @onChildLayerToggle="emit('onChildLayerToggle', $event)"
       @onGroupLayerToggle="emit('onGroupLayerToggle', $event)"
+      @startLoading="isLoading = true"
+      @stopLoading="isLoading = false"
     />
     <Map
       ref="mapRef"
+      :drawingOptions="options.drawing"
       :layers="layers"
       :mapOptions="options.map"
-      :drawingOptions="options.drawing"
+      @onDrawing="emit('onDrawing', $event)"
       @startLoading="isLoading = true"
       @stopLoading="isLoading = false"
-      @onDrawing="emit('onDrawing', $event)"
     />
     <CoordinatePanel
       v-if="mapRef && descriptiveMemorial.show"
       ref="coordinatePanelRef"
-      :map="mapRef.map"
       :descriptiveMemorial="descriptiveMemorial"
-      @systemChange="handleCoordinateSystemChange"
+      :map="mapRef.map"
       @geometryChange="handleGeometryChange"
       @geometryRemoved="handleGeometryRemoved"
+      @systemChange="handleCoordinateSystemChange"
     />
   </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
   import L from 'leaflet'
   import { computed, ref } from 'vue'
-  import {
-    DrawingEvent,
-    GroupLayerData,
-    LayerData,
-    MapLayers,
-    MapOptionsConfig,
-    DescriptiveMemorial
-  } from '../types'
+  import { DrawingEvent, GroupLayerData, LayerData, MapLayers, MapOptionsConfig, DescriptiveMemorial } from '../types'
   import Loading from './loading/Loading.vue'
   import Map from './map/LeafletMap.vue'
   import LayerMenu from './menu/LayerMenu.vue'
@@ -61,7 +54,8 @@
     options: () => ({
       map: {},
       layersMenu: {
-        size: 'medium'
+        size: 'medium',
+        persist: false
       }
     }),
     descriptiveMemorial: () => ({
@@ -141,7 +135,7 @@
 
     const layersToRemove: L.Layer[] = []
 
-    mapRef.value.drawItemsGroup.eachLayer((layer) => {
+    mapRef.value.drawItemsGroup.eachLayer(layer => {
       if ((layer as any).options?.nome === 'memorial') {
         layersToRemove.push(layer)
       }

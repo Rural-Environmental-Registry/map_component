@@ -67,36 +67,33 @@ Em ambos os casos é necessário importar o arquivo de estilos do mapa.
 
 O componente aceita parametros e emite eventos. Além disso, expôe instâncias atraves de refs.
 
-```js
-<MapaDpg
-  :layers = "layers"
-:
-options = "options"
-:
-showLoading = "showLoading"
-:
-disableLoading = "disableLoading"
-:
-descriptiveMemorial = "descriptiveMemorial"
-@onChildLayerToggle
-= "onChildLayerToggle"
-@onGroupLayerToggle
-= "onGroupLayerToggle"
-@onDrawing
-= "onDrawing"
-ref = "mapRef"
-  / >
+```vue
 
-const mapRef = ref(null)
+<template>
+  <MapaDpg
+      :layers="layers"
+      :options="options"
+      :showLoading="showLoading"
+      :disableLoading="disableLoading"
+      :descriptiveMemorial="descriptiveMemorial"
+      @onChildLayerToggle="onChildLayerToggle"
+      @onGroupLayerToggle="onGroupLayerToggle"
+      @onDrawing="onDrawing"
+      ref="mapRef"
+  />
+</template>
+<script setup>
+  const mapRef = ref(null)
 
-const mapRefInstances = computed(() => {
-  return {
-    map: mapRef.value?.map,
-    layerControl: mapRef.value?.layerControl,
-    drawItemsGroup: mapRef.value?.drawItemsGroup,
-    leaflet: mapRef.value?.leaflet
-  }
-})
+  const mapRefInstances = computed(() => {
+    return {
+      map: mapRef.value?.map,
+      layerControl: mapRef.value?.layerControl,
+      drawItemsGroup: mapRef.value?.drawItemsGroup,
+      leaflet: mapRef.value?.leaflet
+    }
+  })
+</script>  
 ```
 
 ### Propriedades
@@ -124,7 +121,7 @@ const mapRefInstances = computed(() => {
 | map            | Mapa Leaflet. Utilizada para manipulação do mapa                    |
 | layerControl   | Controle de camadas Leaflet. Utilizada para manipulação das camadas |
 | drawItemsGroup | Grupo de desenhos Leaflet. Utilizada para manipulação dos desenhos  |
-| leaflet        | Instância Leaflet.                                                  
+| leaflet        | Instância Leaflet.                                                  |
 
 ### Injeção menu lateral
 
@@ -154,9 +151,15 @@ const props = {
     baseMapLayers: [
       {
         name: 'OpenStreetMap',
-        layer: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
         key: 'osm',
-        default: true
+        default: true,
+        tms: false,
+        minZoom: 3,
+        maxZoom: 17,
+        maxNativeZoom: 18,
+        errorTileUrl: 'https://...',
+        minZoomWarning: 3
       }
     ],
     customLayers: [

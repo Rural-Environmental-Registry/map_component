@@ -7,12 +7,18 @@
 
 ## BaseLayer
 
-| Nome    | Tipo    | Descrição                            |
-|---------|---------|--------------------------------------|
-| name    | string  | Nome da camada base.                 |
-| key     | string  | Identificador único.                 |
-| default | boolean | Define se essa camada será a padrão. |
-| url     | string  | URL do serviço de tiles.             |
+| Nome           | Tipo    | Descrição                                                                                                                                               |
+|----------------|---------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
+| name           | string  | Nome da camada base.                                                                                                                                    |
+| key            | string  | Identificador único.                                                                                                                                    |
+| default        | boolean | Define se essa camada será a padrão.                                                                                                                    |
+| url            | string  | URL do serviço de tiles.                                                                                                                                |
+| tms            | boolean | Indica que os tiles usam esquema TMS.                                                                                                                   |
+| minZoom        | number  | Zoom mínimo suportado pela camada.                                                                                                                      |
+| maxZoom        | number  | Zoom máximo suportado pela camada.                                                                                                                      |
+| maxNativeZoom  | number  | Maior nível de zoom nativo dos tiles (evita upscaling acima desse nível).                                                                               |
+| errorTileUrl   | string  | URL de tile a ser exibido quando ocorrer erro no carregamento de um tile.                                                                               |
+| minZoomWarning | number  | Valor de zoom mínimo recomendado. Quando definido, pode ser usado pela aplicação para exibir um aviso caso o mapa esteja com zoom menor que esse valor. |
 
 ## CustomLayer
 
@@ -55,12 +61,12 @@
 
 ## MapConfigConfig
 
-| Campo               | Tipo                                       | Descrição                                         |
-|---------------------|--------------------------------------------|---------------------------------------------------|
-| --                  | [MapOptions](#mapoptions)                  | Define opções do mapa com base na API do Leaflet. |
-| id                  | string                                     | Define id do mapa.                                |
-| removeControlLayers | boolean                                    | Define exibição dos controles do mapa.            |
-| zoomControlPosition | [zoomControlPosition](zoomcontrolposition) | Posição dos controles de zoom.                    |
+| Campo               | Tipo                                        | Descrição                                         |
+|---------------------|---------------------------------------------|---------------------------------------------------|
+| --                  | [MapOptions](#mapoptions)                   | Define opções do mapa com base na API do Leaflet. |
+| id                  | string                                      | Define id do mapa.                                |
+| removeControlLayers | boolean                                     | Define exibição dos controles do mapa.            |
+| zoomControlPosition | [ZoomControlPosition](#zoomcontrolposition) | Posição dos controles de zoom.                    |
 
 ## LayersMenuConfig
 
@@ -143,7 +149,8 @@
 | options     | [ToolbarOptions](#toolbaroptions)       | Opções para personalizar ferramentas de desenho. |
 | translation | [TranslationConfig](#translationconfig) | Traduções para ferramentas de desenho.           |
 
-[//]: # (## ToolbarOptions)
+## ToolbarOptions
+
 Esse campo define opções de cada ferramenta de desenho. É um tipo composto que pode ser:
 
 - [ControlOptions](https://geoman.io/docs/leaflet/toolbar)

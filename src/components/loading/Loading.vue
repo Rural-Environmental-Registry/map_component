@@ -1,5 +1,8 @@
 <template>
-  <div v-if="isLoading" class="map-loading">
+  <div
+    v-if="isLoading"
+    class="map-loading"
+  >
     <img src="../../assets/icons/loading.gif" />
   </div>
 </template>

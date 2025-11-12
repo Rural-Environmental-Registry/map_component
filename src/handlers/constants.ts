@@ -8,7 +8,7 @@ export const DEFAULT_MAP_OPTIONS: MapConfigConfig = {
   center: [-15.235, -51.9253],
   zoom: 4,
   zoomControlPosition: 'topright',
-  removeControlLayers: false,
+  removeControlLayers: false
 }
 
 export const DEFAULT_DRAW_OPTIONS: DrawingControlOptions = {
@@ -30,6 +30,6 @@ export const DEFAULT_DRAW_OPTIONS: DrawingControlOptions = {
     position: 'topright'
   },
   translation: {
-    lang: 'en',
+    lang: 'en'
   }
 }

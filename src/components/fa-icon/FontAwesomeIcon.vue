@@ -25,7 +25,18 @@
 
   defineProps<IconProps>()
 
-  library.add(faCheck, faXmark, faChevronRight, faChevronLeft, faTerminal, faFileLines, faUpload, faPencil, faTrash, faChevronDown)
+  library.add(
+    faCheck,
+    faXmark,
+    faChevronRight,
+    faChevronLeft,
+    faTerminal,
+    faFileLines,
+    faUpload,
+    faPencil,
+    faTrash,
+    faChevronDown
+  )
 </script>
 
 <style>

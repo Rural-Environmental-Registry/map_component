@@ -12,8 +12,8 @@ export default class MapHandler {
 
   constructor(mapOptions: MapConfigConfig | undefined) {
     this._mapOptions = {
-        ...DEFAULT_MAP_OPTIONS,
-        ...mapOptions
+      ...DEFAULT_MAP_OPTIONS,
+      ...mapOptions
     }
 
     this._map = L.map(this._mapOptions.id, {
@@ -24,7 +24,7 @@ export default class MapHandler {
       dragging: this._mapOptions.dragging,
       scrollWheelZoom: this._mapOptions.scrollWheelZoom,
       doubleClickZoom: this._mapOptions.doubleClickZoom
-    }).setView(this._mapOptions.center!, this._mapOptions.zoom);
+    }).setView(this._mapOptions.center!, this._mapOptions.zoom)
   }
 
   get map(): L.Map {
@@ -62,7 +62,9 @@ export default class MapHandler {
   }
 
   private disableLayerControlHover(): void {
-    const container: HTMLElement | null = this._map.getContainer().querySelector('.leaflet-control-layers.leaflet-control')
+    const container: HTMLElement | null = this._map
+      .getContainer()
+      .querySelector('.leaflet-control-layers.leaflet-control')
 
     if (!container) return
 
@@ -74,10 +76,7 @@ export default class MapHandler {
     L.DomEvent.off(container)
   }
 
-  private watchLayerStatus(
-    tileLayer: L.TileLayer,
-    eventEmitterCallback: Function
-  ): void {
+  private watchLayerStatus(tileLayer: L.TileLayer, eventEmitterCallback: Function): void {
     tileLayer.on('loading', () => {
       eventEmitterCallback('startLoading')
     })

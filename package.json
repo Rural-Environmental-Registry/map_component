@@ -5,13 +5,19 @@
   "main": "dist/index.mjs",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
+  "artifactId": "dpg-mapa",
   "scripts": {
     "dev": "vite build --watch",
     "build": "vite build && tsc",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "format": "prettier --write ./src"
   },
   "files": [
     "dist",
+    "src",
+    "index.html",
+    "package.json",
+    "vite.config.js",
     "README.md"
   ],
   "keywords": ["vue", "map", "leaflet", "component", "dataprev"],
@@ -41,6 +47,10 @@
     "@types/leaflet": "1.9.16",
     "@types/papaparse": "5.3.16",
     "@vitejs/plugin-vue": "5.2.1",
+    "element-plus": "2.9.3",
+    "leaflet": "1.9.4",
+    "leaflet-draw": "1.0.4",
+    "papaparse": "5.5.3",
     "typescript": "5.7.3",
     "unplugin-element-plus": "0.9.1",
     "vite": "6.3.5",

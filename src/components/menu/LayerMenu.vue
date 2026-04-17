@@ -7,13 +7,21 @@
     >
       <FontAwesomeIcon :iconName="iconButton" />
     </ElButton>
-    <ElMenu :class="customClasses.customMenu" mode="vertical">
+    <ElMenu
+      :class="customClasses.customMenu"
+      mode="vertical"
+    >
       <div id="external-id-top-menu"></div>
-      <template v-for="group in props.layersConfig">
+      <template
+        v-for="group in props.layersConfig"
+        :key="group.key"
+      >
         <ParentMenu
           :groupData="group"
+          :persist="!!props.options?.persist"
           @onChildLayerToggle="onChildLayerChange"
           @onGroupLayerToggle="onGroupLayerToggle"
+          @onInitDefaultLayer="onInitDefaultLayer"
         />
       </template>
       <div id="external-id-bottom-menu"></div>
@@ -21,18 +29,13 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
   import { ElButton, ElMenu } from 'element-plus'
   import L from 'leaflet'
   import { computed, ref } from 'vue'
   import FontAwesomeIcon from '../fa-icon/FontAwesomeIcon.vue'
   import ParentMenu from './ParentMenu.vue'
-  import {
-    GroupLayerData,
-    LayerData,
-    LayersConfig,
-    LayersMenuConfig
-  } from '../../types'
+  import { GroupLayerData, LayerData, LayersConfig, LayersMenuConfig } from '../../types'
 
   type MenuProps = {
     layersConfig: LayersConfig
@@ -69,8 +72,6 @@
   }
 
   const customClasses = computed((): CustomClasses => {
-
-
     const status = isMenuOpen.value ? 'open' : 'close'
     return {
       layerMenu: `layer-menu layer-menu-${props.options?.size || 'medium'}`,
@@ -85,23 +86,27 @@
     return isMenuOpen.value ? 'chevron-left' : 'chevron-right'
   })
 
-  const onChildLayerChange = (layer: LayerData): void => {
+  const onInitDefaultLayer = (layer: LayerData): void => {
+    if (layer.geojson) return handleGeoJsonLayer(layer)
 
-    if(layer.geojson){
+    handleWmsLayer(layer)
+  }
+
+  const onChildLayerChange = (layer: LayerData): void => {
+    if (layer.geojson) {
       handleGeoJsonLayer(layer)
-    }else{
+    } else {
       handleWmsLayer(layer)
     }
-    
+
     emit('onChildLayerToggle', layer)
   }
 
   const onGroupLayerToggle = (parent: GroupLayerData): void => {
-    
     parent.layers.forEach((childLayer: LayerData) => {
-      if(childLayer.geojson){
+      if (childLayer.geojson) {
         handleGeoJsonLayer(childLayer)
-      }else{
+      } else {
         handleWmsLayer(childLayer)
       }
     })
@@ -113,17 +118,17 @@
     const wmsLayer = L.tileLayer.wms(layer.baseUrl, {
       layers: layer.layers,
       format: layer.format || 'image/png',
-      transparent: layer.transparent 
+      transparent: layer.transparent
     })
-   
+
     if (layer?.cqlFilter && layer.cqlFilter.length > 0) {
-      wmsLayer.setParams({ 
-        cql_filter: layer.cqlFilter 
-      } as any) 
-    } 
- 
-    watchLayerStatus(wmsLayer) 
-    
+      wmsLayer.setParams({
+        cql_filter: layer.cqlFilter
+      } as any)
+    }
+
+    watchLayerStatus(wmsLayer)
+
     return wmsLayer
   }
 
@@ -163,16 +168,15 @@
   }
 
   const convertToGeojsonLayer = (layer: LayerData): L.GeoJSON => {
-   const geojsonLayer = L.geoJSON(layer.geojson, {
-     ...layer,
-      style: layer.style,
+    const geojsonLayer = L.geoJSON(layer.geojson, {
+      ...layer,
+      style: layer.style
     })
 
     watchGeoJsonLayerStatus(geojsonLayer)
-    
-    return geojsonLayer
 
-}
+    return geojsonLayer
+  }
 
   const handleGeoJsonLayer = (layer: LayerData): void => {
     if (convertedGeoJsonLayers.value[layer.key]) {

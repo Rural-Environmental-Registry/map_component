@@ -16,24 +16,32 @@ import {
 } from '../types'
 
 import markerIcon from '../assets/icons/marker-icon.svg'
+import fileIconMemorial from '../assets/icons/file-lines-regular-full-gray.svg'
 
 export default class DrawingControlHandler {
   private readonly _map: Map
   private readonly _drawItemsGroup: FeatureGroup
   private readonly _options: ToolbarOptions
+  private _memorialButtonControl: L.Control | null = null
 
-   constructor( map: Map, drawItemsGroup: FeatureGroup, controlOptions?: DrawingConfig ) {
-     this._map = map
-     this._drawItemsGroup = drawItemsGroup
-     this._options = this.formatMenuOptions(controlOptions?.options || DEFAULT_DRAW_OPTIONS.options)
-     this.addTranslation(controlOptions?.translation || DEFAULT_DRAW_OPTIONS.translation)
+  constructor(map: Map, drawItemsGroup: FeatureGroup, controlOptions?: DrawingConfig) {
+    this._map = map
+    this._drawItemsGroup = drawItemsGroup
+    this._options = this.formatMenuOptions(controlOptions?.options || DEFAULT_DRAW_OPTIONS.options)
+    this.addTranslation(controlOptions?.translation || DEFAULT_DRAW_OPTIONS.translation)
   }
 
-  get drawItemsGroup(): FeatureGroup { return this._drawItemsGroup }
+  get drawItemsGroup(): FeatureGroup {
+    return this._drawItemsGroup
+  }
 
-  get map(): Map { return this._map }
+  get map(): Map {
+    return this._map
+  }
 
-  get options(): ToolbarOptions { return this._options }
+  get options(): ToolbarOptions {
+    return this._options
+  }
 
   private calculateAreas(layer: Layer): DrawnArea {
     if (layer instanceof L.Polygon || layer instanceof L.Rectangle) {
@@ -62,7 +70,6 @@ export default class DrawingControlHandler {
 
   public handleDrawingEvents(eventEmitterCallback: Function): void {
     this._map.on('pm:create', (evt: GeomanDrawingEvent) => {
-
       const { layer } = evt
 
       this._drawItemsGroup.addLayer(layer)
@@ -131,18 +138,13 @@ export default class DrawingControlHandler {
       drawPolyline: 'Line',
       drawPolygon: 'Polygon',
       drawCircle: 'Circle',
-      drawCircleMarker: 'CircleMarker',
+      drawCircleMarker: 'CircleMarker'
     }
 
     const ignoredShapes = (currentShape: PMSupportedShapes): string[] => {
-      return [
-        'Marker',
-        'Circle',
-        'Line',
-        'Rectangle',
-        'Polygon',
-        'CircleMarker',
-      ].filter((shape: string) => shape !== currentShape)
+      return ['Marker', 'Circle', 'Line', 'Rectangle', 'Polygon', 'CircleMarker'].filter(
+        (shape: string) => shape !== currentShape
+      )
     }
 
     this._map.pm.setPathOptions(props, { ignoreShapes: ignoredShapes(shapes[key]), merge: true })
@@ -152,9 +154,86 @@ export default class DrawingControlHandler {
     const MyCustomMarker = new Icon({
       iconAnchor: new Point(12, 12),
       iconSize: new Point(24, 24),
-      iconUrl: markerIcon,
+      iconUrl: markerIcon
     })
 
-    this._map.pm.setGlobalOptions({ markerStyle: { icon : MyCustomMarker } });
+    this._map.pm.setGlobalOptions({ markerStyle: { icon: MyCustomMarker } })
+  }
+
+  private getOrCreateCustomContainer(): HTMLElement {
+    let controlContainer = this._map.getContainer().querySelector('.leaflet-control-memorial') as HTMLElement
+
+    if (!controlContainer) {
+      controlContainer = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-memorial')
+    }
+
+    return controlContainer
+  }
+
+  public addMemorialDescriptiveButton(toggleCallback: () => void, buttonTitle: string): void {
+    const existingButton = this._map.getContainer().querySelector('.memorial-btn')
+    if (existingButton) {
+      return
+    }
+
+    const MemorialDescriptive = L.Control.extend({
+      options: {
+        position: 'topright'
+      },
+      onAdd: () => {
+        const controlContainer = this.getOrCreateCustomContainer()
+
+        const btn = L.DomUtil.create('button', 'memorial-btn leaflet-pm-icon-memorial', controlContainer)
+
+        btn.innerHTML = `<img src="${fileIconMemorial}" alt="${buttonTitle}" />`
+        btn.title = buttonTitle
+
+        L.DomEvent.on(btn, 'click', (e: Event) => {
+          e.stopPropagation()
+          e.preventDefault()
+          if (typeof toggleCallback === 'function') {
+            toggleCallback()
+          }
+        })
+
+        return controlContainer
+      }
+    })
+
+    this._memorialButtonControl = new MemorialDescriptive()
+    this._map.addControl(this._memorialButtonControl)
+  }
+
+  public updateMemorialDescriptiveButtonTitle(newTitle: string): void {
+    const existingButton = this._map.getContainer().querySelector('.memorial-btn') as HTMLButtonElement
+
+    if (existingButton) {
+      existingButton.title = newTitle
+      const img = existingButton.querySelector('img')
+      if (img) {
+        img.alt = newTitle
+      }
+    }
+  }
+
+  public removeMemorialDescriptiveButton(): void {
+    const controlContainer = this._map.getContainer().querySelector('.leaflet-control-memorial')
+
+    if (controlContainer) {
+      const existingButton = controlContainer.querySelector('.memorial-btn')
+
+      if (existingButton) {
+        existingButton.remove()
+      }
+
+      if (controlContainer.children.length === 0) {
+        controlContainer.remove()
+      }
+    }
+
+    if (this._memorialButtonControl) {
+      this._map.removeControl(this._memorialButtonControl)
+      this._memorialButtonControl = null
+    }
   }
 }

@@ -1,5 +1,8 @@
 <template>
-  <div :id="mapOptions.config.id || 'map'"  style="height: inherit; width: inherit;"/>
+  <div
+    :id="mapOptions.config.id || 'map'"
+    style="height: inherit; width: inherit"
+  />
 </template>
 
 <script setup lang="ts">
@@ -7,13 +10,7 @@
   import { onMounted, ref } from 'vue'
   import DrawingControlHandler from '../../handlers/drawingControl'
   import MapHandler from '../../handlers/mapHandler'
-  import {
-    DrawingConfig,
-    DrawingEvent,
-    MapConfig,
-    MemorialConfig,
-    MapLayers
-  } from '../../types'
+  import { DrawingConfig, DrawingEvent, MapConfig, MemorialConfig, MapLayers } from '../../types'
 
   const emit = defineEmits<{
     (e: 'startLoading'): void
@@ -60,11 +57,7 @@
     drawItemsGroup.value = new L.FeatureGroup()
     drawItemsGroup.value.addTo(map.value!)
 
-    const drawingControlHandler = new DrawingControlHandler(
-      map.value!,
-      drawItemsGroup.value,
-      props.drawingOptions
-    )
+    const drawingControlHandler = new DrawingControlHandler(map.value!, drawItemsGroup.value, props.drawingOptions)
 
     map.value!.pm.addControls(drawingControlHandler.options)
 

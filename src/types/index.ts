@@ -4,7 +4,17 @@ import { GeoJsonObject } from 'geojson'
 // @ts-ignore
 import { PM } from '@geoman-io/leaflet-geoman-free'
 
-export type FaIconName = 'check' | 'xmark' | 'chevron-right' | 'chevron-left' | 'terminal' | 'file-lines' | 'upload' | 'pencil' | 'trash' | 'chevron-down'
+export type FaIconName =
+  | 'check'
+  | 'xmark'
+  | 'chevron-right'
+  | 'chevron-left'
+  | 'terminal'
+  | 'file-lines'
+  | 'upload'
+  | 'pencil'
+  | 'trash'
+  | 'chevron-down'
 
 export type DrawnArea = {
   m2: number
@@ -58,6 +68,12 @@ export type BaseMapLayer = {
   key: string
   default: boolean
   url: string
+  tms?: boolean
+  minZoom?: number
+  maxZoom?: number
+  maxNativeZoom?: number
+  errorTileUrl?: string
+  minZoomWarning?: number | null
 }
 
 export type BaseMapLayers = BaseMapLayer[]
@@ -67,15 +83,20 @@ export type MapLayers = {
   customLayers?: LayersConfig
 }
 
-export type MapConfigConfig = MapOptions & { id: string, removeControlLayers?: boolean, zoomControlPosition?: ControlPosition }
+export type MapConfigConfig = MapOptions & {
+  id: string
+  removeControlLayers?: boolean
+  zoomControlPosition?: ControlPosition
+}
 
 export type MapConfig = {
   config?: MapConfigConfig
 }
 
 export type LayersMenuConfig = {
-  size: 'small' | 'medium' | 'large',
+  size: 'small' | 'medium' | 'large'
   removeMenu?: boolean
+  persist: boolean
 }
 
 export type MemorialConfig = {
@@ -177,6 +198,6 @@ export type CoordinatePanelTexts = {
 }
 
 export type DescriptiveMemorial = {
-  show: boolean,
+  show: boolean
   customTexts?: CoordinatePanelTexts
 }

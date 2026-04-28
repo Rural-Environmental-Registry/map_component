@@ -1,20 +1,26 @@
 <template>
-  <ElMenuItem :index="data.key" class="child-menu">
+  <ElMenuItem
+    :index="data.key"
+    class="child-menu"
+  >
     <template #title>
       <div class="child-menu-row">
         <div class="child-layer-title">
           <span
-            class="child-layer-legend"
             :style="{
               borderColor: data.style.fillColor,
               backgroundColor: data.style.color
             }"
+            class="child-layer-legend"
           />
 
           <span>{{ data.name }}</span>
         </div>
         <span class="switch-component">
-          <ElSwitch v-model="active" @click.stop>
+          <ElSwitch
+            v-model="active"
+            @click.stop
+          >
             <template #active-action>
               <FontAwesomeIcon iconName="check" />
             </template>
@@ -32,19 +38,21 @@
   <ElDivider class="child-menu-divider-row" />
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
   import { ElDivider, ElMenuItem, ElSwitch } from 'element-plus'
   import { computed, onMounted } from 'vue'
   import FontAwesomeIcon from '../fa-icon/FontAwesomeIcon.vue'
   import { LayerData } from '../../types'
+  import { getHistory, setHistory } from '../../utils/menuHistory.ts'
 
   type ChildMenuProps = {
     data: LayerData
+    persist: boolean
   }
 
   const props = defineProps<ChildMenuProps>()
 
-  const emit = defineEmits<{ onChildLayerToggle: [LayerData] }>()
+  const emit = defineEmits<{ onChildLayerToggle: [LayerData]; onInitDefaultLayer: [LayerData] }>()
 
   const active = computed<boolean>({
     get: () => props.data.active,
@@ -55,14 +63,16 @@
 
   const toggleLayerVisible = (active: boolean): void => {
     const layer = { ...props.data, active }
+    if (props.persist) setHistory(layer)
     emit('onChildLayerToggle', layer)
   }
 
   onMounted(() => {
+    getHistory(props.data)
+
     if (props.data.activeDefault) {
-      setTimeout(() => {
-        toggleLayerVisible(props.data.activeDefault)
-      }, 100)
+      props.data.active = props.data.activeDefault
+      emit('onInitDefaultLayer', props.data)
     }
   })
 </script>

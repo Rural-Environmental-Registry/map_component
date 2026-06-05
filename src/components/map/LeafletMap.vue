@@ -7,15 +7,27 @@
 
 <script setup lang="ts">
   import L from 'leaflet'
-  import { onMounted, ref } from 'vue'
+  import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
   import DrawingControlHandler from '../../handlers/drawingControl'
   import MapHandler from '../../handlers/mapHandler'
-  import { DrawingConfig, DrawingEvent, MapConfig, MemorialConfig, MapLayers } from '../../types'
+  import MapToolsHandler from '../../handlers/mapToolsHandler'
+  import { resolveMapToolsConfig } from '../../handlers/toolsConstants'
+  import {
+    DrawingConfig,
+    DrawingEvent,
+    MapConfig,
+    MapLayers,
+    MapToolsConfig,
+    MeasureCompleteEvent,
+    MemorialConfig
+  } from '../../types'
 
   const emit = defineEmits<{
     (e: 'startLoading'): void
     (e: 'stopLoading'): void
     (e: 'onDrawing', data: DrawingEvent): void
+    (e: 'onFullscreenChange', active: boolean): void
+    (e: 'onMeasureComplete', data: MeasureCompleteEvent): void
   }>()
 
   type MapProps = {
@@ -23,6 +35,8 @@
     layers: MapLayers
     drawingOptions?: DrawingConfig
     memorialOptions?: MemorialConfig
+    toolsOptions?: MapToolsConfig
+    fullscreenContainer?: HTMLElement | null
   }
 
   const props = defineProps<MapProps>()
@@ -31,26 +45,60 @@
   const layerControl = ref<L.Control.Layers>()
   const drawItemsGroup = ref<L.FeatureGroup>()
 
-  onMounted(() => {
-    initMap()
+  let mapHandlerInstance: MapHandler | null = null
+  let mapToolsHandler: MapToolsHandler | null = null
 
+  onMounted(async () => {
+    initMap()
     if (props.drawingOptions?.show) handleDrawingControls()
+    await nextTick()
+    handleMapTools()
+    await nextTick()
+    mapToolsHandler?.alignTopRightControls()
+  })
+
+  onBeforeUnmount(() => {
+    mapToolsHandler?.destroy()
+    mapToolsHandler = null
   })
 
   const initMap = (): void => {
     const { config } = props.mapOptions
 
-    const mapHandler = new MapHandler(config)
+    mapHandlerInstance = new MapHandler(config)
 
     const emitterCallback = (eventName: string) => {
       if (eventName === 'startLoading') emit('startLoading')
       if (eventName === 'stopLoading') emit('stopLoading')
     }
 
-    mapHandler.init(props.layers, emitterCallback)
+    mapHandlerInstance.init(props.layers, emitterCallback)
 
-    map.value = mapHandler.map
-    layerControl.value = mapHandler.layerControl
+    map.value = mapHandlerInstance.map
+    layerControl.value = mapHandlerInstance.layerControl
+  }
+
+  const resolveFullscreenContainer = (): HTMLElement | null => {
+    if (props.fullscreenContainer) return props.fullscreenContainer
+    const fromMap = map.value?.getContainer()?.closest('.map-container')
+    return fromMap instanceof HTMLElement ? fromMap : null
+  }
+
+  const handleMapTools = (): void => {
+    const fullscreenContainer = resolveFullscreenContainer()
+    if (!resolveMapToolsConfig(props.toolsOptions) || !map.value || !fullscreenContainer) return
+
+    mapToolsHandler = new MapToolsHandler(
+      map.value,
+      props.toolsOptions,
+      mapHandlerInstance!.initialView,
+      drawItemsGroup.value ?? null,
+      fullscreenContainer,
+      {
+        onFullscreenChange: (active) => emit('onFullscreenChange', active),
+        onMeasureComplete: (data) => emit('onMeasureComplete', data)
+      }
+    )
   }
 
   const handleDrawingControls = (): void => {
@@ -67,12 +115,39 @@
 
     drawItemsGroup.value = drawingControlHandler.drawItemsGroup
     map.value = drawingControlHandler.map
+
+    mapToolsHandler?.setDrawItemsGroup(drawItemsGroup.value)
+  }
+
+  const centerMap = (): void => {
+    mapToolsHandler?.centerMap()
+  }
+
+  const enterFullscreen = (): void => {
+    mapToolsHandler?.enterFullscreen()
+  }
+
+  const exitFullscreen = (): void => {
+    mapToolsHandler?.exitFullscreen()
+  }
+
+  const toggleFullscreen = (): void => {
+    mapToolsHandler?.toggleFullscreen()
+  }
+
+  const toggleMeasureArea = (): void => {
+    mapToolsHandler?.toggleMeasureArea()
   }
 
   defineExpose({
     map,
     layerControl,
     drawItemsGroup,
-    leaflet: L
+    leaflet: L,
+    centerMap,
+    enterFullscreen,
+    exitFullscreen,
+    toggleFullscreen,
+    toggleMeasureArea
   })
 </script>

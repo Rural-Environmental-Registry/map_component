@@ -53,6 +53,7 @@
 | map        | [MapConfig](#mapconfig)               | Configurações básicas do mapa (centro, zoom, etc).        |
 | layersMenu | [LayersMenuConfig](#layersmenuconfig) | Configuração do menu de camadas, se houver.               |
 | drawing    | [DrawingConfig](#drawingconfig)       | Opções para ativar e personalizar ferramentas de desenho. |
+| tools      | [MapToolsConfig](#maptoolsconfig)     | Ferramentas do mapa (tela cheia, centralizar, medição).   |
 
 ## MapConfig
 
@@ -141,6 +142,37 @@
 | errorDegreesRequired                     | string | Mensagem de erro para graus obrigatório.                            |
 | errorFirstRowXY                          | string | Mensagem de erro para primeira linha X/Y.                           |
 | errorProvideCoordinatesOrAzimuthDistance | string | Mensagem de erro para coordenadas ou azimute/distância necessários. |
+
+## MapToolsConfig
+
+Ferramentas opcionais do mapa. Por padrão `show: false` (compatível com consumidores existentes).
+
+| Campo        | Tipo                                      | Descrição                                              |
+|--------------|-------------------------------------------|--------------------------------------------------------|
+| show         | boolean                                   | Ativa o bloco de ferramentas do mapa.                  |
+| position     | [ZoomControlPosition](#zoomcontrolposition) | Posição dos controles (default: `topright`).         |
+| fullscreen   | `{ show?: boolean; title?: string }`      | Botão de tela cheia (Fullscreen API do navegador).     |
+| center       | ver abaixo                                | Botão para centralizar/enquadrar o mapa.               |
+| measureArea  | ver abaixo                                | Ferramenta efêmera de medição de área (Geoman + Turf). |
+| texts        | `{ measureResult?: string; noGeometry?: string }` | Textos auxiliares.                         |
+
+### center
+
+| Campo   | Tipo                         | Descrição                                                         |
+|---------|------------------------------|-------------------------------------------------------------------|
+| show    | boolean                      | Exibe o botão de centralizar.                                     |
+| title   | string                       | Tooltip do botão.                                                 |
+| target  | `'drawn' \| 'initial'`       | `drawn`: enquadra `drawItemsGroup`; `initial`: centro/zoom inicial. |
+| padding | `[number, number]`           | Padding do `fitBounds`.                                           |
+
+### measureArea
+
+| Campo         | Tipo                              | Descrição                                           |
+|---------------|-----------------------------------|-----------------------------------------------------|
+| show          | boolean                           | Exibe o botão de medição.                           |
+| title         | string                            | Tooltip do botão.                                   |
+| units         | `('ha' \| 'm2' \| 'km2')[]`       | Unidades exibidas no popup após medir.              |
+| shapeOptions  | [PathOptions](https://leafletjs.com/reference.html#path) | Estilo do polígono de medição. |
 
 ## DrawingConfig
 

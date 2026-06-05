@@ -314,6 +314,52 @@
               </div>
             </div>
           </ElTabPane>
+
+          <ElTabPane
+            :label="texts.shapefileUpload"
+            name="shapefile"
+          >
+            <div class="coordinate-section">
+              <h4>{{ texts.shapefileFileUpload }}</h4>
+              <div class="csv-upload">
+                <ElUpload
+                  ref="shapefileUploadRef"
+                  class="upload-area"
+                  drag
+                  action="#"
+                  :auto-upload="false"
+                  :on-change="handleShapefileChange"
+                  :on-remove="handleShapefileRemove"
+                  :limit="1"
+                  accept=".zip"
+                >
+                  <FontAwesomeIcon
+                    iconName="upload"
+                    class="upload-icon"
+                  />
+                  <div class="el-upload__text">
+                    {{ texts.dragShapefileZip }}
+                  </div>
+                  <template #tip>
+                    <div class="el-upload__tip">
+                      {{ texts.shapefileZipInfo }}
+                    </div>
+                  </template>
+                </ElUpload>
+                <ElButton
+                  type="danger"
+                  class="clear-button"
+                  v-if="shapefileLoaded"
+                  :title="texts.clearGeometriesTitle"
+                  :aria-label="texts.clearGeometriesDescription"
+                  @click="clearGeometries"
+                >
+                  <FontAwesomeIcon iconName="trash" />
+                  {{ texts.clearGeometries }}
+                </ElButton>
+              </div>
+            </div>
+          </ElTabPane>
         </ElTabs>
       </div>
     </div>
@@ -345,13 +391,19 @@
   import { CoordinateConverter } from '../../utils/CoordinateConverter'
   import DrawingControlHandler from '../../handlers/drawingControl'
   import type { DescriptiveMemorial } from '../../types'
+  import { parseShapefileZip } from '../../utils/parseShapefileZip'
+  import { validateShapefileGeometry } from '../../utils/validateShapefileGeometry'
+  import type { Feature, MultiPolygon, Polygon } from 'geojson'
 
   interface CSVRow {
     X?: string
     Y?: string
     AZIMUTH?: string
     DISTANCIA?: string
+    DISTANCE?: string
   }
+
+  const rowDistance = (row: CSVRow): string | undefined => row.DISTANCIA ?? row.DISTANCE
 
   interface ParsedData {
     data: CSVRow[]
@@ -382,6 +434,7 @@
     (e: 'systemChange', system: string): void
     (e: 'coordinatesChange', coordinates: { lat: number; lng: number }): void
     (e: 'geometryChange', geometry: string): void
+    (e: 'geometryGeoJsonChange', feature: Feature<Polygon | MultiPolygon>): void
     (e: 'geometryRemoved'): void
   }>()
 
@@ -392,6 +445,9 @@
   const latitude = ref<string>('')
   const longitude = ref<string>('')
   const csvData = ref<Array<{ x: number; y: number; azimuth: number; distance: number }>>([])
+  const shapefileLoaded = ref<boolean>(false)
+  const uploadRef = ref()
+  const shapefileUploadRef = ref()
   const manualInput = ref({
     x: '',
     y: '',
@@ -407,7 +463,6 @@
   const manualPoints = ref<any[]>([])
   const manualGeometries = ref<string[]>([])
   const editingIndex = ref<number | null>(null)
-  const uploadRef = ref()
   let drawingControlInstance: DrawingControlHandler | null = null
 
   const texts = computed(() => {
@@ -529,19 +584,36 @@
   const convertDMSToDDFromString = (dmsString: string): number => {
     const cleanString = dmsString.trim().toUpperCase()
 
-    if (cleanString.includes('°') || cleanString.includes('′') || cleanString.includes('″')) {
-      const degrees = parseInt(cleanString.split('°')[0])
-      const minutes = parseInt(cleanString.split('°')[1].split('′')[0])
-      const seconds = parseFloat(cleanString.split('′')[1].split('″')[0])
+    if (!cleanString) return NaN
 
+    // Graus decimais com sufixo ° (ex.: -44.990400°) — sem minutos/segundos
+    if (cleanString.includes('°') && !cleanString.includes('′') && !cleanString.includes('″')) {
+      const decimalPart = cleanString.split('°')[0].replace(',', '.')
+      const value = parseFloat(decimalPart)
       const isNegative = cleanString.includes('S') || cleanString.includes('W')
 
-      let dd = degrees + minutes / 60 + seconds / 3600
+      if (Number.isNaN(value)) return NaN
+      return isNegative ? -Math.abs(value) : value
+    }
+
+    if (cleanString.includes('°') || cleanString.includes('′') || cleanString.includes('″')) {
+      const degreesPart = cleanString.split('°')[0] || '0'
+      const afterDegrees = cleanString.split('°')[1] || ''
+      const minutesPart = afterDegrees.split('′')[0] || '0'
+      const afterMinutes = afterDegrees.split('′')[1] || ''
+      const secondsPart = afterMinutes.split('″')[0] || afterMinutes.split('"')[0] || '0'
+
+      const degrees = parseInt(degreesPart, 10) || 0
+      const minutes = parseInt(minutesPart, 10) || 0
+      const seconds = parseFloat(secondsPart.replace(',', '.')) || 0
+
+      const isNegative = cleanString.includes('S') || cleanString.includes('W')
+      const dd = Math.abs(degrees) + minutes / 60 + seconds / 3600
 
       return isNegative ? -dd : dd
     }
 
-    return parseFloat(dmsString)
+    return parseFloat(cleanString.replace(',', '.'))
   }
 
   const processCSVData = (data: CSVRow[]): Point[] => {
@@ -549,20 +621,26 @@
     let lastPoint: Point | null = null
 
     for (const row of data) {
+      const distanceValue = rowDistance(row)
+      const hasXY = Boolean(row.X?.trim() && row.Y?.trim())
+      const hasAzimuthDistance = Boolean(row.AZIMUTH?.trim() && distanceValue?.trim())
+
+      if (!hasXY && !hasAzimuthDistance) continue
+
       let currentPoint: Point | null = null
 
-      if (row.X && row.Y) {
+      if (hasXY) {
         currentPoint = {
-          x: convertDMSToDDFromString(row.X),
-          y: convertDMSToDDFromString(row.Y)
+          x: convertDMSToDDFromString(row.X!),
+          y: convertDMSToDDFromString(row.Y!)
         }
-      } else if (row.AZIMUTH && row.DISTANCIA && lastPoint) {
-        const azimuth = parseFloat(row.AZIMUTH)
-        const distance = parseFloat(row.DISTANCIA)
+      } else if (hasAzimuthDistance && lastPoint) {
+        const azimuth = parseFloat(row.AZIMUTH!)
+        const distance = parseFloat(distanceValue!)
         currentPoint = calculateNewPoint(lastPoint, azimuth, distance)
       }
 
-      if (currentPoint) {
+      if (currentPoint && !Number.isNaN(currentPoint.x) && !Number.isNaN(currentPoint.y)) {
         points.push(currentPoint)
         lastPoint = currentPoint
       }
@@ -574,30 +652,26 @@
   const handleFileChange = (file: any) => {
     if (file.raw) {
       csvData.value = []
-      if (props.map) {
-        props.map.eachLayer(layer => {
-          if (
-            (layer instanceof L.Polyline || layer instanceof L.Polygon || layer instanceof L.Marker) &&
-            (layer as any).options?.nome === 'memorial'
-          ) {
-            props.map?.removeLayer(layer)
-          }
-        })
-      }
+      shapefileLoaded.value = false
+      emit('geometryRemoved')
 
       Papa.parse(file.raw, {
         header: true,
+        skipEmptyLines: true,
         complete: (results: Papa.ParseResult<CSVRow>) => {
-          const headers = results.meta.fields || []
-          const requiredHeaders = ['X', 'Y', 'AZIMUTH', 'DISTANCIA']
+          const rows = results.data.filter(
+            (row) =>
+              (row.X?.trim() && row.Y?.trim()) ||
+              (row.AZIMUTH?.trim() && rowDistance(row)?.trim())
+          )
 
-          const firstRow = results.data[0]
-          if (!firstRow.X || !firstRow.Y) {
+          const firstRow = rows[0]
+          if (!firstRow?.X?.trim() || !firstRow?.Y?.trim()) {
             ElMessage.error(texts.value.errorFirstRowXY)
             return
           }
 
-          const points = processCSVData(results.data)
+          const points = processCSVData(rows)
           if (points.length > 0) {
             csvData.value = points.map(p => ({
               x: p.x,
@@ -616,18 +690,42 @@
   const handleFileRemove = () => {
     csvData.value = []
     manualGeometries.value = []
-    if (props.map) {
-      props.map.eachLayer(layer => {
-        if (
-          (layer instanceof L.Polyline || layer instanceof L.Polygon || layer instanceof L.Marker) &&
-          (layer as any).options?.nome === 'memorial'
-        ) {
-          props.map?.removeLayer(layer)
-        }
-      })
-    }
     if (uploadRef.value) {
       uploadRef.value.clearFiles()
+    }
+    emit('geometryRemoved')
+  }
+
+  const handleShapefileChange = async (file: any) => {
+    if (!file.raw) return
+
+    emit('geometryRemoved')
+    csvData.value = []
+    shapefileLoaded.value = false
+
+    const parseResult = await parseShapefileZip(file.raw)
+    if (!parseResult.ok) {
+      ElMessage.error(parseResult.error)
+      shapefileUploadRef.value?.clearFiles()
+      return
+    }
+
+    const validationResult = validateShapefileGeometry(parseResult.features)
+    if (!validationResult.ok) {
+      ElMessage.error(validationResult.error)
+      shapefileUploadRef.value?.clearFiles()
+      return
+    }
+
+    shapefileLoaded.value = true
+    emit('geometryGeoJsonChange', validationResult.feature)
+    ElMessage.success(texts.value.shapefileAppliedSuccess)
+  }
+
+  const handleShapefileRemove = () => {
+    shapefileLoaded.value = false
+    if (shapefileUploadRef.value) {
+      shapefileUploadRef.value.clearFiles()
     }
     emit('geometryRemoved')
   }
@@ -834,18 +932,12 @@
     manualGeometries.value = []
     csvData.value = []
     manualPoints.value = []
-    if (props.map) {
-      props.map.eachLayer(layer => {
-        if (
-          (layer instanceof L.Polyline || layer instanceof L.Polygon || layer instanceof L.Marker) &&
-          (layer as any).options?.nome === 'memorial'
-        ) {
-          props.map?.removeLayer(layer)
-        }
-      })
-    }
+    shapefileLoaded.value = false
     if (uploadRef.value) {
       uploadRef.value.clearFiles()
+    }
+    if (shapefileUploadRef.value) {
+      shapefileUploadRef.value.clearFiles()
     }
     manualInput.value = {
       x: '',

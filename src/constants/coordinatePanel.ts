@@ -42,8 +42,15 @@ export const COORDINATE_PANEL_TEXTS: CoordinatePanelTexts = {
   csvUpload: 'Upload CSV',
   csvFileUpload: 'Upload de Arquivo CSV',
   dragCsvFile: 'Arraste o arquivo CSV ou clique para fazer upload',
-  csvColumnsInfo: 'O arquivo deve conter as colunas: X, Y, AZIMUTH, DISTANCIA',
+  csvColumnsInfo: 'O arquivo deve conter as colunas: X, Y, AZIMUTH, DISTANCIA (ou DISTANCE)',
   applyCsvCoordinates: 'Aplicar Coordenadas do CSV',
+
+  shapefileUpload: 'Upload Shapefile',
+  shapefileFileUpload: 'Upload de Arquivo Shapefile',
+  dragShapefileZip: 'Arraste o arquivo ZIP ou clique para fazer upload',
+  shapefileZipInfo:
+    'Envie um .zip com .shp, .shx e .dbf contendo uma única geometria Polygon ou MultiPolygon',
+  shapefileAppliedSuccess: 'Shapefile aplicado com sucesso',
 
   placeholderLongitude: 'Ex: -46.6333',
   placeholderLatitude: 'Ex: -23.5505',

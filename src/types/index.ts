@@ -105,10 +105,58 @@ export type MemorialConfig = {
   controlTexts?: any
 }
 
+export type MapToolsConfig = {
+  show?: boolean
+  position?: ControlPosition
+  fullscreen?: { show?: boolean; title?: string }
+  center?: {
+    show?: boolean
+    title?: string
+    target?: 'drawn' | 'initial'
+    padding?: [number, number]
+  }
+  measureArea?: {
+    show?: boolean
+    title?: string
+    shapeOptions?: PathOptions
+  }
+  measureLine?: {
+    show?: boolean
+    title?: string
+  }
+  measurePolygon?: {
+    show?: boolean
+    title?: string
+  }
+  texts?: {
+    measureResult?: string
+    measureLength?: string
+    measureArea?: string
+    measureCancel?: string
+    measureFinish?: string
+    measurePanelTitle?: string
+    measureLineTitle?: string
+    measurePolygonTitle?: string
+    measureLineHelp?: string
+    measurePolygonHelp?: string
+    noGeometry?: string
+  }
+}
+
+export type MeasureCompleteEvent = {
+  m2?: number
+  km2?: number
+  ha?: number
+  lengthM?: number
+  lengthKm?: number
+  geojson: GeoJsonObject
+}
+
 export type MapOptionsConfig = {
   layersMenu?: LayersMenuConfig
   map: MapConfig
   drawing?: DrawingConfig
+  tools?: MapToolsConfig
 }
 
 export type DrawingConfig = DrawingControlOptions & DisplayDrawingControl
@@ -184,6 +232,11 @@ export type CoordinatePanelTexts = {
   dragCsvFile?: string
   csvColumnsInfo?: string
   applyCsvCoordinates?: string
+  shapefileUpload?: string
+  shapefileFileUpload?: string
+  dragShapefileZip?: string
+  shapefileZipInfo?: string
+  shapefileAppliedSuccess?: string
   placeholderLongitude?: string
   placeholderLatitude?: string
   placeholderAzimuth?: string

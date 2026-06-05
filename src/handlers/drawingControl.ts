@@ -1,15 +1,14 @@
 import L, { Map, FeatureGroup, Layer, PathOptions, Icon, Point } from 'leaflet'
 import '@geoman-io/leaflet-geoman-free'
 import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css'
-import { area } from '@turf/turf'
 
 import { DEFAULT_DRAW_OPTIONS } from './constants'
+import { calculateLayerArea } from '../utils/areaCalculator'
 import {
   DrawingConfig,
   GeomanDrawingEvent,
   IncrementedLayer,
   TranslationConfig,
-  DrawnArea,
   ToolbarOptions,
   PMToolbarOptions,
   PMSupportedShapes
@@ -43,33 +42,17 @@ export default class DrawingControlHandler {
     return this._options
   }
 
-  private calculateAreas(layer: Layer): DrawnArea {
-    if (layer instanceof L.Polygon || layer instanceof L.Rectangle) {
-      const drawnArea: number = area(layer.toGeoJSON())
-
-      return {
-        m2: drawnArea,
-        km2: drawnArea / 1000000,
-        ha: drawnArea / 10000
-      }
-    }
-
-    return {
-      m2: 0,
-      km2: 0,
-      ha: 0
-    }
-  }
-
   private incrementLayerInfos(layer: Layer): IncrementedLayer {
     const newLayer = layer as IncrementedLayer
-    newLayer.drawnArea = this.calculateAreas(layer)
+    newLayer.drawnArea = calculateLayerArea(layer)
 
     return newLayer
   }
 
   public handleDrawingEvents(eventEmitterCallback: Function): void {
     this._map.on('pm:create', (evt: GeomanDrawingEvent) => {
+      if ((this._map as L.Map & { _leafletMeasureActive?: boolean })._leafletMeasureActive) return
+
       const { layer } = evt
 
       this._drawItemsGroup.addLayer(layer)
@@ -157,7 +140,7 @@ export default class DrawingControlHandler {
       iconUrl: markerIcon
     })
 
-    this._map.pm.setGlobalOptions({ markerStyle: { icon: MyCustomMarker } })
+    this._map.pm.setGlobalOptions({ markerStyle: { icon: MyCustomMarker, pane: 'markerPane' } })
   }
 
   private getOrCreateCustomContainer(): HTMLElement {

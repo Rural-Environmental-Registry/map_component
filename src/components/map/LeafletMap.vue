@@ -12,6 +12,7 @@
   import MapHandler from '../../handlers/mapHandler'
   import MapToolsHandler from '../../handlers/mapToolsHandler'
   import { resolveMapToolsConfig } from '../../handlers/toolsConstants'
+  import { bindMarkerZoomStability } from '../../utils/stableMarker'
   import {
     DrawingConfig,
     DrawingEvent,
@@ -47,6 +48,17 @@
 
   let mapHandlerInstance: MapHandler | null = null
   let mapToolsHandler: MapToolsHandler | null = null
+  let unbindMarkerZoomStability: (() => void) | null = null
+
+  const setupMarkerZoomStability = (): void => {
+    unbindMarkerZoomStability?.()
+    unbindMarkerZoomStability = null
+
+    if (props.mapOptions?.config?.stabilizeMarkersOnZoom === false) return
+    if (!map.value || !drawItemsGroup.value) return
+
+    unbindMarkerZoomStability = bindMarkerZoomStability(map.value, drawItemsGroup.value)
+  }
 
   onMounted(async () => {
     initMap()
@@ -58,6 +70,8 @@
   })
 
   onBeforeUnmount(() => {
+    unbindMarkerZoomStability?.()
+    unbindMarkerZoomStability = null
     mapToolsHandler?.destroy()
     mapToolsHandler = null
   })
@@ -117,6 +131,7 @@
     map.value = drawingControlHandler.map
 
     mapToolsHandler?.setDrawItemsGroup(drawItemsGroup.value)
+    setupMarkerZoomStability()
   }
 
   const centerMap = (): void => {

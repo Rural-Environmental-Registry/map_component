@@ -87,6 +87,8 @@ export type MapConfigConfig = MapOptions & {
   id: string
   removeControlLayers?: boolean
   zoomControlPosition?: ControlPosition
+  /** Reposiciona marcadores após zoom (evita drift de divIcon). Padrão: true. */
+  stabilizeMarkersOnZoom?: boolean
 }
 
 export type MapConfig = {

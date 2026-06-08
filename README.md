@@ -414,6 +414,25 @@ npm run build
 
 Em seguida, sincronize para o frontend (o `./start.sh` na raiz do core faz isso automaticamente via `rsync`, excluindo `.git` e `node_modules`).
 
+### Marcadores estáveis no zoom
+
+Opções em `options.map.config`:
+
+| Opção | Descrição |
+|-------|-----------|
+| `markerZoomAnimation: false` | Desativa animação de marcadores no zoom (padrão no componente) |
+| `stabilizeMarkersOnZoom: true` | Reposiciona marcadores após `zoomend` (evita drift de `divIcon`) |
+
+Utilitários exportados pelo pacote (para consumidores que criam marcadores fora do fluxo interno):
+
+```typescript
+import { createStableMarker, bindMarkerZoomStability } from '@rural-environmental-registry/map_component'
+
+const marker = createStableMarker(L, latlng, { icon: customDivIcon, layerCode: 'hq' })
+```
+
+O `LeafletMap` aplica `bindMarkerZoomStability` automaticamente no `drawItemsGroup` quando `stabilizeMarkersOnZoom` não é `false`.
+
 ### Dependências relevantes
 
 | Pacote | Uso |

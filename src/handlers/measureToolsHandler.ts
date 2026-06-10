@@ -144,13 +144,17 @@ export default class MeasureToolsHandler {
         const finishBtn = handler._interactionPanel.querySelector('.js-finish')
 
         if (cancelBtn instanceof HTMLElement) {
-          L.DomEvent.on(cancelBtn, 'click', L.DomEvent.stop)
-          L.DomEvent.on(cancelBtn, 'click', () => handler.cancel())
+          L.DomEvent.on(cancelBtn, 'click', (e) => {
+            L.DomEvent.stop(e)
+            handler.cancel()
+          })
         }
 
         if (finishBtn instanceof HTMLElement) {
-          L.DomEvent.on(finishBtn, 'click', L.DomEvent.stop)
-          L.DomEvent.on(finishBtn, 'click', () => handler.finishDrawing())
+          L.DomEvent.on(finishBtn, 'click', (e) => {
+            L.DomEvent.stop(e)
+            handler.finishDrawing()
+          })
         }
 
         L.DomEvent.disableClickPropagation(container)

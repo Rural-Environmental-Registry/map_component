@@ -38,7 +38,6 @@
         :data="child"
         :persist="props.persist"
         @onChildLayerToggle="onChildChange($event, idx)"
-        @onInitDefaultLayer="onInitDefaultLayer($event, idx)"
       />
     </template>
   </ElSubMenu>
@@ -51,7 +50,7 @@
   import FontAwesomeIcon from '../fa-icon/FontAwesomeIcon.vue'
   import ChildMenu from './ChildMenu.vue'
   import { GroupLayerData, LayerData } from '../../types'
-  import { setHistory } from '../../utils/menuHistory.ts'
+  import { resolveLayerActiveState, setHistory } from '../../utils/menuHistory.ts'
 
   type ParentMenuProps = {
     groupData: GroupLayerData
@@ -66,7 +65,9 @@
     onInitDefaultLayer: [LayerData]
   }>()
 
-  const childrenLayers = ref<LayerData[]>(props.groupData.layers)
+  const childrenLayers = ref<LayerData[]>(
+    props.groupData.layers.map((layer) => resolveLayerActiveState(layer, props.persist))
+  )
 
   const toggleVisibleAllLayers = (): void => {
     if (props.persist) childrenLayers.value.forEach((layer: LayerData) => setHistory(layer))

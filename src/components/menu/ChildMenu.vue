@@ -40,10 +40,10 @@
 
 <script lang="ts" setup>
   import { ElDivider, ElMenuItem, ElSwitch } from 'element-plus'
-  import { computed, onMounted } from 'vue'
+  import { computed } from 'vue'
   import FontAwesomeIcon from '../fa-icon/FontAwesomeIcon.vue'
   import { LayerData } from '../../types'
-  import { getHistory, setHistory } from '../../utils/menuHistory.ts'
+  import { setHistory } from '../../utils/menuHistory.ts'
 
   type ChildMenuProps = {
     data: LayerData
@@ -52,7 +52,7 @@
 
   const props = defineProps<ChildMenuProps>()
 
-  const emit = defineEmits<{ onChildLayerToggle: [LayerData]; onInitDefaultLayer: [LayerData] }>()
+  const emit = defineEmits<{ onChildLayerToggle: [LayerData] }>()
 
   const active = computed<boolean>({
     get: () => props.data.active,
@@ -67,14 +67,6 @@
     emit('onChildLayerToggle', layer)
   }
 
-  onMounted(() => {
-    getHistory(props.data)
-
-    if (props.data.activeDefault) {
-      props.data.active = props.data.activeDefault
-      emit('onInitDefaultLayer', props.data)
-    }
-  })
 </script>
 
 <style>

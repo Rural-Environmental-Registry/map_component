@@ -4,17 +4,6 @@
     class="map-container"
   >
     <Loading :isLoading="(isLoading || showLoading) && !disableLoading" />
-    <LayerMenu
-      v-if="mapRef && layers?.customLayers"
-      :layerControl="mapRef.layerControl"
-      :layersConfig="layers.customLayers"
-      :map="mapRef.map"
-      :options="options.layersMenu"
-      @onChildLayerToggle="emit('onChildLayerToggle', $event)"
-      @onGroupLayerToggle="emit('onGroupLayerToggle', $event)"
-      @startLoading="isLoading = true"
-      @stopLoading="isLoading = false"
-    />
     <Map
       ref="mapRef"
       :drawingOptions="options.drawing"
@@ -25,6 +14,17 @@
       @onDrawing="emit('onDrawing', $event)"
       @onFullscreenChange="emit('onFullscreenChange', $event)"
       @onMeasureComplete="emit('onMeasureComplete', $event)"
+      @startLoading="isLoading = true"
+      @stopLoading="isLoading = false"
+    />
+    <LayerMenu
+      v-if="mapRef?.map && layers?.customLayers"
+      :layerControl="mapRef.layerControl"
+      :layersConfig="layers.customLayers"
+      :map="mapRef.map"
+      :options="options.layersMenu"
+      @onChildLayerToggle="emit('onChildLayerToggle', $event)"
+      @onGroupLayerToggle="emit('onGroupLayerToggle', $event)"
       @startLoading="isLoading = true"
       @stopLoading="isLoading = false"
     />

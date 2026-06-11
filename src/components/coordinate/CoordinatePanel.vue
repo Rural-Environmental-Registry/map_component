@@ -785,8 +785,8 @@
           ElMessage.error(texts.value.errorXYRequired)
           return
         }
-        x = parseFloat(manualInput.value.x) || parseFloat(manualPoints.value[editingIndex.value].x)
-        y = parseFloat(manualInput.value.y) || parseFloat(manualPoints.value[editingIndex.value].y)
+        x = manualInput.value.x !== '' ? parseFloat(manualInput.value.x) : parseFloat(manualPoints.value[editingIndex.value].x)
+        y = manualInput.value.y !== '' ? parseFloat(manualInput.value.y) : parseFloat(manualPoints.value[editingIndex.value].y)
       } else {
         if (editingIndex.value === 0 && (!manualInput.value.xDegrees || !manualInput.value.yDegrees)) {
           ElMessage.error(texts.value.errorDegreesRequired)

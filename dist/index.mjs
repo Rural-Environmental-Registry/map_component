@@ -31548,7 +31548,7 @@ const Ki = /* @__PURE__ */ Ge({
     groupData: {},
     persist: { type: Boolean }
   },
-  emits: ["onChildLayerToggle", "onGroupLayerToggle", "onInitDefaultLayer"],
+  emits: ["onChildLayerToggle", "onGroupLayerToggle"],
   setup(e, { emit: t }) {
     const n = e, i = t, a = te(
       n.groupData.layers.map((f) => D0(f, n.persist))
@@ -31739,8 +31739,7 @@ const Ki = /* @__PURE__ */ Ge({
                 groupData: G,
                 persist: !!((Q = i.options) != null && Q.persist),
                 onOnChildLayerToggle: _,
-                onOnGroupLayerToggle: w,
-                onOnInitDefaultLayer: g
+                onOnGroupLayerToggle: w
               }, null, 8, ["groupData", "persist"]);
             }), 128)),
             N[2] || (N[2] = Pe("div", { id: "external-id-bottom-menu" }, null, -1))

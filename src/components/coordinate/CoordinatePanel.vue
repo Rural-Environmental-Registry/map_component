@@ -792,10 +792,10 @@
           ElMessage.error(texts.value.errorDegreesRequired)
           return
         }
-        x = manualInput.value.xDegrees
+        x =  manualInput.value.xDegrees !== ''
           ? convertDMSToDD(manualInput.value.xDegrees, manualInput.value.xMinutes, manualInput.value.xSeconds)
           : parseFloat(manualPoints.value[editingIndex.value].x)
-        y = manualInput.value.yDegrees
+        y = manualInput.value.yDegrees !== ''
           ? convertDMSToDD(manualInput.value.yDegrees, manualInput.value.yMinutes, manualInput.value.ySeconds)
           : parseFloat(manualPoints.value[editingIndex.value].y)
       }

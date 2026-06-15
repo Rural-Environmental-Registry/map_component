@@ -21,7 +21,6 @@
           :persist="!!props.options?.persist"
           @onChildLayerToggle="onChildLayerChange"
           @onGroupLayerToggle="onGroupLayerToggle"
-          @onInitDefaultLayer="onInitDefaultLayer"
         />
       </template>
       <div id="external-id-bottom-menu"></div>

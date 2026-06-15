@@ -62,7 +62,6 @@
   const emit = defineEmits<{
     onChildLayerToggle: [LayerData]
     onGroupLayerToggle: [GroupLayerData]
-    onInitDefaultLayer: [LayerData]
   }>()
 
   const childrenLayers = ref<LayerData[]>(
@@ -95,11 +94,6 @@
   const onChildChange = (layer: LayerData, idx: number): void => {
     childrenLayers.value[idx] = layer
     emit('onChildLayerToggle', layer)
-  }
-
-  const onInitDefaultLayer = (layer: LayerData, idx: number): void => {
-    childrenLayers.value[idx] = layer
-    emit('onInitDefaultLayer', layer)
   }
 </script>
 

@@ -389,7 +389,7 @@
   import L from 'leaflet'
   import { COORDINATE_PANEL_TEXTS } from '../../constants/coordinatePanel'
   import { CoordinateConverter } from '../../utils/CoordinateConverter'
-  import DrawingControlHandler from '../../handlers/drawingControl'
+  import MemorialButtonControl from '../../handlers/memorialButtonControl'
   import type { DescriptiveMemorial } from '../../types'
   import { parseShapefileZip } from '../../utils/parseShapefileZip'
   import { validateShapefileGeometry } from '../../utils/validateShapefileGeometry'
@@ -463,7 +463,7 @@
   const manualPoints = ref<any[]>([])
   const manualGeometries = ref<string[]>([])
   const editingIndex = ref<number | null>(null)
-  let drawingControlInstance: DrawingControlHandler | null = null
+  let memorialButtonControl: MemorialButtonControl | null = null
 
   const texts = computed(() => {
     return { ...COORDINATE_PANEL_TEXTS, ...props.descriptiveMemorial?.customTexts }
@@ -473,42 +473,40 @@
     isOpen.value = !isOpen.value
   }
 
-  const getDrawingControlInstance = (): DrawingControlHandler | null => {
-    if (!drawingControlInstance && props.map) {
-      drawingControlInstance = new DrawingControlHandler(props.map, new L.FeatureGroup())
+  const getMemorialButtonControl = (): MemorialButtonControl | null => {
+    if (!memorialButtonControl && props.map) {
+      memorialButtonControl = new MemorialButtonControl(props.map)
     }
 
-    return drawingControlInstance
+    return memorialButtonControl
   }
 
   onMounted(() => {
     if (props.descriptiveMemorial?.show) {
-      const controller = getDrawingControlInstance()
+      const controller = getMemorialButtonControl()
       if (controller) {
         const buttonTitle = texts.value.memorialDescriptive || ''
-        controller.addMemorialDescriptiveButton(togglePanel, buttonTitle)
+        controller.add(togglePanel, buttonTitle)
       }
     }
   })
 
   onBeforeUnmount(() => {
-    const controller = getDrawingControlInstance()
-    if (controller) {
-      controller.removeMemorialDescriptiveButton()
-    }
+    memorialButtonControl?.remove()
+    memorialButtonControl = null
   })
 
   watch(
     () => props.descriptiveMemorial?.show,
     newValue => {
-      const controller = getDrawingControlInstance()
+      const controller = getMemorialButtonControl()
       if (!controller) return
 
       if (newValue) {
         const buttonTitle = texts.value.memorialDescriptive || ''
-        controller.addMemorialDescriptiveButton(togglePanel, buttonTitle)
+        controller.add(togglePanel, buttonTitle)
       } else {
-        controller.removeMemorialDescriptiveButton()
+        controller.remove()
       }
     }
   )
@@ -516,9 +514,9 @@
   watch(
     () => props.descriptiveMemorial?.customTexts?.memorialDescriptive,
     newTitle => {
-      const controller = getDrawingControlInstance()
+      const controller = getMemorialButtonControl()
       if (newTitle && controller) {
-        controller.updateMemorialDescriptiveButtonTitle(newTitle)
+        controller.updateTitle(newTitle)
       }
     }
   )
@@ -798,6 +796,11 @@
         y = manualInput.value.yDegrees !== ''
           ? convertDMSToDD(manualInput.value.yDegrees, manualInput.value.yMinutes, manualInput.value.ySeconds)
           : parseFloat(manualPoints.value[editingIndex.value].y)
+      }
+
+      if (Number.isNaN(x) || Number.isNaN(y)) {
+        ElMessage.error(texts.value.errorProvideCoordinatesOrAzimuthDistance)
+        return
       }
 
       manualPoints.value[editingIndex.value] = {

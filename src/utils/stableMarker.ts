@@ -31,13 +31,17 @@ export function createStableMarker(
  */
 export function bindMarkerZoomStability(map: Map, layerGroup: FeatureGroup): () => void {
   const handler = (): void => {
-    layerGroup.eachLayer(layer => {
-      if (typeof (layer as Marker).getLatLng !== 'function') return
-      const latlng = (layer as Marker).getLatLng()
-      if (latlng) {
-        ;(layer as Marker).setLatLng(latlng)
+    const stabilize = (layer: any): void => {
+      if (typeof layer.getLatLng === 'function' && typeof layer.setLatLng === 'function') {
+        const latlng = layer.getLatLng()
+        if (latlng) {
+          layer.setLatLng(latlng)
+        }
+      } else if (typeof layer.eachLayer === 'function') {
+        layer.eachLayer(stabilize)
       }
-    })
+    }
+    layerGroup.eachLayer(stabilize)
   }
 
   map.on('zoomend', handler)

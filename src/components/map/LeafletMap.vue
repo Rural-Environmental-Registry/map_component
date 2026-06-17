@@ -12,6 +12,7 @@
   import MapHandler from '../../handlers/mapHandler'
   import MapToolsHandler from '../../handlers/mapToolsHandler'
   import { resolveMapToolsConfig } from '../../handlers/toolsConstants'
+  import { resolveDrawingPathOptions, type MemorialDrawShape } from '../../utils/drawingPathOptions'
   import { bindMarkerZoomStability } from '../../utils/stableMarker'
   import {
     DrawingConfig,
@@ -154,11 +155,15 @@
     mapToolsHandler?.toggleMeasureArea()
   }
 
+  const getDrawingPathOptions = (shape: MemorialDrawShape) =>
+    resolveDrawingPathOptions(map.value, props.drawingOptions, shape)
+
   defineExpose({
     map,
     layerControl,
     drawItemsGroup,
     leaflet: L,
+    getDrawingPathOptions,
     centerMap,
     enterFullscreen,
     exitFullscreen,

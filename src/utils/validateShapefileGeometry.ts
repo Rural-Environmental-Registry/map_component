@@ -17,6 +17,7 @@ function isRingClosed(ring: Position[]): boolean {
 }
 
 function validateRingsClosed(geometry: Polygon | MultiPolygon): boolean {
+  if (!Array.isArray(geometry?.coordinates)) return false
   const polygons = geometry.type === 'Polygon' ? [geometry.coordinates] : geometry.coordinates
   return polygons.every(polygon => polygon.every(ring => isRingClosed(ring)))
 }

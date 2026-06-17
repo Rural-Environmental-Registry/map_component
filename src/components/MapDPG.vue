@@ -58,6 +58,8 @@
   import LayerMenu from './menu/LayerMenu.vue'
   import CoordinatePanel from './coordinate/CoordinatePanel.vue'
   import { isMemorialLayer, MEMORIAL_KEY } from '../utils/memorialLayer'
+  import { resolveDrawingPathOptions } from '../utils/drawingPathOptions'
+  import type { MemorialDrawShape } from '../utils/drawingPathOptions'
   import type { Feature, MultiPolygon, Polygon } from 'geojson'
 
   type MapaDPGProps = {
@@ -68,7 +70,7 @@
     descriptiveMemorial: DescriptiveMemorial
   }
 
-  withDefaults(defineProps<MapaDPGProps>(), {
+  const props = withDefaults(defineProps<MapaDPGProps>(), {
     options: () => ({
       map: {},
       layersMenu: {
@@ -93,9 +95,9 @@
   type MapRef = {
     map: L.Map
     layerControl: L.Control.Layers
-    drawControl: L.Control.Draw
     drawItemsGroup: L.FeatureGroup
     leaflet: typeof L
+    getDrawingPathOptions: (shape: MemorialDrawShape) => L.PathOptions
     centerMap: () => void
     enterFullscreen: () => void
     exitFullscreen: () => void
@@ -107,6 +109,10 @@
   const mapContainerRef = ref<HTMLElement | null>(null)
   const coordinatePanelRef = ref()
   const isLoading = ref<boolean>(false)
+
+  const getMemorialPathOptions = (shape: MemorialDrawShape): L.PathOptions =>
+    mapRef.value?.getDrawingPathOptions(shape) ??
+    resolveDrawingPathOptions(mapRef.value?.map, props.options.drawing, shape)
 
   const handleCoordinateSystemChange = (system: string) => {
     emit('onCoordinateSystemChange', system)
@@ -124,17 +130,17 @@
         return [parseFloat(y), parseFloat(x)] as [number, number]
       })
 
-    const polygonColor = (mapRef.value?.drawControl?.options as any)?.draw?.polygon?.shapeOptions?.color || '#3388ff'
-    const polylineColor = (mapRef.value?.drawControl?.options as any)?.draw?.polyline?.shapeOptions?.color || '#3388ff'
+    const polylineStyle = getMemorialPathOptions('polyline')
+    const polygonStyle = getMemorialPathOptions('polygon')
 
     let leafletGeometry: L.Layer & { options: { memorialKey?: string } }
 
     if (geometry.startsWith('POINT')) {
       leafletGeometry = L.marker(coordinates[0])
     } else if (geometry.startsWith('LINESTRING')) {
-      leafletGeometry = L.polyline(coordinates as [number, number][], { color: polylineColor })
+      leafletGeometry = L.polyline(coordinates as [number, number][], polylineStyle)
     } else if (geometry.startsWith('POLYGON')) {
-      leafletGeometry = L.polygon(coordinates as [number, number][], { color: polygonColor })
+      leafletGeometry = L.polygon(coordinates as [number, number][], polygonStyle)
     } else {
       console.error('Tipo de geometria não suportado:', geometry)
       return
@@ -179,11 +185,10 @@
 
     removeMemorialLayers()
 
-    const polygonColor =
-      (mapRef.value?.drawControl?.options as any)?.draw?.polygon?.shapeOptions?.color || '#3388ff'
+    const polygonStyle = getMemorialPathOptions('polygon')
 
     const leafletGeometry = L.geoJSON(feature, {
-      style: { color: polygonColor },
+      style: polygonStyle,
       onEachFeature: (_geoJsonFeature, layer) => {
         ;(layer as L.Layer & { options: { memorialKey?: string } }).options.memorialKey = MEMORIAL_KEY
       }
@@ -248,9 +253,9 @@
   defineExpose({
     map: computed(() => mapRef.value?.map),
     layerControl: computed(() => mapRef.value?.layerControl),
-    drawControl: computed(() => mapRef.value?.drawControl),
     drawItemsGroup: computed(() => mapRef.value?.drawItemsGroup),
     leaflet: computed(() => mapRef.value?.leaflet),
+    getDrawingPathOptions: getMemorialPathOptions,
     toggleCoordinatePanel,
     closeCoordinatePanel,
     centerMap,

@@ -3,15 +3,19 @@ import { LayerData } from '../types'
 const MENU_HISTORY_KEY = 'menuHistory'
 
 const readHistory = (): Record<string, boolean> => {
-  const raw = window.sessionStorage.getItem(MENU_HISTORY_KEY)
-  if (!raw) return {}
+  try {
+    const raw = window.sessionStorage.getItem(MENU_HISTORY_KEY)
+    if (!raw) return {}
 
-  const parsed: unknown = JSON.parse(raw)
-  if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+    const parsed: unknown = JSON.parse(raw)
+    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+      return {}
+    }
+
+    return parsed as Record<string, boolean>
+  } catch {
     return {}
   }
-
-  return parsed as Record<string, boolean>
 }
 
 export const setHistory = (layer: LayerData): void => {

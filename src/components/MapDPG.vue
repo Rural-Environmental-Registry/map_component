@@ -29,7 +29,7 @@
       @stopLoading="isLoading = false"
     />
     <CoordinatePanel
-      v-if="mapRef && descriptiveMemorial.show"
+      v-if="mapRef && descriptiveMemorial?.show"
       ref="coordinatePanelRef"
       :descriptiveMemorial="descriptiveMemorial"
       :map="mapRef.map"

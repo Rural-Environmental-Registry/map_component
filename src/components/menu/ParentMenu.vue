@@ -65,7 +65,7 @@
   }>()
 
   const childrenLayers = ref<LayerData[]>(
-    props.groupData.layers.map((layer) => resolveLayerActiveState(layer, props.persist))
+    (props.groupData.layers ?? []).map((layer) => resolveLayerActiveState(layer, props.persist))
   )
 
   const toggleVisibleAllLayers = (): void => {

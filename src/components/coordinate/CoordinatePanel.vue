@@ -1,9 +1,9 @@
 <template>
-  <div>
-    <div
-      class="coordinate-panel"
-      :class="{ 'panel-open': isOpen }"
-    >
+  <div
+    class="coordinate-panel-shell"
+    :class="{ 'panel-open': isOpen }"
+  >
+    <div class="coordinate-panel">
       <div class="panel-header">
         <h3>{{ texts.title }}</h3>
         <ElButton
@@ -262,7 +262,7 @@
           </ElTabPane>
 
           <ElTabPane
-            label="Upload CSV"
+            :label="texts.csvUpload"
             name="csv"
           >
             <div class="coordinate-section">
@@ -582,7 +582,7 @@
   }
 
   const convertDMSToDDFromString = (dmsString: string): number => {
-    const cleanString = dmsString.trim().toUpperCase()
+    const cleanString = dmsString.trim().toUpperCase().replace(/'/g, '′').replace(/"/g, '″')
 
     if (!cleanString) return NaN
 
@@ -590,7 +590,7 @@
     if (cleanString.includes('°') && !cleanString.includes('′') && !cleanString.includes('″')) {
       const decimalPart = cleanString.split('°')[0].replace(',', '.')
       const value = parseFloat(decimalPart)
-      const isNegative = cleanString.includes('S') || cleanString.includes('W')
+      const isNegative = cleanString.includes('S') || cleanString.includes('W') || cleanString.startsWith('-')
 
       if (Number.isNaN(value)) return NaN
       return isNegative ? -Math.abs(value) : value
@@ -607,7 +607,7 @@
       const minutes = parseInt(minutesPart, 10) || 0
       const seconds = parseFloat(secondsPart.replace(',', '.')) || 0
 
-      const isNegative = cleanString.includes('S') || cleanString.includes('W')
+      const isNegative = cleanString.includes('S') || cleanString.includes('W') || cleanString.startsWith('-') || degrees < 0
       const dd = Math.abs(degrees) + minutes / 60 + seconds / 3600
 
       return isNegative ? -dd : dd
@@ -961,19 +961,14 @@
 </script>
 
 <style scoped>
-  .coordinate-panel {
+  .coordinate-panel-shell {
     position: absolute;
     bottom: 50px;
     right: 10px;
     z-index: 1000;
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-    max-height: 445px;
+    max-height: min(445px, calc(100vh - 120px));
     max-width: 480px;
     min-width: 480px !important;
-    overflow-y: auto;
-    overflow-x: auto;
     transform: translateX(100%);
     transition: transform 0.3s ease;
     opacity: 0;
@@ -986,6 +981,17 @@
     }
   }
 
+  .coordinate-panel {
+    display: flex;
+    flex-direction: column;
+    height: min(445px, calc(100vh - 120px));
+    max-height: min(445px, calc(100vh - 120px));
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+  }
+
   .coordinate-inputs-column {
     display: flex;
     flex-direction: column;
@@ -995,11 +1001,13 @@
   }
 
   .panel-header {
+    flex-shrink: 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 15px;
     border-bottom: 1px solid #eee;
+    background-color: white;
 
     h3 {
       margin: 0;
@@ -1018,7 +1026,20 @@
   }
 
   .panel-content {
+    flex: 1 1 auto;
+    min-height: 0;
     padding: 15px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  :deep(.el-tabs__header) {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    margin-bottom: 0;
+    background-color: white;
   }
 
   .coordinate-section {

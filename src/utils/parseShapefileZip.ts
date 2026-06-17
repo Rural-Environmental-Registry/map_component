@@ -18,7 +18,7 @@ function normalizeToFeatures(geojson: FeatureCollection | Feature | Feature[]): 
 export async function parseShapefileZip(file: File): Promise<ShapefileParseResult> {
   const fileName = file.name.toLowerCase()
   if (!fileName.endsWith('.zip')) {
-    return { ok: false, error: 'O arquivo deve ser um .zip contendo o shapefile' }
+    return { ok: false, error: 'The file must be a .zip containing the shapefile' }
   }
 
   try {
@@ -27,14 +27,14 @@ export async function parseShapefileZip(file: File): Promise<ShapefileParseResul
     const features = normalizeToFeatures(geojson as FeatureCollection | Feature | Feature[])
 
     if (features.length === 0) {
-      return { ok: false, error: 'O shapefile não contém geometrias' }
+      return { ok: false, error: 'The shapefile contains no geometries' }
     }
 
     return { ok: true, features }
   } catch {
     return {
       ok: false,
-      error: 'Não foi possível ler o arquivo. Verifique se o .zip contém .shp, .shx e .dbf válidos'
+      error: 'Could not read the file. Check that the .zip contains valid .shp, .shx and .dbf files'
     }
   }
 }

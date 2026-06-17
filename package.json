@@ -46,7 +46,6 @@
     "element-plus": "2.9.3",
     "leaflet": "1.9.4",
     "leaflet-draw": "1.0.4",
-    "leaflet-measure": "^3.1.0",
     "papaparse": "5.5.3",
     "shpjs": "6.1.0"
   },

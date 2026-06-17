@@ -97,8 +97,8 @@
 
     const persist = !!props.options?.persist
 
-    props.layersConfig.forEach((group) => {
-      group.layers.forEach((layer) => {
+    props.layersConfig?.forEach((group) => {
+      group.layers?.forEach((layer) => {
         if (!shouldInitLayerOnMap(layer, persist)) return
 
         const resolved = resolveLayerActiveState(layer, persist)

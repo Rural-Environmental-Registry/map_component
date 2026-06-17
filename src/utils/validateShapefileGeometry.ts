@@ -23,30 +23,30 @@ function validateRingsClosed(geometry: Polygon | MultiPolygon): boolean {
 
 export function validateShapefileGeometry(features: Feature[]): ShapefileValidationResult {
   if (features.length !== 1) {
-    return { ok: false, error: 'O shapefile deve conter exatamente uma geometria' }
+    return { ok: false, error: 'The shapefile must contain exactly one geometry' }
   }
 
   const feature = features[0]
   const geometry = feature.geometry
 
   if (!geometry || (geometry.type !== 'Polygon' && geometry.type !== 'MultiPolygon')) {
-    return { ok: false, error: 'A geometria deve ser Polygon ou MultiPolygon' }
+    return { ok: false, error: 'Geometry must be Polygon or MultiPolygon' }
   }
 
   if (!validateRingsClosed(geometry)) {
-    return { ok: false, error: 'Anel de polígono não está fechado ou é inválido' }
+    return { ok: false, error: 'Polygon ring is not closed or is invalid' }
   }
 
   if (!booleanValid(geometry)) {
-    return { ok: false, error: 'Geometria inválida' }
+    return { ok: false, error: 'Invalid geometry' }
   }
 
   if (kinks(geometry).features.length > 0) {
-    return { ok: false, error: 'Geometria com auto-interseção' }
+    return { ok: false, error: 'Geometry has self-intersection' }
   }
 
   if (area(geometry) <= 0) {
-    return { ok: false, error: 'Polígono com área zero' }
+    return { ok: false, error: 'Polygon has zero area' }
   }
 
   return { ok: true, feature: feature as Feature<Polygon | MultiPolygon> }

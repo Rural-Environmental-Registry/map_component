@@ -2,7 +2,7 @@
 
 .map-container {
   --map-control-size: var(--mapa-size-base-30);
-  --map-control-icon-size: var(--mapa-size-base-18);
+  --map-control-icon-size: var(--mapa-size-base-20);
 
   .leaflet-control-layers {
     border: none !important;
@@ -101,6 +101,10 @@
     box-shadow: var(--mapa-base-box-shadow);
   }
 
+  .leaflet-pm-toolbar.leaflet-pm-draw.leaflet-bar.leaflet-control {
+    transform: translateX(-1.5px);
+  }
+
   .leaflet-pm-toolbar .button-container {
     padding: 0;
     margin: 0;
@@ -122,10 +126,20 @@
     height: var(--map-control-size) !important;
     line-height: var(--map-control-size) !important;
     background-size: var(--map-control-icon-size) var(--map-control-icon-size) !important;
-    background-position: center !important;
+    background-position: center center !important;
     background-repeat: no-repeat !important;
     overflow: hidden;
     box-sizing: border-box;
+  }
+
+  .leaflet-pm-toolbar .leaflet-pm-icon-shapefile {
+    background-image: url('../icons/file-import-regular-full-gray.svg');
+  }
+
+  /* Ajuste óptico: polígono e importar ficam levemente à direita no glyph do Geoman/FA */
+  .leaflet-pm-toolbar .leaflet-pm-icon-polygon,
+  .leaflet-pm-toolbar .leaflet-pm-icon-shapefile {
+    background-position: calc(50%) center !important;
   }
 
   .leaflet-pm-toolbar .button-container a,

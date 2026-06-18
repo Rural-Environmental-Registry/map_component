@@ -314,55 +314,16 @@
               </div>
             </div>
           </ElTabPane>
-
-          <ElTabPane
-            :label="texts.shapefileUpload"
-            name="shapefile"
-          >
-            <div class="coordinate-section">
-              <h4>{{ texts.shapefileFileUpload }}</h4>
-              <div class="csv-upload">
-                <ElUpload
-                  ref="shapefileUploadRef"
-                  class="upload-area"
-                  drag
-                  action="#"
-                  :auto-upload="false"
-                  :on-change="handleShapefileChange"
-                  :on-remove="handleShapefileRemove"
-                  :limit="1"
-                  accept=".zip"
-                >
-                  <FontAwesomeIcon
-                    iconName="upload"
-                    class="upload-icon"
-                  />
-                  <div class="el-upload__text">
-                    {{ texts.dragShapefileZip }}
-                  </div>
-                  <template #tip>
-                    <div class="el-upload__tip">
-                      {{ texts.shapefileZipInfo }}
-                    </div>
-                  </template>
-                </ElUpload>
-                <ElButton
-                  type="danger"
-                  class="clear-button"
-                  v-if="shapefileLoaded"
-                  :title="texts.clearGeometriesTitle"
-                  :aria-label="texts.clearGeometriesDescription"
-                  @click="clearGeometries"
-                >
-                  <FontAwesomeIcon iconName="trash" />
-                  {{ texts.clearGeometries }}
-                </ElButton>
-              </div>
-            </div>
-          </ElTabPane>
         </ElTabs>
       </div>
     </div>
+    <input
+      ref="shapefileInputRef"
+      type="file"
+      accept=".zip"
+      class="shapefile-input-hidden"
+      @change="handleShapefileInputChange"
+    />
   </div>
 </template>
 
@@ -447,7 +408,7 @@
   const csvData = ref<Array<{ x: number; y: number; azimuth: number; distance: number }>>([])
   const shapefileLoaded = ref<boolean>(false)
   const uploadRef = ref()
-  const shapefileUploadRef = ref()
+  const shapefileInputRef = ref<HTMLInputElement>()
   const manualInput = ref({
     x: '',
     y: '',
@@ -481,13 +442,23 @@
     return memorialButtonControl
   }
 
+  const alignMapControls = () => {
+    const align = (props.map as L.Map & { alignTopRightControls?: () => void })?.alignTopRightControls
+    align?.()
+  }
+
+  const registerMapButtons = () => {
+    const controller = getMemorialButtonControl()
+    if (!controller) return
+
+    controller.addMemorial(togglePanel, texts.value.memorialDescriptive || '')
+    controller.addShapefile(openShapefilePicker, texts.value.shapefileUpload || '')
+    alignMapControls()
+  }
+
   onMounted(() => {
     if (props.descriptiveMemorial?.show) {
-      const controller = getMemorialButtonControl()
-      if (controller) {
-        const buttonTitle = texts.value.memorialDescriptive || ''
-        controller.add(togglePanel, buttonTitle)
-      }
+      registerMapButtons()
     }
   })
 
@@ -503,8 +474,7 @@
       if (!controller) return
 
       if (newValue) {
-        const buttonTitle = texts.value.memorialDescriptive || ''
-        controller.add(togglePanel, buttonTitle)
+        registerMapButtons()
       } else {
         controller.remove()
       }
@@ -516,7 +486,17 @@
     newTitle => {
       const controller = getMemorialButtonControl()
       if (newTitle && controller) {
-        controller.updateTitle(newTitle)
+        controller.updateMemorialTitle(newTitle)
+      }
+    }
+  )
+
+  watch(
+    () => props.descriptiveMemorial?.customTexts?.shapefileUpload,
+    newTitle => {
+      const controller = getMemorialButtonControl()
+      if (newTitle && controller) {
+        controller.updateShapefileTitle(newTitle)
       }
     }
   )
@@ -694,24 +674,24 @@
     emit('geometryRemoved')
   }
 
-  const handleShapefileChange = async (file: any) => {
-    if (!file.raw) return
+  const openShapefilePicker = () => {
+    shapefileInputRef.value?.click()
+  }
 
+  const processShapefile = async (file: File) => {
     emit('geometryRemoved')
     csvData.value = []
     shapefileLoaded.value = false
 
-    const parseResult = await parseShapefileZip(file.raw)
+    const parseResult = await parseShapefileZip(file)
     if (!parseResult.ok) {
       ElMessage.error(parseResult.error)
-      shapefileUploadRef.value?.clearFiles()
       return
     }
 
     const validationResult = validateShapefileGeometry(parseResult.features)
     if (!validationResult.ok) {
       ElMessage.error(validationResult.error)
-      shapefileUploadRef.value?.clearFiles()
       return
     }
 
@@ -720,12 +700,13 @@
     ElMessage.success(texts.value.shapefileAppliedSuccess)
   }
 
-  const handleShapefileRemove = () => {
-    shapefileLoaded.value = false
-    if (shapefileUploadRef.value) {
-      shapefileUploadRef.value.clearFiles()
-    }
-    emit('geometryRemoved')
+  const handleShapefileInputChange = async (event: Event) => {
+    const input = event.target as HTMLInputElement
+    const file = input.files?.[0]
+    if (!file) return
+
+    await processShapefile(file)
+    input.value = ''
   }
 
   const editPoint = (index: number) => {
@@ -939,8 +920,8 @@
     if (uploadRef.value) {
       uploadRef.value.clearFiles()
     }
-    if (shapefileUploadRef.value) {
-      shapefileUploadRef.value.clearFiles()
+    if (shapefileInputRef.value) {
+      shapefileInputRef.value.value = ''
     }
     manualInput.value = {
       x: '',
@@ -959,7 +940,8 @@
 
   defineExpose({
     togglePanel,
-    closePanel
+    closePanel,
+    openShapefilePicker
   })
 </script>
 
@@ -1202,5 +1184,9 @@
     .el-input {
       width: 100%;
     }
+  }
+
+  .shapefile-input-hidden {
+    display: none;
   }
 </style>

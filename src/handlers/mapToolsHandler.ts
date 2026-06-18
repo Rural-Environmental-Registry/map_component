@@ -139,15 +139,26 @@ export default class MapToolsHandler {
       onAdd() {
         const container = L.DomUtil.create('div', 'leaflet-control leaflet-control-map-tools')
 
-        if (config.fullscreen?.show !== false) {
-          handler._fullscreenBtn = handler.createButton(
+        if (config.zoom?.show !== false) {
+          handler.createButton(
             container,
-            'map-tools-btn map-tools-btn--fullscreen',
-            config.fullscreen?.title ?? 'Fullscreen',
-            FULLSCREEN_ICON,
+            'map-tools-btn map-tools-btn--zoom-in',
+            config.zoom?.titleIn ?? 'Zoom in',
+            '+',
             (e) => {
               L.DomEvent.stop(e)
-              handler.toggleFullscreen()
+              handler._map.zoomIn()
+            }
+          )
+
+          handler.createButton(
+            container,
+            'map-tools-btn map-tools-btn--zoom-out',
+            config.zoom?.titleOut ?? 'Zoom out',
+            '−',
+            (e) => {
+              L.DomEvent.stop(e)
+              handler._map.zoomOut()
             }
           )
         }
@@ -165,6 +176,19 @@ export default class MapToolsHandler {
           )
         }
 
+        if (config.fullscreen?.show !== false) {
+          handler._fullscreenBtn = handler.createButton(
+            container,
+            'map-tools-btn map-tools-btn--fullscreen',
+            config.fullscreen?.title ?? 'Fullscreen',
+            FULLSCREEN_ICON,
+            (e) => {
+              L.DomEvent.stop(e)
+              handler.toggleFullscreen()
+            }
+          )
+        }
+
         L.DomEvent.disableClickPropagation(container)
         L.DomEvent.disableScrollPropagation(container)
 
@@ -174,7 +198,18 @@ export default class MapToolsHandler {
 
     this._control = new MapToolsControl()
     this._map.addControl(this._control)
+    this.removeNativeZoomControl()
     this.alignTopRightControls()
+  }
+
+  private removeNativeZoomControl(): void {
+    const zoomControl = this._map.getContainer().querySelector('.leaflet-control-zoom')
+    if (!zoomControl) return
+
+    const control = this._map.zoomControl
+    if (control) {
+      this._map.removeControl(control)
+    }
   }
 
   public alignTopRightControls(): void {
@@ -183,9 +218,8 @@ export default class MapToolsHandler {
 
     const prioritySelectors = [
       '.leaflet-control-map-tools',
-      '.leaflet-control-measure-tools',
-      '.leaflet-control-zoom',
       '.leaflet-control-layers',
+      '.leaflet-control-measure-tools',
       '.leaflet-control-measure'
     ]
 

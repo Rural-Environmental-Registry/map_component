@@ -48,12 +48,15 @@
 }
 
 .leaflet-control-memorial {
+  display: flex;
+  flex-direction: column;
   background-color: var(--mapa-base-white);
   border-radius: var(--mapa-base-radius-10);
   box-shadow: var(--mapa-base-box-shadow);
   border: none !important;
   width: var(--mapa-size-base-30);
-  height: var(--mapa-size-base-30);
+  min-width: var(--mapa-size-base-30);
+  height: auto;
   overflow: hidden;
   box-sizing: border-box;
 }
@@ -85,15 +88,16 @@
 }
 
 .memorial-btn img {
-  width: var(--mapa-size-base-18);
-  height: var(--mapa-size-base-18);
-  max-width: var(--mapa-size-base-18);
-  max-height: var(--mapa-size-base-18);
+  width: var(--map-control-icon-size, var(--mapa-size-base-20));
+  height: var(--map-control-icon-size, var(--mapa-size-base-20));
+  max-width: var(--map-control-icon-size, var(--mapa-size-base-20));
+  max-height: var(--map-control-icon-size, var(--mapa-size-base-20));
   display: block;
   object-fit: contain;
   margin: 0;
   pointer-events: none;
   flex-shrink: 0;
+  transform: translateX(0px);
 }
 
 .leaflet-control-map-tools {
@@ -150,8 +154,15 @@
 .leaflet-control-map-tools .map-tools-btn svg {
   display: block;
   flex-shrink: 0;
-  width: var(--mapa-size-base-18);
-  height: var(--mapa-size-base-18);
+  width: var(--map-control-icon-size, var(--mapa-size-base-20));
+  height: var(--map-control-icon-size, var(--mapa-size-base-20));
+}
+
+.leaflet-control-map-tools .map-tools-btn--zoom-in,
+.leaflet-control-map-tools .map-tools-btn--zoom-out {
+  font-size: var(--mapa-fs-22);
+  font-weight: 400;
+  line-height: 1;
 }
 
 /* Marcadores divIcon (ex.: Property Headquarter) — anchor alinhado ao iconSize 32×32 */

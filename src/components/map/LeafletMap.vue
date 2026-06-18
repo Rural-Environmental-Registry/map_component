@@ -10,6 +10,7 @@
   import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
   import DrawingControlHandler from '../../handlers/drawingControl'
   import MapHandler from '../../handlers/mapHandler'
+  import { DEFAULT_MAP_OPTIONS } from '../../handlers/constants'
   import MapToolsHandler from '../../handlers/mapToolsHandler'
   import { resolveMapToolsConfig } from '../../handlers/toolsConstants'
   import { resolveDrawingPathOptions, type MemorialDrawShape } from '../../utils/drawingPathOptions'
@@ -18,6 +19,7 @@
     DrawingConfig,
     DrawingEvent,
     MapConfig,
+    MapConfigConfig,
     MapLayers,
     MapToolsConfig,
     MeasureCompleteEvent,
@@ -79,8 +81,13 @@
 
   const initMap = (): void => {
     const { config } = props.mapOptions
+    const mapConfig: MapConfigConfig = {
+      ...DEFAULT_MAP_OPTIONS,
+      ...config,
+      ...(resolveMapToolsConfig(props.toolsOptions) ? { zoomControl: false } : {})
+    }
 
-    mapHandlerInstance = new MapHandler(config)
+    mapHandlerInstance = new MapHandler(mapConfig)
 
     const emitterCallback = (eventName: string) => {
       if (eventName === 'startLoading') emit('startLoading')
@@ -114,6 +121,9 @@
         onMeasureComplete: (data) => emit('onMeasureComplete', data)
       }
     )
+
+    ;(map.value as L.Map & { alignTopRightControls?: () => void }).alignTopRightControls = () =>
+      mapToolsHandler?.alignTopRightControls()
   }
 
   const handleDrawingControls = (): void => {

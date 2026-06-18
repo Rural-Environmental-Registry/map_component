@@ -3,6 +3,11 @@ import { MapToolsConfig } from '../types'
 export const DEFAULT_MAP_TOOLS: MapToolsConfig = {
   show: false,
   position: 'topright',
+  zoom: {
+    show: true,
+    titleIn: 'Zoom in',
+    titleOut: 'Zoom out'
+  },
   fullscreen: {
     show: true,
     title: 'Fullscreen'
@@ -53,6 +58,7 @@ export function resolveMapToolsConfig(tools?: MapToolsConfig): MapToolsConfig | 
   return {
     ...DEFAULT_MAP_TOOLS,
     ...tools,
+    zoom: { ...DEFAULT_MAP_TOOLS.zoom, ...tools.zoom },
     fullscreen: { ...DEFAULT_MAP_TOOLS.fullscreen, ...tools.fullscreen },
     center: { ...DEFAULT_MAP_TOOLS.center, ...tools.center },
     measureArea: { ...DEFAULT_MAP_TOOLS.measureArea, ...tools.measureArea },

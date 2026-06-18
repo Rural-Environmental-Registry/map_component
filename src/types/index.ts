@@ -110,6 +110,7 @@ export type MemorialConfig = {
 export type MapToolsConfig = {
   show?: boolean
   position?: ControlPosition
+  zoom?: { show?: boolean; titleIn?: string; titleOut?: string }
   fullscreen?: { show?: boolean; title?: string }
   center?: {
     show?: boolean

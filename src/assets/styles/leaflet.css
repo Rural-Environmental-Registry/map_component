@@ -136,10 +136,13 @@
     background-image: url('../icons/file-import-regular-full-gray.svg');
   }
 
-  /* Ajuste óptico: polígono e importar ficam levemente à direita no glyph do Geoman/FA */
-  .leaflet-pm-toolbar .leaflet-pm-icon-polygon,
-  .leaflet-pm-toolbar .leaflet-pm-icon-shapefile {
+  /* Ajuste óptico: polígono e importar no glyph do Geoman/FA */
+  .leaflet-pm-toolbar .leaflet-pm-icon-polygon {
     background-position: calc(50%) center !important;
+  }
+
+  .leaflet-pm-toolbar .leaflet-pm-icon-shapefile {
+    background-position: calc(50% + 1px) center !important;
   }
 
   .leaflet-pm-toolbar .button-container a,

@@ -97,7 +97,7 @@
   margin: 0;
   pointer-events: none;
   flex-shrink: 0;
-  transform: translateX(0px);
+  transform: translateX(1px);
 }
 
 .leaflet-control-map-tools {

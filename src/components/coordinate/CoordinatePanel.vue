@@ -564,34 +564,25 @@
 
     if (!cleanString) return NaN
 
-    // Graus decimais com sufixo ° (ex.: -44.990400°) — sem minutos/segundos
-    if (cleanString.includes('°') && !cleanString.includes('′') && !cleanString.includes('″')) {
-      const decimalPart = cleanString.split('°')[0].replace(',', '.')
-      const value = parseFloat(decimalPart)
-      const isNegative = cleanString.includes('S') || cleanString.includes('W') || cleanString.startsWith('-')
+    const dmsRegex =
+      /^\s*(-)?\s*(?:(\d+(?:[.,]\d+)?)\s*°)?\s*(?:(\d+(?:[.,]\d+)?)\s*′)?\s*(?:(\d+(?:[.,]\d+)?)\s*(?:″|′′))?\s*([NSEW])?\s*$/
+    const match = cleanString.match(dmsRegex)
 
-      if (Number.isNaN(value)) return NaN
-      return isNegative ? -Math.abs(value) : value
-    }
+    if (match && (match[2] != null || match[3] != null || match[4] != null || cleanString.includes('°'))) {
+      const isNegative = !!match[1] || ['S', 'W'].includes(match[5] || '')
+      const degrees = parseFloat(match[2]?.replace(',', '.') || '0')
+      const minutes = parseFloat(match[3]?.replace(',', '.') || '0')
+      const seconds = parseFloat(match[4]?.replace(',', '.') || '0')
 
-    if (cleanString.includes('°') || cleanString.includes('′') || cleanString.includes('″')) {
-      const degreesPart = cleanString.split('°')[0] || '0'
-      const afterDegrees = cleanString.split('°')[1] || ''
-      const minutesPart = afterDegrees.split('′')[0] || '0'
-      const afterMinutes = afterDegrees.split('′')[1] || ''
-      const secondsPart = afterMinutes.split('″')[0] || afterMinutes.split('"')[0] || '0'
-
-      const degrees = parseInt(degreesPart, 10) || 0
-      const minutes = parseInt(minutesPart, 10) || 0
-      const seconds = parseFloat(secondsPart.replace(',', '.')) || 0
-
-      const isNegative = cleanString.includes('S') || cleanString.includes('W') || cleanString.startsWith('-') || degrees < 0
       const dd = Math.abs(degrees) + minutes / 60 + seconds / 3600
-
       return isNegative ? -dd : dd
     }
 
-    return parseFloat(cleanString.replace(',', '.'))
+    const value = parseFloat(cleanString.replace(',', '.'))
+    if (Number.isNaN(value)) return NaN
+
+    const isNegative = cleanString.includes('S') || cleanString.includes('W') || cleanString.startsWith('-')
+    return isNegative ? -Math.abs(value) : value
   }
 
   const processCSVData = (data: CSVRow[]): Point[] => {

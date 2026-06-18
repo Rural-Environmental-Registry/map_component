@@ -31,7 +31,7 @@
 <script lang="ts" setup>
   import { ElButton, ElMenu } from 'element-plus'
   import L from 'leaflet'
-  import { computed, nextTick, onMounted, ref } from 'vue'
+  import { computed, nextTick, ref, watch } from 'vue'
   import FontAwesomeIcon from '../fa-icon/FontAwesomeIcon.vue'
   import ParentMenu from './ParentMenu.vue'
   import { GroupLayerData, LayerData, LayersConfig, LayersMenuConfig } from '../../types'
@@ -92,6 +92,8 @@
     handleWmsLayer(layer)
   }
 
+  const initializedLayerKeys = new Set<string>()
+
   const initDefaultLayers = (): void => {
     if (!props.map) return
 
@@ -99,19 +101,25 @@
 
     props.layersConfig?.forEach((group) => {
       group.layers?.forEach((layer) => {
+        if (initializedLayerKeys.has(layer.key)) return
         if (!shouldInitLayerOnMap(layer, persist)) return
 
         const resolved = resolveLayerActiveState(layer, persist)
         onInitDefaultLayer(resolved)
+        initializedLayerKeys.add(layer.key)
       })
     })
   }
 
-  onMounted(() => {
-    void nextTick(() => {
-      initDefaultLayers()
-    })
-  })
+  watch(
+    [() => props.layersConfig, () => props.map],
+    () => {
+      void nextTick(() => {
+        initDefaultLayers()
+      })
+    },
+    { immediate: true, deep: true }
+  )
 
   const onChildLayerChange = (layer: LayerData): void => {
     if (layer.geojson) {

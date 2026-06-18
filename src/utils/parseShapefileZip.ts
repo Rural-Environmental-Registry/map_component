@@ -5,14 +5,30 @@ export type ShapefileParseResult =
   | { ok: true; features: Feature[] }
   | { ok: false; error: string }
 
-function normalizeToFeatures(geojson: FeatureCollection | Feature | Feature[]): Feature[] {
+function isFeatureCollection(value: unknown): value is FeatureCollection {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'type' in value &&
+    (value as FeatureCollection).type === 'FeatureCollection'
+  )
+}
+
+function normalizeToFeatures(geojson: FeatureCollection | Feature | Feature[] | FeatureCollection[]): Feature[] {
   if (Array.isArray(geojson)) {
-    return geojson
+    return geojson.flatMap((item) => {
+      if (isFeatureCollection(item)) {
+        return item.features
+      }
+      return [item as Feature]
+    })
   }
-  if (geojson.type === 'FeatureCollection') {
+
+  if (isFeatureCollection(geojson)) {
     return geojson.features
   }
-  return [geojson]
+
+  return [geojson as Feature]
 }
 
 export async function parseShapefileZip(file: File): Promise<ShapefileParseResult> {
@@ -24,7 +40,7 @@ export async function parseShapefileZip(file: File): Promise<ShapefileParseResul
   try {
     const buffer = await file.arrayBuffer()
     const geojson = await shp(buffer)
-    const features = normalizeToFeatures(geojson as FeatureCollection | Feature | Feature[])
+    const features = normalizeToFeatures(geojson as FeatureCollection | Feature | Feature[] | FeatureCollection[])
 
     if (features.length === 0) {
       return { ok: false, error: 'The shapefile contains no geometries' }

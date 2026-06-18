@@ -1,10 +1,17 @@
 <template>
-  <ElSubMenu :index="groupData.key" class="parent-menu" :disabled="!childrenLayers.length">
+  <ElSubMenu
+    :disabled="!childrenLayers.length"
+    :index="groupData.key"
+    class="parent-menu"
+  >
     <template #title>
       <div class="parent-menu-row">
         <div class="parent-layer-title">{{ groupData.name }}</div>
         <span class="switch-component">
-          <ElSwitch v-model="allLayersActive" @click.stop>
+          <ElSwitch
+            v-model="allLayersActive"
+            @click.stop
+          >
             <template #active-action>
               <FontAwesomeIcon iconName="check" />
             </template>
@@ -13,20 +20,23 @@
             </template>
           </ElSwitch>
           <span class="parent-layer-status">
-            {{
-              allLayersActive
-                ? groupData.toggle.active
-                : groupData.toggle.inactive
-            }}
+            {{ allLayersActive ? groupData.toggle.active : groupData.toggle.inactive }}
           </span>
-          <ElDivider class="divider-bar" direction="vertical" />
+          <ElDivider
+            class="divider-bar"
+            direction="vertical"
+          />
         </span>
       </div>
     </template>
-    <template v-for="(child, idx) in childrenLayers">
+    <template
+      v-for="(child, idx) in childrenLayers"
+      :key="child.key"
+    >
       <ChildMenu
         v-if="child.name"
         :data="child"
+        :persist="props.persist"
         @onChildLayerToggle="onChildChange($event, idx)"
       />
     </template>
@@ -34,15 +44,17 @@
   <ElDivider class="parent-menu-divider-row" />
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
   import { ElDivider, ElSubMenu, ElSwitch } from 'element-plus'
   import { computed, ref } from 'vue'
   import FontAwesomeIcon from '../fa-icon/FontAwesomeIcon.vue'
   import ChildMenu from './ChildMenu.vue'
   import { GroupLayerData, LayerData } from '../../types'
+  import { resolveLayerActiveState, setHistory } from '../../utils/menuHistory.ts'
 
   type ParentMenuProps = {
     groupData: GroupLayerData
+    persist: boolean
   }
 
   const props = defineProps<ParentMenuProps>()
@@ -52,9 +64,13 @@
     onGroupLayerToggle: [GroupLayerData]
   }>()
 
-  const childrenLayers = ref<LayerData[]>(props.groupData.layers)
+  const childrenLayers = ref<LayerData[]>(
+    (props.groupData.layers ?? []).map((layer) => resolveLayerActiveState(layer, props.persist))
+  )
 
   const toggleVisibleAllLayers = (): void => {
+    if (props.persist) childrenLayers.value.forEach((layer: LayerData) => setHistory(layer))
+
     emit('onGroupLayerToggle', {
       ...props.groupData,
       layers: childrenLayers.value

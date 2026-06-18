@@ -4,7 +4,17 @@ import { GeoJsonObject } from 'geojson'
 // @ts-ignore
 import { PM } from '@geoman-io/leaflet-geoman-free'
 
-export type FaIconName = 'check' | 'xmark' | 'chevron-right' | 'chevron-left' | 'terminal' | 'file-lines' | 'upload' | 'pencil' | 'trash' | 'chevron-down'
+export type FaIconName =
+  | 'check'
+  | 'xmark'
+  | 'chevron-right'
+  | 'chevron-left'
+  | 'terminal'
+  | 'file-lines'
+  | 'upload'
+  | 'pencil'
+  | 'trash'
+  | 'chevron-down'
 
 export type DrawnArea = {
   m2: number
@@ -58,6 +68,12 @@ export type BaseMapLayer = {
   key: string
   default: boolean
   url: string
+  tms?: boolean
+  minZoom?: number
+  maxZoom?: number
+  maxNativeZoom?: number
+  errorTileUrl?: string
+  minZoomWarning?: number | null
 }
 
 export type BaseMapLayers = BaseMapLayer[]
@@ -67,15 +83,22 @@ export type MapLayers = {
   customLayers?: LayersConfig
 }
 
-export type MapConfigConfig = MapOptions & { id: string, removeControlLayers?: boolean, zoomControlPosition?: ControlPosition }
+export type MapConfigConfig = MapOptions & {
+  id: string
+  removeControlLayers?: boolean
+  zoomControlPosition?: ControlPosition
+  /** Reposiciona marcadores após zoom (evita drift de divIcon). Padrão: true. */
+  stabilizeMarkersOnZoom?: boolean
+}
 
 export type MapConfig = {
   config?: MapConfigConfig
 }
 
 export type LayersMenuConfig = {
-  size: 'small' | 'medium' | 'large',
+  size: 'small' | 'medium' | 'large'
   removeMenu?: boolean
+  persist: boolean
 }
 
 export type MemorialConfig = {
@@ -84,10 +107,59 @@ export type MemorialConfig = {
   controlTexts?: any
 }
 
+export type MapToolsConfig = {
+  show?: boolean
+  position?: ControlPosition
+  zoom?: { show?: boolean; titleIn?: string; titleOut?: string }
+  fullscreen?: { show?: boolean; title?: string }
+  center?: {
+    show?: boolean
+    title?: string
+    target?: 'drawn' | 'initial'
+    padding?: [number, number]
+  }
+  measureArea?: {
+    show?: boolean
+    title?: string
+    shapeOptions?: PathOptions
+  }
+  measureLine?: {
+    show?: boolean
+    title?: string
+  }
+  measurePolygon?: {
+    show?: boolean
+    title?: string
+  }
+  texts?: {
+    measureResult?: string
+    measureLength?: string
+    measureArea?: string
+    measureCancel?: string
+    measureFinish?: string
+    measurePanelTitle?: string
+    measureLineTitle?: string
+    measurePolygonTitle?: string
+    measureLineHelp?: string
+    measurePolygonHelp?: string
+    noGeometry?: string
+  }
+}
+
+export type MeasureCompleteEvent = {
+  m2?: number
+  km2?: number
+  ha?: number
+  lengthM?: number
+  lengthKm?: number
+  geojson: GeoJsonObject
+}
+
 export type MapOptionsConfig = {
   layersMenu?: LayersMenuConfig
   map: MapConfig
   drawing?: DrawingConfig
+  tools?: MapToolsConfig
 }
 
 export type DrawingConfig = DrawingControlOptions & DisplayDrawingControl
@@ -163,6 +235,11 @@ export type CoordinatePanelTexts = {
   dragCsvFile?: string
   csvColumnsInfo?: string
   applyCsvCoordinates?: string
+  shapefileUpload?: string
+  shapefileFileUpload?: string
+  dragShapefileZip?: string
+  shapefileZipInfo?: string
+  shapefileAppliedSuccess?: string
   placeholderLongitude?: string
   placeholderLatitude?: string
   placeholderAzimuth?: string
@@ -177,6 +254,6 @@ export type CoordinatePanelTexts = {
 }
 
 export type DescriptiveMemorial = {
-  show: boolean,
+  show: boolean
   customTexts?: CoordinatePanelTexts
 }

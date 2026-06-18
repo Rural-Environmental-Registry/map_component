@@ -7,32 +7,58 @@ import L from 'leaflet'
 export default class MapHandler {
   private readonly _map: L.Map
   private readonly _mapOptions: MapConfigConfig
+  private readonly _initialView: { center: L.LatLngExpression; zoom: number }
   private _mapLayers!: MapLayers
-  private _layerControl!: L.Control.Layers
 
   constructor(mapOptions: MapConfigConfig | undefined) {
     this._mapOptions = {
-        ...DEFAULT_MAP_OPTIONS,
-        ...mapOptions
+      ...DEFAULT_MAP_OPTIONS,
+      ...mapOptions
+    }
+
+    this._initialView = {
+      center: this._mapOptions.center!,
+      zoom: this._mapOptions.zoom!
     }
 
     this._map = L.map(this._mapOptions.id, {
-      preferCanvas: true,
+      // SVG evita desalinhamento de divIcon e geometrias efêmeras ao dar zoom
+      preferCanvas: this._mapOptions.preferCanvas ?? false,
+      markerZoomAnimation: this._mapOptions.markerZoomAnimation ?? false,
       zoomControl: false,
       minZoom: this._mapOptions.minZoom,
       maxZoom: this._mapOptions.maxZoom,
       dragging: this._mapOptions.dragging,
       scrollWheelZoom: this._mapOptions.scrollWheelZoom,
       doubleClickZoom: this._mapOptions.doubleClickZoom
-    }).setView(this._mapOptions.center!, this._mapOptions.zoom);
+    }).setView(this._mapOptions.center!, this._mapOptions.zoom)
+  }
+
+  private _layerControl!: L.Control.Layers
+
+  get layerControl(): L.Control.Layers {
+    return this._layerControl
   }
 
   get map(): L.Map {
     return this._map
   }
 
-  get layerControl(): L.Control.Layers {
-    return this._layerControl
+  get initialView(): { center: L.LatLngExpression; zoom: number } {
+    return this._initialView
+  }
+
+  public init(mapLayers: MapLayers, eventEmitterCallback: Function): void {
+    this._mapLayers = mapLayers || DEFAULT_MAP_LAYER
+
+    this.addControls()
+    this.addBaseLayer(eventEmitterCallback)
+
+    setTimeout(() => {
+      this._map.invalidateSize()
+    }, 300)
+
+    this.disableLayerControlHover()
   }
 
   private addControls(): void {
@@ -49,7 +75,13 @@ export default class MapHandler {
     const baseMap = this._mapLayers?.mapLayers
 
     baseMap.forEach((layer: BaseMapLayer) => {
-      const tileLayer = L.tileLayer(layer.url)
+      const tileLayer = L.tileLayer(layer.url, {
+        tms: layer.tms,
+        minZoom: layer.minZoom,
+        maxZoom: layer.maxZoom,
+        maxNativeZoom: layer.maxNativeZoom,
+        errorTileUrl: layer.errorTileUrl
+      })
 
       this.watchLayerStatus(tileLayer, eventEmitterCallback)
 
@@ -62,7 +94,9 @@ export default class MapHandler {
   }
 
   private disableLayerControlHover(): void {
-    const container: HTMLElement | null = this._map.getContainer().querySelector('.leaflet-control-layers.leaflet-control')
+    const container: HTMLElement | null = this._map
+      .getContainer()
+      .querySelector('.leaflet-control-layers.leaflet-control')
 
     if (!container) return
 
@@ -74,10 +108,7 @@ export default class MapHandler {
     L.DomEvent.off(container)
   }
 
-  private watchLayerStatus(
-    tileLayer: L.TileLayer,
-    eventEmitterCallback: Function
-  ): void {
+  private watchLayerStatus(tileLayer: L.TileLayer, eventEmitterCallback: Function): void {
     tileLayer.on('loading', () => {
       eventEmitterCallback('startLoading')
     })
@@ -89,18 +120,5 @@ export default class MapHandler {
     tileLayer.on('error', () => {
       eventEmitterCallback('stopLoading')
     })
-  }
-
-  public init(mapLayers: MapLayers, eventEmitterCallback: Function): void {
-    this._mapLayers = mapLayers || DEFAULT_MAP_LAYER
-
-    this.addControls()
-    this.addBaseLayer(eventEmitterCallback)
-
-    setTimeout(() => {
-      this._map.invalidateSize()
-    }, 300)
-
-    this.disableLayerControlHover()
   }
 }

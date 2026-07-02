@@ -113,7 +113,12 @@
 
   watch(
     [() => props.layersConfig, () => props.map],
-    () => {
+    (newValues, oldValues) => {
+      const [, newMap] = newValues
+      const [, oldMap] = oldValues ?? []
+      if (newMap !== oldMap) {
+        initializedLayerKeys.clear()
+      }
       void nextTick(() => {
         initDefaultLayers()
       })
@@ -179,8 +184,11 @@
   }
 
   const removeWmsLayer = (layer: LayerData): void => {
-    props.map.removeLayer(convertedLayers.value[layer.key])
-    props.layerControl?.removeLayer(convertedLayers.value[layer.key])
+    const wmsLayer = convertedLayers.value[layer.key]
+    if (!wmsLayer) return
+
+    props.map.removeLayer(wmsLayer)
+    props.layerControl?.removeLayer(wmsLayer)
 
     delete convertedLayers.value[layer.key]
   }
@@ -228,8 +236,11 @@
   }
 
   const removeGeoJsonLayer = (layer: LayerData): void => {
-    props.map.removeLayer(convertedGeoJsonLayers.value[layer.key])
-    props.layerControl?.removeLayer(convertedGeoJsonLayers.value[layer.key])
+    const geoJsonLayer = convertedGeoJsonLayers.value[layer.key]
+    if (!geoJsonLayer) return
+
+    props.map.removeLayer(geoJsonLayer)
+    props.layerControl?.removeLayer(geoJsonLayer)
 
     delete convertedGeoJsonLayers.value[layer.key]
   }

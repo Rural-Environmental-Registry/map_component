@@ -41,6 +41,7 @@ export default class MeasureToolsHandler {
   private _activeMode: MeasureMode | null = null
   private _suppressMeasureCancel = false
   private _restoreZoomAnimation = true
+  private _measureCreateTimeoutId: number | null = null
 
   constructor(map: Map, config: MapToolsConfig, callbacks: MeasureToolsCallbacks = {}) {
     this._map = map
@@ -66,6 +67,7 @@ export default class MeasureToolsHandler {
   }
 
   public destroy(): void {
+    this.clearMeasureCreateTimeout()
     this.stopMode()
     document.removeEventListener('keydown', this._boundEscapeKey)
     this._map.off('pm:create', this._boundMeasureCreate)
@@ -295,7 +297,12 @@ export default class MeasureToolsHandler {
 
     this.stopMode()
 
-    window.setTimeout(() => {
+    this.clearMeasureCreateTimeout()
+    this._measureCreateTimeoutId = window.setTimeout(() => {
+      this._measureCreateTimeoutId = null
+
+      if (!this._map?.hasLayer(this._measureGroup)) return
+
       this.applyMeasureLayerOptions(layer)
 
       if (this._map.hasLayer(layer)) {
@@ -314,6 +321,13 @@ export default class MeasureToolsHandler {
 
       this._callbacks.onMeasureComplete?.(event)
     }, 0)
+  }
+
+  private clearMeasureCreateTimeout(): void {
+    if (this._measureCreateTimeoutId !== null) {
+      window.clearTimeout(this._measureCreateTimeoutId)
+      this._measureCreateTimeoutId = null
+    }
   }
 
   private handleMeasureCancel(): void {

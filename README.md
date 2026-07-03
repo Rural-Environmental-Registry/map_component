@@ -113,15 +113,70 @@ O componente aceita parametros e emite eventos. Além disso, expôe instâncias 
 | onChildLayerToggle | Emite os dados da camada adicionada/removida do mapa                                                                                      |
 | onGroupLayerToggle | Emite os dados do grupo e das suas camadas adicionadas/removidas do mapa                                                                  |
 | onDrawing          | Emite os dados do(s) desenho(s) adicionado(s)/removido(s) do mapa. Poligonos e retângulos são incrementados com a propriedade "drawnArea" |
+| onCoordinateSystemChange | Emite o sistema de referência selecionado no memorial descritivo (ex.: `SIRGAS2000`)                                                      |
+| onFullscreenChange | Emite `true`/`false` quando o mapa entra ou sai de tela cheia                                                                               |
+| onMeasureComplete  | Emite área medida (`m2`, `km2`, `ha`, `geojson`) após medição efêmera (não dispara `onDrawing`)                                           |
 
 ### Instâncias
 
-| Nome           | Descrição                                                           |
-|----------------|---------------------------------------------------------------------|
-| map            | Mapa Leaflet. Utilizada para manipulação do mapa                    |
-| layerControl   | Controle de camadas Leaflet. Utilizada para manipulação das camadas |
-| drawItemsGroup | Grupo de desenhos Leaflet. Utilizada para manipulação dos desenhos  |
-| leaflet        | Instância Leaflet.                                                  |
+| Nome              | Descrição                                                           |
+|-------------------|---------------------------------------------------------------------|
+| map               | Mapa Leaflet. Utilizada para manipulação do mapa                    |
+| layerControl      | Controle de camadas Leaflet. Utilizada para manipulação das camadas |
+| drawItemsGroup    | Grupo de desenhos Leaflet. Utilizada para manipulação dos desenhos  |
+| leaflet           | Instância Leaflet.                                                  |
+| centerMap         | Centraliza/enquadra o mapa conforme `options.tools.center`          |
+| toggleFullscreen  | Alterna tela cheia                                                  |
+| enterFullscreen   | Entra em tela cheia                                                 |
+| exitFullscreen    | Sai de tela cheia                                                   |
+| toggleMeasureArea | Ativa/desativa modo de medição de área (legado; preferir os botões de linha/polígono em `options.tools`) |
+| toggleCoordinatePanel | Abre ou fecha o painel do memorial descritivo                                                             |
+| closeCoordinatePanel  | Fecha o painel do memorial descritivo                                                                     |
+
+### Memorial descritivo
+
+Quando `descriptiveMemorial.show` é `true`, o mapa exibe um painel lateral com três formas de informar a geometria da propriedade:
+
+| Aba | Entrada | Saída no mapa |
+|-----|---------|---------------|
+| Preenchimento manual | Pontos com coordenadas (DD ou DMS), azimute e distância | WKT (`POINT`, `LINESTRING` ou `POLYGON`) |
+| Upload CSV | Arquivo `.csv` com colunas `X`, `Y`, `AZIMUTH`, `DISTANCIA` (ou `DISTANCE`) | WKT (`POLYGON`) |
+| Upload Shapefile | Arquivo `.zip` contendo shapefile (`.shp`, `.shx`, `.dbf`) | GeoJSON (`Polygon` ou `MultiPolygon`) |
+
+Geometrias do memorial são marcadas internamente com `options.memorialKey = 'memorial'` e disparam `onDrawing` com `type: 'created'`, permitindo que a aplicação consumidora aplique a geometria na camada de propriedade.
+
+#### Upload Shapefile (.zip)
+
+Requisitos do arquivo:
+
+- Formato: `.zip` com shapefile completo (`.shp`, `.shx` e `.dbf`; `.prj` recomendado).
+- **Uma única geometria** (um feature no shapefile).
+- Tipos aceitos: `Polygon` ou `MultiPolygon` (MultiPolygon com várias partes é válido).
+- A geometria deve estar **fechada** e **topologicamente válida** (sem auto-interseção, área maior que zero).
+
+Validações rejeitam, entre outros:
+
+- Mais de um feature no shapefile.
+- Geometrias do tipo `Point`, `LineString` etc.
+- Anéis abertos ou polígonos com área zero.
+- Auto-interseções.
+
+O parse é feito no browser (`shpjs`); não há envio ao backend. A projeção do shapefile deve coincidir com o sistema de referência esperado pela aplicação (ex.: SIRGAS 2000) — não há reprojeção automática.
+
+Textos da aba e mensagens de erro podem ser customizados via `descriptiveMemorial.customTexts` (chaves `shapefileUpload`, `shapefileFileUpload`, `dragShapefileZip`, `shapefileZipInfo`, `shapefileAppliedSuccess`).
+
+#### Ferramentas de medição
+
+Com `options.tools.show: true`, o mapa exibe controles de tela cheia, centralização e medição efêmera (linha e polígono). A medição **não** adiciona camadas permanentes nem dispara `onDrawing`; o resultado é emitido em `onMeasureComplete`.
+
+Configuração adicional em `options.tools`:
+
+| Propriedade | Descrição |
+|-------------|-----------|
+| `measureLine` | Botão de medição de distância entre dois pontos |
+| `measurePolygon` | Botão de medição de área por polígono desenhado |
+| `measureArea` | Modo legado de medição de área |
+| `texts` | Rótulos do painel de medição (distância, área, ajuda, cancelar, finalizar) |
 
 ### Injeção menu lateral
 
@@ -144,7 +199,9 @@ const props = {
     show: true,
     customTexts: {
       title: 'New title',
-      addPoint: 'Custom text'
+      addPoint: 'Custom text',
+      shapefileUpload: 'Upload Shapefile',
+      shapefileZipInfo: 'Envie um .zip com .shp, .shx e .dbf contendo uma única geometria Polygon ou MultiPolygon'
     }
   },
   layers: {
@@ -236,6 +293,24 @@ const props = {
       persist: true,
       removeMenu: false
     },
+    tools: {
+      show: true,
+      position: 'topright',
+      fullscreen: { show: true, title: 'Tela cheia' },
+      center: { show: true, title: 'Centralizar', target: 'drawn' },
+      measureArea: { show: true, title: 'Medir área' },
+      measureLine: { show: true, title: 'Medir distância' },
+      measurePolygon: { show: true, title: 'Medir polígono' },
+      texts: {
+        measureResult: 'Medição',
+        measureLength: 'Distância',
+        measureArea: 'Área',
+        measureLineHelp: 'Clique em dois pontos no mapa. Duplo clique para finalizar.',
+        measurePolygonHelp: 'Clique para adicionar vértices. Finalize no primeiro ponto, em Finalizar ou com duplo clique.',
+        measureCancel: 'Cancelar',
+        measureFinish: 'Finalizar medição'
+      }
+    },
     drawing: {
       show: true,
       translation: {
@@ -326,3 +401,44 @@ const props = {
   }
 }
 ```
+
+## Desenvolvimento local
+
+No repositório **core**, o `map_component` é consumido pelo frontend como pacote local (`file:./map_component`). Para alterar o componente:
+
+```bash
+cd map_component
+npm install
+npm run build
+```
+
+Em seguida, sincronize para o frontend (o `./start.sh` na raiz do core faz isso automaticamente via `rsync`, excluindo `.git` e `node_modules`).
+
+### Marcadores estáveis no zoom
+
+Opções em `options.map.config`:
+
+| Opção | Descrição |
+|-------|-----------|
+| `markerZoomAnimation: false` | Desativa animação de marcadores no zoom (padrão no componente) |
+| `stabilizeMarkersOnZoom: true` | Reposiciona marcadores após `zoomend` (evita drift de `divIcon`) |
+
+Utilitários exportados pelo pacote (para consumidores que criam marcadores fora do fluxo interno):
+
+```typescript
+import { createStableMarker, bindMarkerZoomStability } from '@rural-environmental-registry/map_component'
+
+const marker = createStableMarker(L, latlng, { icon: customDivIcon, layerCode: 'hq' })
+```
+
+O `LeafletMap` aplica `bindMarkerZoomStability` automaticamente no `drawItemsGroup` quando `stabilizeMarkersOnZoom` não é `false`.
+
+### Dependências relevantes
+
+| Pacote | Uso |
+|--------|-----|
+| `leaflet`, `@geoman-io/leaflet-geoman-free` | Mapa, desenho e medição |
+| `@turf/turf` | Validação geométrica do shapefile |
+| `shpjs` | Parse de shapefile em `.zip` no memorial descritivo |
+| `papaparse` | Parse de CSV no memorial descritivo |
+| `element-plus` | UI do painel de coordenadas |

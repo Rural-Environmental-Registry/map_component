@@ -21,7 +21,6 @@
           :persist="!!props.options?.persist"
           @onChildLayerToggle="onChildLayerChange"
           @onGroupLayerToggle="onGroupLayerToggle"
-          @onInitDefaultLayer="onInitDefaultLayer"
         />
       </template>
       <div id="external-id-bottom-menu"></div>
@@ -32,16 +31,17 @@
 <script lang="ts" setup>
   import { ElButton, ElMenu } from 'element-plus'
   import L from 'leaflet'
-  import { computed, ref } from 'vue'
+  import { computed, nextTick, ref, watch } from 'vue'
   import FontAwesomeIcon from '../fa-icon/FontAwesomeIcon.vue'
   import ParentMenu from './ParentMenu.vue'
   import { GroupLayerData, LayerData, LayersConfig, LayersMenuConfig } from '../../types'
+  import { resolveLayerActiveState, shouldInitLayerOnMap } from '../../utils/menuHistory.ts'
 
   type MenuProps = {
     layersConfig: LayersConfig
     options?: LayersMenuConfig
     map: L.Map
-    layerControl: L.Control.Layers
+    layerControl?: L.Control.Layers
   }
 
   type ConvertedLayers = {
@@ -91,6 +91,35 @@
 
     handleWmsLayer(layer)
   }
+
+  const initializedLayerKeys = new Set<string>()
+
+  const initDefaultLayers = (): void => {
+    if (!props.map) return
+
+    const persist = !!props.options?.persist
+
+    props.layersConfig?.forEach((group) => {
+      group.layers?.forEach((layer) => {
+        if (initializedLayerKeys.has(layer.key)) return
+        if (!shouldInitLayerOnMap(layer, persist)) return
+
+        const resolved = resolveLayerActiveState(layer, persist)
+        onInitDefaultLayer(resolved)
+        initializedLayerKeys.add(layer.key)
+      })
+    })
+  }
+
+  watch(
+    [() => props.layersConfig, () => props.map],
+    () => {
+      void nextTick(() => {
+        initDefaultLayers()
+      })
+    },
+    { immediate: true, deep: true }
+  )
 
   const onChildLayerChange = (layer: LayerData): void => {
     if (layer.geojson) {
@@ -143,12 +172,15 @@
     convertedLayers.value[layer.key] = wmsLayer
 
     wmsLayer.addTo(props.map)
-    props.layerControl.addOverlay(wmsLayer, `${wmsLayer.options.attribution}`)
+
+    if (props.layerControl) {
+      props.layerControl.addOverlay(wmsLayer, `${wmsLayer.options.attribution}`)
+    }
   }
 
   const removeWmsLayer = (layer: LayerData): void => {
     props.map.removeLayer(convertedLayers.value[layer.key])
-    props.layerControl.removeLayer(convertedLayers.value[layer.key])
+    props.layerControl?.removeLayer(convertedLayers.value[layer.key])
 
     delete convertedLayers.value[layer.key]
   }
@@ -189,12 +221,15 @@
     convertedGeoJsonLayers.value[layer.key] = geoJsonLayer
 
     geoJsonLayer.addTo(props.map)
-    props.layerControl.addOverlay(geoJsonLayer, `${geoJsonLayer.options.attribution}`)
+
+    if (props.layerControl) {
+      props.layerControl.addOverlay(geoJsonLayer, `${geoJsonLayer.options.attribution}`)
+    }
   }
 
   const removeGeoJsonLayer = (layer: LayerData): void => {
     props.map.removeLayer(convertedGeoJsonLayers.value[layer.key])
-    props.layerControl.removeLayer(convertedGeoJsonLayers.value[layer.key])
+    props.layerControl?.removeLayer(convertedGeoJsonLayers.value[layer.key])
 
     delete convertedGeoJsonLayers.value[layer.key]
   }

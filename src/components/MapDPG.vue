@@ -1,8 +1,24 @@
 <template>
-  <div class="map-container">
+  <div
+    ref="mapContainerRef"
+    class="map-container"
+  >
     <Loading :isLoading="(isLoading || showLoading) && !disableLoading" />
+    <Map
+      ref="mapRef"
+      :drawingOptions="options.drawing"
+      :fullscreenContainer="mapContainerRef"
+      :layers="layers"
+      :mapOptions="options.map"
+      :toolsOptions="options.tools"
+      @onDrawing="emit('onDrawing', $event)"
+      @onFullscreenChange="emit('onFullscreenChange', $event)"
+      @onMeasureComplete="emit('onMeasureComplete', $event)"
+      @startLoading="isLoading = true"
+      @stopLoading="isLoading = false"
+    />
     <LayerMenu
-      v-if="mapRef && layers?.customLayers"
+      v-if="mapRef?.map && layers?.customLayers"
       :layerControl="mapRef.layerControl"
       :layersConfig="layers.customLayers"
       :map="mapRef.map"
@@ -12,21 +28,13 @@
       @startLoading="isLoading = true"
       @stopLoading="isLoading = false"
     />
-    <Map
-      ref="mapRef"
-      :drawingOptions="options.drawing"
-      :layers="layers"
-      :mapOptions="options.map"
-      @onDrawing="emit('onDrawing', $event)"
-      @startLoading="isLoading = true"
-      @stopLoading="isLoading = false"
-    />
     <CoordinatePanel
-      v-if="mapRef && descriptiveMemorial.show"
+      v-if="mapRef && descriptiveMemorial?.show"
       ref="coordinatePanelRef"
       :descriptiveMemorial="descriptiveMemorial"
       :map="mapRef.map"
       @geometryChange="handleGeometryChange"
+      @geometryGeoJsonChange="handleGeometryGeoJsonChange"
       @geometryRemoved="handleGeometryRemoved"
       @systemChange="handleCoordinateSystemChange"
     />
@@ -36,11 +44,23 @@
 <script lang="ts" setup>
   import L from 'leaflet'
   import { computed, ref } from 'vue'
-  import { DrawingEvent, GroupLayerData, LayerData, MapLayers, MapOptionsConfig, DescriptiveMemorial } from '../types'
+  import {
+    DrawingEvent,
+    GroupLayerData,
+    LayerData,
+    MapLayers,
+    MapOptionsConfig,
+    DescriptiveMemorial,
+    MeasureCompleteEvent
+  } from '../types'
   import Loading from './loading/Loading.vue'
   import Map from './map/LeafletMap.vue'
   import LayerMenu from './menu/LayerMenu.vue'
   import CoordinatePanel from './coordinate/CoordinatePanel.vue'
+  import { isMemorialLayer, MEMORIAL_KEY } from '../utils/memorialLayer'
+  import { resolveDrawingPathOptions } from '../utils/drawingPathOptions'
+  import type { MemorialDrawShape } from '../utils/drawingPathOptions'
+  import type { Feature, MultiPolygon, Polygon } from 'geojson'
 
   type MapaDPGProps = {
     layers: MapLayers
@@ -50,7 +70,7 @@
     descriptiveMemorial: DescriptiveMemorial
   }
 
-  withDefaults(defineProps<MapaDPGProps>(), {
+  const props = withDefaults(defineProps<MapaDPGProps>(), {
     options: () => ({
       map: {},
       layersMenu: {
@@ -68,19 +88,31 @@
     (e: 'onChildLayerToggle', data: LayerData): void
     (e: 'onDrawing', data: DrawingEvent): void
     (e: 'onCoordinateSystemChange', system: string): void
+    (e: 'onFullscreenChange', active: boolean): void
+    (e: 'onMeasureComplete', data: MeasureCompleteEvent): void
   }>()
 
   type MapRef = {
     map: L.Map
     layerControl: L.Control.Layers
-    drawControl: L.Control.Draw
     drawItemsGroup: L.FeatureGroup
     leaflet: typeof L
+    getDrawingPathOptions: (shape: MemorialDrawShape) => L.PathOptions
+    centerMap: () => void
+    enterFullscreen: () => void
+    exitFullscreen: () => void
+    toggleFullscreen: () => void
+    toggleMeasureArea: () => void
   }
 
   const mapRef = ref<MapRef>()
+  const mapContainerRef = ref<HTMLElement | null>(null)
   const coordinatePanelRef = ref()
   const isLoading = ref<boolean>(false)
+
+  const getMemorialPathOptions = (shape: MemorialDrawShape): L.PathOptions =>
+    mapRef.value?.getDrawingPathOptions(shape) ??
+    resolveDrawingPathOptions(mapRef.value?.map, props.options.drawing, shape)
 
   const handleCoordinateSystemChange = (system: string) => {
     emit('onCoordinateSystemChange', system)
@@ -98,23 +130,23 @@
         return [parseFloat(y), parseFloat(x)] as [number, number]
       })
 
-    const polygonColor = (mapRef.value?.drawControl?.options as any)?.draw?.polygon?.shapeOptions?.color || '#3388ff'
-    const polylineColor = (mapRef.value?.drawControl?.options as any)?.draw?.polyline?.shapeOptions?.color || '#3388ff'
+    const polylineStyle = getMemorialPathOptions('polyline')
+    const polygonStyle = getMemorialPathOptions('polygon')
 
     let leafletGeometry: L.Layer & { options: { memorialKey?: string } }
 
     if (geometry.startsWith('POINT')) {
       leafletGeometry = L.marker(coordinates[0])
     } else if (geometry.startsWith('LINESTRING')) {
-      leafletGeometry = L.polyline(coordinates as [number, number][], { color: polylineColor })
+      leafletGeometry = L.polyline(coordinates as [number, number][], polylineStyle)
     } else if (geometry.startsWith('POLYGON')) {
-      leafletGeometry = L.polygon(coordinates as [number, number][], { color: polygonColor })
+      leafletGeometry = L.polygon(coordinates as [number, number][], polygonStyle)
     } else {
       console.error('Tipo de geometria não suportado:', geometry)
       return
     }
 
-    leafletGeometry.options.memorialKey = 'memorial'
+    leafletGeometry.options.memorialKey = MEMORIAL_KEY
 
     mapRef.value.drawItemsGroup.addLayer(leafletGeometry)
 
@@ -130,13 +162,13 @@
     }
   }
 
-  const handleGeometryRemoved = () => {
-    if (!mapRef.value?.map || !mapRef.value?.drawItemsGroup) return
+  const removeMemorialLayers = (): L.Layer[] => {
+    if (!mapRef.value?.drawItemsGroup) return []
 
     const layersToRemove: L.Layer[] = []
 
     mapRef.value.drawItemsGroup.eachLayer(layer => {
-      if ((layer as any).options?.nome === 'memorial') {
+      if (isMemorialLayer(layer)) {
         layersToRemove.push(layer)
       }
     })
@@ -144,6 +176,39 @@
     layersToRemove.forEach(layer => {
       mapRef.value?.drawItemsGroup.removeLayer(layer)
     })
+
+    return layersToRemove
+  }
+
+  const handleGeometryGeoJsonChange = (feature: Feature<Polygon | MultiPolygon>) => {
+    if (!mapRef.value?.map || !mapRef.value?.drawItemsGroup) return
+
+    removeMemorialLayers()
+
+    const polygonStyle = getMemorialPathOptions('polygon')
+
+    const leafletGeometry = L.geoJSON(feature, {
+      style: polygonStyle,
+      onEachFeature: (_geoJsonFeature, layer) => {
+        ;(layer as L.Layer & { options: { memorialKey?: string } }).options.memorialKey = MEMORIAL_KEY
+      }
+    }) as L.Layer & { options: { memorialKey?: string } }
+
+    leafletGeometry.options.memorialKey = MEMORIAL_KEY
+
+    mapRef.value.drawItemsGroup.addLayer(leafletGeometry)
+    mapRef.value.map.fitBounds(leafletGeometry.getBounds())
+
+    emit('onDrawing', {
+      type: 'created',
+      layer: leafletGeometry
+    })
+  }
+
+  const handleGeometryRemoved = () => {
+    if (!mapRef.value?.map || !mapRef.value?.drawItemsGroup) return
+
+    const layersToRemove = removeMemorialLayers()
 
     if (layersToRemove.length > 0) {
       emit('onDrawing', {
@@ -165,14 +230,39 @@
     }
   }
 
+  const centerMap = () => {
+    mapRef.value?.centerMap()
+  }
+
+  const enterFullscreen = () => {
+    mapRef.value?.enterFullscreen()
+  }
+
+  const exitFullscreen = () => {
+    mapRef.value?.exitFullscreen()
+  }
+
+  const toggleFullscreen = () => {
+    mapRef.value?.toggleFullscreen()
+  }
+
+  const toggleMeasureArea = () => {
+    mapRef.value?.toggleMeasureArea()
+  }
+
   defineExpose({
     map: computed(() => mapRef.value?.map),
     layerControl: computed(() => mapRef.value?.layerControl),
-    drawControl: computed(() => mapRef.value?.drawControl),
     drawItemsGroup: computed(() => mapRef.value?.drawItemsGroup),
     leaflet: computed(() => mapRef.value?.leaflet),
+    getDrawingPathOptions: getMemorialPathOptions,
     toggleCoordinatePanel,
-    closeCoordinatePanel
+    closeCoordinatePanel,
+    centerMap,
+    enterFullscreen,
+    exitFullscreen,
+    toggleFullscreen,
+    toggleMeasureArea
   })
 </script>
 
@@ -185,5 +275,14 @@
     height: 100%;
     overflow: hidden;
     border-radius: var(--mapa-base-radius-5);
+  }
+
+  .map-container--fullscreen {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
   }
 </style>

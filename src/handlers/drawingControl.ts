@@ -1,28 +1,25 @@
 import L, { Map, FeatureGroup, Layer, PathOptions, Icon, Point } from 'leaflet'
 import '@geoman-io/leaflet-geoman-free'
 import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css'
-import { area } from '@turf/turf'
 
 import { DEFAULT_DRAW_OPTIONS } from './constants'
+import { calculateLayerArea } from '../utils/areaCalculator'
 import {
   DrawingConfig,
   GeomanDrawingEvent,
   IncrementedLayer,
   TranslationConfig,
-  DrawnArea,
   ToolbarOptions,
   PMToolbarOptions,
   PMSupportedShapes
 } from '../types'
 
 import markerIcon from '../assets/icons/marker-icon.svg'
-import fileIconMemorial from '../assets/icons/file-lines-regular-full-gray.svg'
 
 export default class DrawingControlHandler {
   private readonly _map: Map
   private readonly _drawItemsGroup: FeatureGroup
   private readonly _options: ToolbarOptions
-  private _memorialButtonControl: L.Control | null = null
 
   constructor(map: Map, drawItemsGroup: FeatureGroup, controlOptions?: DrawingConfig) {
     this._map = map
@@ -43,33 +40,17 @@ export default class DrawingControlHandler {
     return this._options
   }
 
-  private calculateAreas(layer: Layer): DrawnArea {
-    if (layer instanceof L.Polygon || layer instanceof L.Rectangle) {
-      const drawnArea: number = area(layer.toGeoJSON())
-
-      return {
-        m2: drawnArea,
-        km2: drawnArea / 1000000,
-        ha: drawnArea / 10000
-      }
-    }
-
-    return {
-      m2: 0,
-      km2: 0,
-      ha: 0
-    }
-  }
-
   private incrementLayerInfos(layer: Layer): IncrementedLayer {
     const newLayer = layer as IncrementedLayer
-    newLayer.drawnArea = this.calculateAreas(layer)
+    newLayer.drawnArea = calculateLayerArea(layer)
 
     return newLayer
   }
 
   public handleDrawingEvents(eventEmitterCallback: Function): void {
     this._map.on('pm:create', (evt: GeomanDrawingEvent) => {
+      if ((this._map as L.Map & { _leafletMeasureActive?: boolean })._leafletMeasureActive) return
+
       const { layer } = evt
 
       this._drawItemsGroup.addLayer(layer)
@@ -157,83 +138,6 @@ export default class DrawingControlHandler {
       iconUrl: markerIcon
     })
 
-    this._map.pm.setGlobalOptions({ markerStyle: { icon: MyCustomMarker } })
-  }
-
-  private getOrCreateCustomContainer(): HTMLElement {
-    let controlContainer = this._map.getContainer().querySelector('.leaflet-control-memorial') as HTMLElement
-
-    if (!controlContainer) {
-      controlContainer = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-memorial')
-    }
-
-    return controlContainer
-  }
-
-  public addMemorialDescriptiveButton(toggleCallback: () => void, buttonTitle: string): void {
-    const existingButton = this._map.getContainer().querySelector('.memorial-btn')
-    if (existingButton) {
-      return
-    }
-
-    const MemorialDescriptive = L.Control.extend({
-      options: {
-        position: 'topright'
-      },
-      onAdd: () => {
-        const controlContainer = this.getOrCreateCustomContainer()
-
-        const btn = L.DomUtil.create('button', 'memorial-btn leaflet-pm-icon-memorial', controlContainer)
-
-        btn.innerHTML = `<img src="${fileIconMemorial}" alt="${buttonTitle}" />`
-        btn.title = buttonTitle
-
-        L.DomEvent.on(btn, 'click', (e: Event) => {
-          e.stopPropagation()
-          e.preventDefault()
-          if (typeof toggleCallback === 'function') {
-            toggleCallback()
-          }
-        })
-
-        return controlContainer
-      }
-    })
-
-    this._memorialButtonControl = new MemorialDescriptive()
-    this._map.addControl(this._memorialButtonControl)
-  }
-
-  public updateMemorialDescriptiveButtonTitle(newTitle: string): void {
-    const existingButton = this._map.getContainer().querySelector('.memorial-btn') as HTMLButtonElement
-
-    if (existingButton) {
-      existingButton.title = newTitle
-      const img = existingButton.querySelector('img')
-      if (img) {
-        img.alt = newTitle
-      }
-    }
-  }
-
-  public removeMemorialDescriptiveButton(): void {
-    const controlContainer = this._map.getContainer().querySelector('.leaflet-control-memorial')
-
-    if (controlContainer) {
-      const existingButton = controlContainer.querySelector('.memorial-btn')
-
-      if (existingButton) {
-        existingButton.remove()
-      }
-
-      if (controlContainer.children.length === 0) {
-        controlContainer.remove()
-      }
-    }
-
-    if (this._memorialButtonControl) {
-      this._map.removeControl(this._memorialButtonControl)
-      this._memorialButtonControl = null
-    }
+    this._map.pm.setGlobalOptions({ markerStyle: { icon: MyCustomMarker, pane: 'markerPane' } })
   }
 }

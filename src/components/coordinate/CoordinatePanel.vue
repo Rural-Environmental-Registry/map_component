@@ -1,9 +1,9 @@
 <template>
-  <div>
-    <div
-      class="coordinate-panel"
-      :class="{ 'panel-open': isOpen }"
-    >
+  <div
+    class="coordinate-panel-shell"
+    :class="{ 'panel-open': isOpen }"
+  >
+    <div class="coordinate-panel">
       <div class="panel-header">
         <h3>{{ texts.title }}</h3>
         <ElButton
@@ -262,7 +262,7 @@
           </ElTabPane>
 
           <ElTabPane
-            label="Upload CSV"
+            :label="texts.csvUpload"
             name="csv"
           >
             <div class="coordinate-section">
@@ -317,6 +317,13 @@
         </ElTabs>
       </div>
     </div>
+    <input
+      ref="shapefileInputRef"
+      type="file"
+      accept=".zip"
+      class="shapefile-input-hidden"
+      @change="handleShapefileInputChange"
+    />
   </div>
 </template>
 
@@ -343,15 +350,21 @@
   import L from 'leaflet'
   import { COORDINATE_PANEL_TEXTS } from '../../constants/coordinatePanel'
   import { CoordinateConverter } from '../../utils/CoordinateConverter'
-  import DrawingControlHandler from '../../handlers/drawingControl'
+  import MemorialButtonControl from '../../handlers/memorialButtonControl'
   import type { DescriptiveMemorial } from '../../types'
+  import { parseShapefileZip } from '../../utils/parseShapefileZip'
+  import { validateShapefileGeometry } from '../../utils/validateShapefileGeometry'
+  import type { Feature, MultiPolygon, Polygon } from 'geojson'
 
   interface CSVRow {
     X?: string
     Y?: string
     AZIMUTH?: string
     DISTANCIA?: string
+    DISTANCE?: string
   }
+
+  const rowDistance = (row: CSVRow): string | undefined => row.DISTANCIA ?? row.DISTANCE
 
   interface ParsedData {
     data: CSVRow[]
@@ -382,6 +395,7 @@
     (e: 'systemChange', system: string): void
     (e: 'coordinatesChange', coordinates: { lat: number; lng: number }): void
     (e: 'geometryChange', geometry: string): void
+    (e: 'geometryGeoJsonChange', feature: Feature<Polygon | MultiPolygon>): void
     (e: 'geometryRemoved'): void
   }>()
 
@@ -392,6 +406,9 @@
   const latitude = ref<string>('')
   const longitude = ref<string>('')
   const csvData = ref<Array<{ x: number; y: number; azimuth: number; distance: number }>>([])
+  const shapefileLoaded = ref<boolean>(false)
+  const uploadRef = ref()
+  const shapefileInputRef = ref<HTMLInputElement>()
   const manualInput = ref({
     x: '',
     y: '',
@@ -407,8 +424,7 @@
   const manualPoints = ref<any[]>([])
   const manualGeometries = ref<string[]>([])
   const editingIndex = ref<number | null>(null)
-  const uploadRef = ref()
-  let drawingControlInstance: DrawingControlHandler | null = null
+  let memorialButtonControl: MemorialButtonControl | null = null
 
   const texts = computed(() => {
     return { ...COORDINATE_PANEL_TEXTS, ...props.descriptiveMemorial?.customTexts }
@@ -418,42 +434,49 @@
     isOpen.value = !isOpen.value
   }
 
-  const getDrawingControlInstance = (): DrawingControlHandler | null => {
-    if (!drawingControlInstance && props.map) {
-      drawingControlInstance = new DrawingControlHandler(props.map, new L.FeatureGroup())
+  const getMemorialButtonControl = (): MemorialButtonControl | null => {
+    if (!memorialButtonControl && props.map) {
+      memorialButtonControl = new MemorialButtonControl(props.map)
     }
 
-    return drawingControlInstance
+    return memorialButtonControl
+  }
+
+  const alignMapControls = () => {
+    const align = (props.map as L.Map & { alignTopRightControls?: () => void })?.alignTopRightControls
+    align?.()
+  }
+
+  const registerMapButtons = () => {
+    const controller = getMemorialButtonControl()
+    if (!controller) return
+
+    controller.addMemorial(togglePanel, texts.value.memorialDescriptive || '')
+    controller.addShapefile(openShapefilePicker, texts.value.shapefileUpload || '')
+    alignMapControls()
   }
 
   onMounted(() => {
     if (props.descriptiveMemorial?.show) {
-      const controller = getDrawingControlInstance()
-      if (controller) {
-        const buttonTitle = texts.value.memorialDescriptive || ''
-        controller.addMemorialDescriptiveButton(togglePanel, buttonTitle)
-      }
+      registerMapButtons()
     }
   })
 
   onBeforeUnmount(() => {
-    const controller = getDrawingControlInstance()
-    if (controller) {
-      controller.removeMemorialDescriptiveButton()
-    }
+    memorialButtonControl?.remove()
+    memorialButtonControl = null
   })
 
   watch(
     () => props.descriptiveMemorial?.show,
     newValue => {
-      const controller = getDrawingControlInstance()
+      const controller = getMemorialButtonControl()
       if (!controller) return
 
       if (newValue) {
-        const buttonTitle = texts.value.memorialDescriptive || ''
-        controller.addMemorialDescriptiveButton(togglePanel, buttonTitle)
+        registerMapButtons()
       } else {
-        controller.removeMemorialDescriptiveButton()
+        controller.remove()
       }
     }
   )
@@ -461,9 +484,19 @@
   watch(
     () => props.descriptiveMemorial?.customTexts?.memorialDescriptive,
     newTitle => {
-      const controller = getDrawingControlInstance()
+      const controller = getMemorialButtonControl()
       if (newTitle && controller) {
-        controller.updateMemorialDescriptiveButtonTitle(newTitle)
+        controller.updateMemorialTitle(newTitle)
+      }
+    }
+  )
+
+  watch(
+    () => props.descriptiveMemorial?.customTexts?.shapefileUpload,
+    newTitle => {
+      const controller = getMemorialButtonControl()
+      if (newTitle && controller) {
+        controller.updateShapefileTitle(newTitle)
       }
     }
   )
@@ -527,21 +560,29 @@
   }
 
   const convertDMSToDDFromString = (dmsString: string): number => {
-    const cleanString = dmsString.trim().toUpperCase()
+    const cleanString = dmsString.trim().toUpperCase().replace(/'/g, '′').replace(/"/g, '″')
 
-    if (cleanString.includes('°') || cleanString.includes('′') || cleanString.includes('″')) {
-      const degrees = parseInt(cleanString.split('°')[0])
-      const minutes = parseInt(cleanString.split('°')[1].split('′')[0])
-      const seconds = parseFloat(cleanString.split('′')[1].split('″')[0])
+    if (!cleanString) return NaN
 
-      const isNegative = cleanString.includes('S') || cleanString.includes('W')
+    const dmsRegex =
+      /^\s*(-)?\s*(?:(\d+(?:[.,]\d+)?)\s*°)?\s*(?:(\d+(?:[.,]\d+)?)\s*′)?\s*(?:(\d+(?:[.,]\d+)?)\s*(?:″|′′))?\s*([NSEW])?\s*$/
+    const match = cleanString.match(dmsRegex)
 
-      let dd = degrees + minutes / 60 + seconds / 3600
+    if (match && (match[2] != null || match[3] != null || match[4] != null || cleanString.includes('°'))) {
+      const isNegative = !!match[1] || ['S', 'W'].includes(match[5] || '')
+      const degrees = parseFloat(match[2]?.replace(',', '.') || '0')
+      const minutes = parseFloat(match[3]?.replace(',', '.') || '0')
+      const seconds = parseFloat(match[4]?.replace(',', '.') || '0')
 
+      const dd = Math.abs(degrees) + minutes / 60 + seconds / 3600
       return isNegative ? -dd : dd
     }
 
-    return parseFloat(dmsString)
+    const value = parseFloat(cleanString.replace(',', '.'))
+    if (Number.isNaN(value)) return NaN
+
+    const isNegative = cleanString.includes('S') || cleanString.includes('W') || cleanString.startsWith('-')
+    return isNegative ? -Math.abs(value) : value
   }
 
   const processCSVData = (data: CSVRow[]): Point[] => {
@@ -549,20 +590,26 @@
     let lastPoint: Point | null = null
 
     for (const row of data) {
+      const distanceValue = rowDistance(row)
+      const hasXY = Boolean(row.X?.trim() && row.Y?.trim())
+      const hasAzimuthDistance = Boolean(row.AZIMUTH?.trim() && distanceValue?.trim())
+
+      if (!hasXY && !hasAzimuthDistance) continue
+
       let currentPoint: Point | null = null
 
-      if (row.X && row.Y) {
+      if (hasXY) {
         currentPoint = {
-          x: convertDMSToDDFromString(row.X),
-          y: convertDMSToDDFromString(row.Y)
+          x: convertDMSToDDFromString(row.X!),
+          y: convertDMSToDDFromString(row.Y!)
         }
-      } else if (row.AZIMUTH && row.DISTANCIA && lastPoint) {
-        const azimuth = parseFloat(row.AZIMUTH)
-        const distance = parseFloat(row.DISTANCIA)
+      } else if (hasAzimuthDistance && lastPoint) {
+        const azimuth = parseFloat(row.AZIMUTH!)
+        const distance = parseFloat(distanceValue!)
         currentPoint = calculateNewPoint(lastPoint, azimuth, distance)
       }
 
-      if (currentPoint) {
+      if (currentPoint && !Number.isNaN(currentPoint.x) && !Number.isNaN(currentPoint.y)) {
         points.push(currentPoint)
         lastPoint = currentPoint
       }
@@ -574,30 +621,26 @@
   const handleFileChange = (file: any) => {
     if (file.raw) {
       csvData.value = []
-      if (props.map) {
-        props.map.eachLayer(layer => {
-          if (
-            (layer instanceof L.Polyline || layer instanceof L.Polygon || layer instanceof L.Marker) &&
-            (layer as any).options?.nome === 'memorial'
-          ) {
-            props.map?.removeLayer(layer)
-          }
-        })
-      }
+      shapefileLoaded.value = false
+      emit('geometryRemoved')
 
       Papa.parse(file.raw, {
         header: true,
+        skipEmptyLines: true,
         complete: (results: Papa.ParseResult<CSVRow>) => {
-          const headers = results.meta.fields || []
-          const requiredHeaders = ['X', 'Y', 'AZIMUTH', 'DISTANCIA']
+          const rows = results.data.filter(
+            (row) =>
+              (row.X?.trim() && row.Y?.trim()) ||
+              (row.AZIMUTH?.trim() && rowDistance(row)?.trim())
+          )
 
-          const firstRow = results.data[0]
-          if (!firstRow.X || !firstRow.Y) {
+          const firstRow = rows[0]
+          if (!firstRow?.X?.trim() || !firstRow?.Y?.trim()) {
             ElMessage.error(texts.value.errorFirstRowXY)
             return
           }
 
-          const points = processCSVData(results.data)
+          const points = processCSVData(rows)
           if (points.length > 0) {
             csvData.value = points.map(p => ({
               x: p.x,
@@ -616,20 +659,45 @@
   const handleFileRemove = () => {
     csvData.value = []
     manualGeometries.value = []
-    if (props.map) {
-      props.map.eachLayer(layer => {
-        if (
-          (layer instanceof L.Polyline || layer instanceof L.Polygon || layer instanceof L.Marker) &&
-          (layer as any).options?.nome === 'memorial'
-        ) {
-          props.map?.removeLayer(layer)
-        }
-      })
-    }
     if (uploadRef.value) {
       uploadRef.value.clearFiles()
     }
     emit('geometryRemoved')
+  }
+
+  const openShapefilePicker = () => {
+    shapefileInputRef.value?.click()
+  }
+
+  const processShapefile = async (file: File) => {
+    emit('geometryRemoved')
+    csvData.value = []
+    shapefileLoaded.value = false
+
+    const parseResult = await parseShapefileZip(file)
+    if (!parseResult.ok) {
+      ElMessage.error(parseResult.error)
+      return
+    }
+
+    const validationResult = validateShapefileGeometry(parseResult.features)
+    if (!validationResult.ok) {
+      ElMessage.error(validationResult.error)
+      return
+    }
+
+    shapefileLoaded.value = true
+    emit('geometryGeoJsonChange', validationResult.feature)
+    ElMessage.success(texts.value.shapefileAppliedSuccess)
+  }
+
+  const handleShapefileInputChange = async (event: Event) => {
+    const input = event.target as HTMLInputElement
+    const file = input.files?.[0]
+    if (!file) return
+
+    await processShapefile(file)
+    input.value = ''
   }
 
   const editPoint = (index: number) => {
@@ -687,19 +755,24 @@
           ElMessage.error(texts.value.errorXYRequired)
           return
         }
-        x = parseFloat(manualInput.value.x) || parseFloat(manualPoints.value[editingIndex.value].x)
-        y = parseFloat(manualInput.value.y) || parseFloat(manualPoints.value[editingIndex.value].y)
+        x = manualInput.value.x !== '' ? parseFloat(manualInput.value.x) : parseFloat(manualPoints.value[editingIndex.value].x)
+        y = manualInput.value.y !== '' ? parseFloat(manualInput.value.y) : parseFloat(manualPoints.value[editingIndex.value].y)
       } else {
         if (editingIndex.value === 0 && (!manualInput.value.xDegrees || !manualInput.value.yDegrees)) {
           ElMessage.error(texts.value.errorDegreesRequired)
           return
         }
-        x = manualInput.value.xDegrees
+        x =  manualInput.value.xDegrees !== ''
           ? convertDMSToDD(manualInput.value.xDegrees, manualInput.value.xMinutes, manualInput.value.xSeconds)
           : parseFloat(manualPoints.value[editingIndex.value].x)
-        y = manualInput.value.yDegrees
+        y = manualInput.value.yDegrees !== ''
           ? convertDMSToDD(manualInput.value.yDegrees, manualInput.value.yMinutes, manualInput.value.ySeconds)
           : parseFloat(manualPoints.value[editingIndex.value].y)
+      }
+
+      if (Number.isNaN(x) || Number.isNaN(y)) {
+        ElMessage.error(texts.value.errorProvideCoordinatesOrAzimuthDistance)
+        return
       }
 
       manualPoints.value[editingIndex.value] = {
@@ -834,18 +907,12 @@
     manualGeometries.value = []
     csvData.value = []
     manualPoints.value = []
-    if (props.map) {
-      props.map.eachLayer(layer => {
-        if (
-          (layer instanceof L.Polyline || layer instanceof L.Polygon || layer instanceof L.Marker) &&
-          (layer as any).options?.nome === 'memorial'
-        ) {
-          props.map?.removeLayer(layer)
-        }
-      })
-    }
+    shapefileLoaded.value = false
     if (uploadRef.value) {
       uploadRef.value.clearFiles()
+    }
+    if (shapefileInputRef.value) {
+      shapefileInputRef.value.value = ''
     }
     manualInput.value = {
       x: '',
@@ -864,24 +931,20 @@
 
   defineExpose({
     togglePanel,
-    closePanel
+    closePanel,
+    openShapefilePicker
   })
 </script>
 
 <style scoped>
-  .coordinate-panel {
+  .coordinate-panel-shell {
     position: absolute;
     bottom: 50px;
     right: 10px;
     z-index: 1000;
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-    max-height: 445px;
+    max-height: min(445px, calc(100vh - 120px));
     max-width: 480px;
     min-width: 480px !important;
-    overflow-y: auto;
-    overflow-x: auto;
     transform: translateX(100%);
     transition: transform 0.3s ease;
     opacity: 0;
@@ -894,6 +957,17 @@
     }
   }
 
+  .coordinate-panel {
+    display: flex;
+    flex-direction: column;
+    height: min(445px, calc(100vh - 120px));
+    max-height: min(445px, calc(100vh - 120px));
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+  }
+
   .coordinate-inputs-column {
     display: flex;
     flex-direction: column;
@@ -903,11 +977,13 @@
   }
 
   .panel-header {
+    flex-shrink: 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 15px;
     border-bottom: 1px solid #eee;
+    background-color: white;
 
     h3 {
       margin: 0;
@@ -926,7 +1002,20 @@
   }
 
   .panel-content {
+    flex: 1 1 auto;
+    min-height: 0;
     padding: 15px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  :deep(.el-tabs__header) {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    margin-bottom: 0;
+    background-color: white;
   }
 
   .coordinate-section {
@@ -1086,5 +1175,9 @@
     .el-input {
       width: 100%;
     }
+  }
+
+  .shapefile-input-hidden {
+    display: none;
   }
 </style>

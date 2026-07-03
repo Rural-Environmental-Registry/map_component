@@ -20,7 +20,13 @@
     "vite.config.js",
     "README.md"
   ],
-  "keywords": ["vue", "map", "leaflet", "component", "dataprev"],
+  "keywords": [
+    "vue",
+    "map",
+    "leaflet",
+    "component",
+    "dataprev"
+  ],
   "author": "Dataprev",
   "license": "GPL-3.0",
   "repository": {
@@ -40,7 +46,8 @@
     "element-plus": "2.9.3",
     "leaflet": "1.9.4",
     "leaflet-draw": "1.0.4",
-    "papaparse": "5.5.3"
+    "papaparse": "5.5.3",
+    "shpjs": "6.1.0"
   },
   "devDependencies": {
     "@types/geojson": "7946.0.16",

@@ -7,6 +7,7 @@ import L from 'leaflet'
 export default class MapHandler {
   private readonly _map: L.Map
   private readonly _mapOptions: MapConfigConfig
+  private readonly _initialView: { center: L.LatLngExpression; zoom: number }
   private _mapLayers!: MapLayers
 
   constructor(mapOptions: MapConfigConfig | undefined) {
@@ -15,8 +16,15 @@ export default class MapHandler {
       ...mapOptions
     }
 
+    this._initialView = {
+      center: this._mapOptions.center!,
+      zoom: this._mapOptions.zoom!
+    }
+
     this._map = L.map(this._mapOptions.id, {
-      preferCanvas: true,
+      // SVG evita desalinhamento de divIcon e geometrias efêmeras ao dar zoom
+      preferCanvas: this._mapOptions.preferCanvas ?? false,
+      markerZoomAnimation: this._mapOptions.markerZoomAnimation ?? false,
       zoomControl: false,
       minZoom: this._mapOptions.minZoom,
       maxZoom: this._mapOptions.maxZoom,
@@ -34,6 +42,10 @@ export default class MapHandler {
 
   get map(): L.Map {
     return this._map
+  }
+
+  get initialView(): { center: L.LatLngExpression; zoom: number } {
+    return this._initialView
   }
 
   public init(mapLayers: MapLayers, eventEmitterCallback: Function): void {

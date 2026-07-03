@@ -47,6 +47,7 @@
   import {
     DrawingEvent,
     GroupLayerData,
+    IncrementedLayer,
     LayerData,
     MapLayers,
     MapOptionsConfig,
@@ -58,6 +59,7 @@
   import LayerMenu from './menu/LayerMenu.vue'
   import CoordinatePanel from './coordinate/CoordinatePanel.vue'
   import { isMemorialLayer, MEMORIAL_KEY } from '../utils/memorialLayer'
+  import { calculateLayerArea } from '../utils/geometryCalculator'
   import { resolveDrawingPathOptions } from '../utils/drawingPathOptions'
   import type { MemorialDrawShape } from '../utils/drawingPathOptions'
   import type { Feature, MultiPolygon, Polygon } from 'geojson'
@@ -118,6 +120,18 @@
     emit('onCoordinateSystemChange', system)
   }
 
+  const incrementLayerWithDrawnArea = (layer: L.Layer): IncrementedLayer => {
+    if (layer instanceof L.GeoJSON) {
+      const innerLayer = layer.getLayers()[0]
+      const drawnArea = innerLayer ? calculateLayerArea(innerLayer) : { m2: 0, km2: 0, ha: 0 }
+      return Object.assign(layer, { drawnArea }) as IncrementedLayer
+    }
+
+    const incrementedLayer = layer as IncrementedLayer
+    incrementedLayer.drawnArea = calculateLayerArea(layer)
+    return incrementedLayer
+  }
+
   const handleGeometryChange = (geometry: string) => {
     if (!mapRef.value?.map || !mapRef.value?.drawItemsGroup) return
 
@@ -152,7 +166,7 @@
 
     emit('onDrawing', {
       type: 'created',
-      layer: leafletGeometry
+      layer: incrementLayerWithDrawnArea(leafletGeometry)
     })
 
     if (leafletGeometry instanceof L.Marker) {
@@ -201,7 +215,7 @@
 
     emit('onDrawing', {
       type: 'created',
-      layer: leafletGeometry
+      layer: incrementLayerWithDrawnArea(leafletGeometry)
     })
   }
 

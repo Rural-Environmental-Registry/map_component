@@ -142,20 +142,29 @@ export default class MemorialButtonControl {
 
   public remove(): void {
     this.cancelShapefileRetries()
-    this.removeShapefileFromToolbar()
+    try {
+      this.removeShapefileFromToolbar()
 
-    const controlContainer = this._map.getContainer().querySelector('.leaflet-control-memorial')
+      const container = this._map.getContainer()
+      const controlContainer = container?.querySelector('.leaflet-control-memorial')
 
-    if (controlContainer) {
-      controlContainer.querySelector('.memorial-btn')?.remove()
+      if (controlContainer) {
+        controlContainer.querySelector('.memorial-btn')?.remove()
 
-      if (controlContainer.children.length === 0) {
-        controlContainer.remove()
+        if (controlContainer.children.length === 0) {
+          controlContainer.remove()
+        }
       }
+    } catch {
+      // Map container might already be destroyed or unavailable
     }
 
     if (this._memorialButtonControl) {
-      this._map.removeControl(this._memorialButtonControl)
+      try {
+        this._map.removeControl(this._memorialButtonControl)
+      } catch {
+        // Ignore if map is already destroyed
+      }
       this._memorialButtonControl = null
     }
   }

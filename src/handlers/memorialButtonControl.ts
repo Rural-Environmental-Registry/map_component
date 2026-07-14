@@ -6,6 +6,7 @@ import fileIconMemorial from '../assets/icons/file-lines-regular-full-gray.svg'
 export default class MemorialButtonControl {
   private readonly _map: Map
   private _memorialButtonControl: L.Control | null = null
+  private _shapefileRetryTimeoutId: number | null = null
 
   constructor(map: Map) {
     this._map = map
@@ -63,37 +64,55 @@ export default class MemorialButtonControl {
   }
 
   public attachShapefileToDrawToolbar(importCallback: () => void, buttonTitle: string): boolean {
-    if (this._map.getContainer().querySelector('.shapefile-toolbar-btn')) {
+    try {
+      const container = this._map.getContainer()
+      if (!container) return false
+
+      if (container.querySelector('.shapefile-toolbar-btn')) {
+        return true
+      }
+
+      const polygonContainer = this.getPolygonButtonContainer()
+      if (!polygonContainer) return false
+
+      const shapefileContainer = L.DomUtil.create('div', 'button-container button-container-shapefile')
+
+      const link = L.DomUtil.create('a', 'leaflet-buttons-control-button shapefile-toolbar-btn', shapefileContainer) as HTMLAnchorElement
+      link.href = '#'
+      link.title = buttonTitle
+      link.setAttribute('role', 'button')
+      link.innerHTML = '<div class="control-icon leaflet-pm-icon-shapefile"></div>'
+
+      polygonContainer.insertAdjacentElement('afterend', shapefileContainer)
+
+      L.DomEvent.on(link, 'click', (e: Event) => {
+        e.stopPropagation()
+        e.preventDefault()
+        importCallback()
+      })
+
       return true
+    } catch {
+      return false
     }
-
-    const polygonContainer = this.getPolygonButtonContainer()
-    if (!polygonContainer) return false
-
-    const shapefileContainer = L.DomUtil.create('div', 'button-container button-container-shapefile')
-
-    const link = L.DomUtil.create('a', 'leaflet-buttons-control-button shapefile-toolbar-btn', shapefileContainer) as HTMLAnchorElement
-    link.href = '#'
-    link.title = buttonTitle
-    link.setAttribute('role', 'button')
-    link.innerHTML = '<div class="control-icon leaflet-pm-icon-shapefile"></div>'
-
-    polygonContainer.insertAdjacentElement('afterend', shapefileContainer)
-
-    L.DomEvent.on(link, 'click', (e: Event) => {
-      e.stopPropagation()
-      e.preventDefault()
-      importCallback()
-    })
-
-    return true
   }
 
   public addShapefile(importCallback: () => void, buttonTitle: string, retries = 8): void {
     const attached = this.attachShapefileToDrawToolbar(importCallback, buttonTitle)
 
     if (!attached && retries > 0) {
-      window.setTimeout(() => this.addShapefile(importCallback, buttonTitle, retries - 1), 150)
+      this.cancelShapefileRetries()
+      this._shapefileRetryTimeoutId = window.setTimeout(() => {
+        this._shapefileRetryTimeoutId = null
+        this.addShapefile(importCallback, buttonTitle, retries - 1)
+      }, 150)
+    }
+  }
+
+  private cancelShapefileRetries(): void {
+    if (this._shapefileRetryTimeoutId !== null) {
+      window.clearTimeout(this._shapefileRetryTimeoutId)
+      this._shapefileRetryTimeoutId = null
     }
   }
 
@@ -122,20 +141,30 @@ export default class MemorialButtonControl {
   }
 
   public remove(): void {
-    this.removeShapefileFromToolbar()
+    this.cancelShapefileRetries()
+    try {
+      this.removeShapefileFromToolbar()
 
-    const controlContainer = this._map.getContainer().querySelector('.leaflet-control-memorial')
+      const container = this._map.getContainer()
+      const controlContainer = container?.querySelector('.leaflet-control-memorial')
 
-    if (controlContainer) {
-      controlContainer.querySelector('.memorial-btn')?.remove()
+      if (controlContainer) {
+        controlContainer.querySelector('.memorial-btn')?.remove()
 
-      if (controlContainer.children.length === 0) {
-        controlContainer.remove()
+        if (controlContainer.children.length === 0) {
+          controlContainer.remove()
+        }
       }
+    } catch {
+      // Map container might already be destroyed or unavailable
     }
 
     if (this._memorialButtonControl) {
-      this._map.removeControl(this._memorialButtonControl)
+      try {
+        this._map.removeControl(this._memorialButtonControl)
+      } catch {
+        // Ignore if map is already destroyed
+      }
       this._memorialButtonControl = null
     }
   }

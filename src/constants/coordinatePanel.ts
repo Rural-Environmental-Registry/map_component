@@ -45,12 +45,13 @@ export const COORDINATE_PANEL_TEXTS: CoordinatePanelTexts = {
   csvColumnsInfo: 'The file must contain the columns: X, Y, AZIMUTH, DISTANCE',
   applyCsvCoordinates: 'Apply CSV Coordinates',
 
-  shapefileUpload: 'Shapefile Upload',
-  shapefileFileUpload: 'Shapefile Upload',
-  dragShapefileZip: 'Drag ZIP file or click to upload',
+  shapefileUpload: 'Shapefile, KML and Geojson Upload',
+  shapefileFileUpload: 'Shapefile, KML and Geojson Upload',
+  dragShapefileZip: 'Drag file or click to upload',
   shapefileZipInfo:
-    'Upload a .zip with .shp, .shx and .dbf containing a single Polygon or MultiPolygon geometry',
-  shapefileAppliedSuccess: 'Shapefile applied successfully',
+    'Upload a .zip (shapefile), .kml, .geojson or .json with a single Polygon or MultiPolygon geometry',
+  shapefileAppliedSuccess: 'Geometry applied successfully',
+  geometryImportUnsupportedFormat: 'Unsupported file format. Use .zip, .kml, .geojson or .json',
 
   placeholderLongitude: 'e.g., -46.6333',
   placeholderLatitude: 'e.g., -23.5505',

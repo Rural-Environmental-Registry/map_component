@@ -1,7 +1,7 @@
 import { area, booleanValid, kinks } from '@turf/turf'
 import type { Feature, MultiPolygon, Polygon, Position } from 'geojson'
 
-export type ShapefileValidationResult =
+export type ImportedPolygonValidationResult =
   | { ok: true; feature: Feature<Polygon | MultiPolygon> }
   | { ok: false; error: string }
 
@@ -22,9 +22,9 @@ function validateRingsClosed(geometry: Polygon | MultiPolygon): boolean {
   return polygons.every(polygon => polygon.every(ring => isRingClosed(ring)))
 }
 
-export function validateShapefileGeometry(features: Feature[]): ShapefileValidationResult {
+export function validateImportedPolygonGeometry(features: Feature[]): ImportedPolygonValidationResult {
   if (features.length !== 1) {
-    return { ok: false, error: 'The shapefile must contain exactly one geometry' }
+    return { ok: false, error: 'The file must contain exactly one geometry' }
   }
 
   const feature = features[0]

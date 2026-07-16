@@ -5,7 +5,9 @@ function isFeatureCollection(value: unknown): value is FeatureCollection {
     typeof value === 'object' &&
     value !== null &&
     'type' in value &&
-    (value as FeatureCollection).type === 'FeatureCollection'
+    (value as FeatureCollection).type === 'FeatureCollection' &&
+    'features' in value &&
+    Array.isArray(value.features)
   )
 }
 
@@ -14,7 +16,8 @@ function isFeature(value: unknown): value is Feature {
     typeof value === 'object' &&
     value !== null &&
     'type' in value &&
-    (value as Feature).type === 'Feature'
+    (value as Feature).type === 'Feature' &&
+    'geometry' in value
   )
 }
 

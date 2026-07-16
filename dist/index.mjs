@@ -32254,8 +32254,8 @@ const VD = /* @__PURE__ */ $y(qD), WD = {
   dragCsvFile: "Drag CSV file or click to upload",
   csvColumnsInfo: "The file must contain the columns: X, Y, AZIMUTH, DISTANCE",
   applyCsvCoordinates: "Apply CSV Coordinates",
-  shapefileUpload: "Import Geometry",
-  shapefileFileUpload: "Import Geometry",
+  shapefileUpload: "Shapefile, KML and Geojson Upload",
+  shapefileFileUpload: "Shapefile, KML and Geojson Upload",
   dragShapefileZip: "Drag file or click to upload",
   shapefileZipInfo: "Upload a .zip (shapefile), .kml, .geojson or .json with a single Polygon or MultiPolygon geometry",
   shapefileAppliedSuccess: "Geometry applied successfully",
@@ -37572,10 +37572,10 @@ const yN = async (e) => {
   return e = Vb(e), t = qb(t), ug(e, t);
 };
 function EN(e) {
-  return typeof e == "object" && e !== null && "type" in e && e.type === "FeatureCollection";
+  return typeof e == "object" && e !== null && "type" in e && e.type === "FeatureCollection" && "features" in e && Array.isArray(e.features);
 }
 function MN(e) {
-  return typeof e == "object" && e !== null && "type" in e && e.type === "Feature";
+  return typeof e == "object" && e !== null && "type" in e && e.type === "Feature" && "geometry" in e;
 }
 function xN(e) {
   return typeof e == "object" && e !== null && "type" in e && !("features" in e) && e.type !== "Feature";

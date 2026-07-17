@@ -320,9 +320,9 @@
     <input
       ref="shapefileInputRef"
       type="file"
-      accept=".zip"
+      accept=".zip,.kml,.geojson,.json"
       class="shapefile-input-hidden"
-      @change="handleShapefileInputChange"
+      @change="handleGeometryFileInputChange"
     />
   </div>
 </template>
@@ -353,7 +353,10 @@
   import MemorialButtonControl from '../../handlers/memorialButtonControl'
   import type { DescriptiveMemorial } from '../../types'
   import { parseShapefileZip } from '../../utils/parseShapefileZip'
-  import { validateShapefileGeometry } from '../../utils/validateShapefileGeometry'
+  import { parseGeoJsonFile } from '../../utils/parseGeoJsonFile'
+  import { parseKmlFile } from '../../utils/parseKmlFile'
+  import { validateImportedPolygonGeometry } from '../../utils/validateImportedPolygonGeometry'
+  import type { GeometryFileParseResult } from '../../utils/geometryFileParseResult'
   import type { Feature, MultiPolygon, Polygon } from 'geojson'
 
   interface CSVRow {
@@ -669,18 +672,38 @@
     shapefileInputRef.value?.click()
   }
 
-  const processShapefile = async (file: File) => {
+  const getGeometryFileExtension = (fileName: string): 'zip' | 'kml' | 'geojson' | null => {
+    const lower = fileName.toLowerCase()
+
+    if (lower.endsWith('.zip')) return 'zip'
+    if (lower.endsWith('.kml')) return 'kml'
+    if (lower.endsWith('.geojson') || lower.endsWith('.json')) return 'geojson'
+
+    return null
+  }
+
+  const parseGeometryFile = async (file: File): Promise<GeometryFileParseResult> => {
+    const extension = getGeometryFileExtension(file.name)
+
+    if (extension === 'zip') return parseShapefileZip(file)
+    if (extension === 'kml') return parseKmlFile(file)
+    if (extension === 'geojson') return parseGeoJsonFile(file)
+
+    return { ok: false, error: texts.value.geometryImportUnsupportedFormat || 'Unsupported file format' }
+  }
+
+  const processGeometryFile = async (file: File) => {
     emit('geometryRemoved')
     csvData.value = []
     shapefileLoaded.value = false
 
-    const parseResult = await parseShapefileZip(file)
+    const parseResult = await parseGeometryFile(file)
     if (!parseResult.ok) {
       ElMessage.error(parseResult.error)
       return
     }
 
-    const validationResult = validateShapefileGeometry(parseResult.features)
+    const validationResult = validateImportedPolygonGeometry(parseResult.features)
     if (!validationResult.ok) {
       ElMessage.error(validationResult.error)
       return
@@ -691,12 +714,12 @@
     ElMessage.success(texts.value.shapefileAppliedSuccess)
   }
 
-  const handleShapefileInputChange = async (event: Event) => {
+  const handleGeometryFileInputChange = async (event: Event) => {
     const input = event.target as HTMLInputElement
     const file = input.files?.[0]
     if (!file) return
 
-    await processShapefile(file)
+    await processGeometryFile(file)
     input.value = ''
   }
 

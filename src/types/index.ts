@@ -240,6 +240,7 @@ export type CoordinatePanelTexts = {
   dragShapefileZip?: string
   shapefileZipInfo?: string
   shapefileAppliedSuccess?: string
+  geometryImportUnsupportedFormat?: string
   placeholderLongitude?: string
   placeholderLatitude?: string
   placeholderAzimuth?: string

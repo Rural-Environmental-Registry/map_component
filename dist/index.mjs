@@ -38143,10 +38143,17 @@ function az(e) {
   return Array.isArray(e == null ? void 0 : e.coordinates) ? (e.type === "Polygon" ? [e.coordinates] : e.coordinates).every((n) => n.every((i) => rz(i))) : !1;
 }
 function oz(e) {
-  if (e.length !== 1)
-    return { ok: !1, error: "The file must contain exactly one geometry" };
-  const t = e[0], n = t.geometry;
-  return !n || n.type !== "Polygon" && n.type !== "MultiPolygon" ? { ok: !1, error: "Geometry must be Polygon or MultiPolygon" } : az(n) ? HA(n) ? jA(n).features.length > 0 ? { ok: !1, error: "Geometry has self-intersection" } : Xy(n) <= 0 ? { ok: !1, error: "Polygon has zero area" } : { ok: !0, feature: t } : { ok: !1, error: "Invalid geometry" } : { ok: !1, error: "Polygon ring is not closed or is invalid" };
+  try {
+    if (e.length !== 1)
+      return { ok: !1, error: "The file must contain exactly one geometry" };
+    const t = e[0], n = t.geometry;
+    return !n || n.type !== "Polygon" && n.type !== "MultiPolygon" ? { ok: !1, error: "Geometry must be Polygon or MultiPolygon" } : az(n) ? HA(n) ? jA(n).features.length > 0 ? { ok: !1, error: "Geometry has self-intersection" } : Xy(n) <= 0 ? { ok: !1, error: "Polygon has zero area" } : { ok: !0, feature: t } : { ok: !1, error: "Invalid geometry" } : { ok: !1, error: "Polygon ring is not closed or is invalid" };
+  } catch {
+    return {
+      ok: !1,
+      error: "An error occurred while validating the geometry. Ensure the file contains valid coordinates."
+    };
+  }
 }
 const sz = { class: "coordinate-panel" }, lz = { class: "panel-header" }, uz = { class: "panel-content" }, cz = { class: "coordinate-section" }, hz = { class: "coordinate-section" }, fz = { class: "coordinate-section" }, dz = {
   key: 0,

@@ -10,14 +10,14 @@ export async function parseKmlFile(file: File): Promise<GeometryFileParseResult>
 
   try {
     const content = await file.text()
-    const document = new DOMParser().parseFromString(content, 'text/xml')
-    const parserError = document.querySelector('parsererror')
+    const xmlDoc = new DOMParser().parseFromString(content, 'text/xml')
+    const parserError = xmlDoc.querySelector('parsererror')
 
     if (parserError) {
       return { ok: false, error: 'Could not read the file. Check that it contains valid KML' }
     }
 
-    const geojson = kml(document)
+    const geojson = kml(xmlDoc)
     const features = normalizeGeoJsonToFeatures(geojson)
 
     if (features.length === 0) {

@@ -23,32 +23,40 @@ function validateRingsClosed(geometry: Polygon | MultiPolygon): boolean {
 }
 
 export function validateImportedPolygonGeometry(features: Feature[]): ImportedPolygonValidationResult {
-  if (features.length !== 1) {
-    return { ok: false, error: 'The file must contain exactly one geometry' }
+  try {
+    if (features.length !== 1) {
+      return { ok: false, error: 'The file must contain exactly one geometry' }
+    }
+
+    const feature = features[0]
+    const geometry = feature.geometry
+
+    if (!geometry || (geometry.type !== 'Polygon' && geometry.type !== 'MultiPolygon')) {
+      return { ok: false, error: 'Geometry must be Polygon or MultiPolygon' }
+    }
+
+    if (!validateRingsClosed(geometry)) {
+      return { ok: false, error: 'Polygon ring is not closed or is invalid' }
+    }
+
+    if (!booleanValid(geometry)) {
+      return { ok: false, error: 'Invalid geometry' }
+    }
+
+    if (kinks(geometry).features.length > 0) {
+      return { ok: false, error: 'Geometry has self-intersection' }
+    }
+
+    if (area(geometry) <= 0) {
+      return { ok: false, error: 'Polygon has zero area' }
+    }
+
+    return { ok: true, feature: feature as Feature<Polygon | MultiPolygon> }
+  } catch {
+    return {
+      ok: false,
+      error:
+        'An error occurred while validating the geometry. Ensure the file contains valid coordinates.'
+    }
   }
-
-  const feature = features[0]
-  const geometry = feature.geometry
-
-  if (!geometry || (geometry.type !== 'Polygon' && geometry.type !== 'MultiPolygon')) {
-    return { ok: false, error: 'Geometry must be Polygon or MultiPolygon' }
-  }
-
-  if (!validateRingsClosed(geometry)) {
-    return { ok: false, error: 'Polygon ring is not closed or is invalid' }
-  }
-
-  if (!booleanValid(geometry)) {
-    return { ok: false, error: 'Invalid geometry' }
-  }
-
-  if (kinks(geometry).features.length > 0) {
-    return { ok: false, error: 'Geometry has self-intersection' }
-  }
-
-  if (area(geometry) <= 0) {
-    return { ok: false, error: 'Polygon has zero area' }
-  }
-
-  return { ok: true, feature: feature as Feature<Polygon | MultiPolygon> }
 }
